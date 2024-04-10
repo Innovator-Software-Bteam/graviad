@@ -1,0 +1,16 @@
+## IDE:
+.idea/
+*.iml
+*.ipr
+*.iws
+.idea_modules/
+
+
+# Node modules
+node_modules/
+
+# Design
+#designs/
+
+# Documents
+#documents/
