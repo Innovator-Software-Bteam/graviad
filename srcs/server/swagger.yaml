@@ -1,0 +1,9 @@
+openapi: "3.0.2"
+info:
+  title: Graviad API Documentation
+  version: "1.0.0"
+servers:
+  - url: https://api.server.test/v1
+paths:
+  /auth:
+    /auth/login

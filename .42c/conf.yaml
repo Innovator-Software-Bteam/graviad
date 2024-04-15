@@ -1,0 +1,3 @@
+apis:
+  srcs/server/swagger.yaml:
+    alias: "graviad-api-documentation"
