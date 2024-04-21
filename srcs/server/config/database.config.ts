@@ -14,4 +14,4 @@ export const localSequelize = new Sequelize({
 });
 export const configSequelize = () => {
 
-}
+};

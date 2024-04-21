@@ -15,11 +15,13 @@ CREATE TABLE IF NOT EXISTS roles
     UNIQUE (name),
     CHECK (name <> '')
 );
+drop table if exists customers;
 CREATE TABLE IF NOT EXISTS customers
 (
     customer_id SERIAL PRIMARY KEY,
     account_id  SERIAL       NOT NULL,
-    name        VARCHAR(255) NOT NULL,
+    first_name  VARCHAR(255) NOT NULL,
+    last_name   VARCHAR(255) NOT NULL,
     created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (account_id) REFERENCES accounts (account_id)

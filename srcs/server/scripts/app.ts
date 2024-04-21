@@ -16,7 +16,7 @@ import {configSwagger} from "../config/swagger.config";
 config({node_env: process.env.NODE_ENV});
 
 const app = express();
-const port = process.env.PORT || 8080;
+const port = process.env.GRAVIAD_SERVER_PORT;
 
 // Config
 configPassport();
@@ -31,13 +31,13 @@ app.use('/api-docs', ...configSwagger());
 
 const SequelizeStoreSession = SequelizeStore(session.Store);
 app.use(session({   // Use express-session middleware
-    secret: 'your-secret-key', // Secret key for session encryption, replace with your own secret key
+    secret: 'graviad_key_012345',
     resave: false,
     saveUninitialized: false,
-    store: new SequelizeStoreSession({
-        db: sequelize,
-        tableName: 'sessions',
-    }),
+    // store: new SequelizeStoreSession({
+    //     db: sequelize,
+    //     tableName: 'sessions',
+    // }),
     cookie: {
         maxAge: 1000 * 60 * 60 * 24,
     }

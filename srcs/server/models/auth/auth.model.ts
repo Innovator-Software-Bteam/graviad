@@ -1,105 +1,128 @@
+/**
+ * @module auth.model.ts
+ * @version 1.1.0
+ * @description This is the model for the authentication module.
+ * It includes all models from the root database and initializes the connections to map them.
+ * @author Hoang Duc Bach
+ * @updated on 2021/10/06
+ */
+import {v4 as uuidv4} from 'uuid';
+import {ABaseEntity} from "../base.model";
 import {DataTypes} from "sequelize";
-import {Model} from "sequelize";
-import {localSequelize as sequelize} from "../../config/database.config";
-import {IAuth} from "../../interfaces/customer/customer.interface";
+import {localSequelize} from "../../config/database.config";
+import {IUser} from "../../interfaces/customer.interface";
 
-// Define the model
-export abstract class BaseModel extends Model {
-    public id!: number;
-    public name!: Date;
-    public createdAt!: Date;
-    public updatedAt!: Date;
+export class Role extends ABaseEntity<number> {
+    declare name: string;
+    declare description: string;
+
+    declare permissions: Permission[];
 }
 
-export class Account extends Model {
-    public email!: string;
-    public password!: string;
-    public createdAt!: Date;
-    public updatedAt!: Date;
+export class Permission extends ABaseEntity<number> {
+    declare name: string;
+    declare description: string;
 }
 
-export class Role extends BaseModel {
+export class User extends ABaseEntity<string> implements IUser {
+    declare firstName: string;
+    declare lastName: string;
+    declare username: string;
+    declare email: string;
+    declare password: string;
 
+    declare roles: Role[];
+
+    constructor(values?: any, options?: any) {
+        super(values, options);
+        if (!this.id) {
+            this.id = uuidv4();
+        }
+    }
+
+    logout = (email: string) => {
+        // Implement the logout functionality here
+    };
+
+    signUp = (email: string, password: string) => {
+        // Implement the signUp functionality here
+    };
+
+    login = (password: string) => {
+        return this.password === password;
+    };
 }
-
-export class Provider extends BaseModel {
-
-}
-
-export class Customer extends BaseModel {
-    public account: Account = new Account();
-    public firstName!: string;
-    public lastName!: string;
-    public roles: Role[] = [];
-
-}
-
-// Initialize the model
-Customer.init({
+User.init({
+    id: {
+        type: DataTypes.UUID,
+        primaryKey: true,
+        defaultValue: DataTypes.UUIDV4
+    },
     firstName: {
         type: DataTypes.STRING,
-        allowNull: false,
+        allowNull: true,
         field: 'first_name'
     },
     lastName: {
         type: DataTypes.STRING,
-        allowNull: false,
+        allowNull: true,
         field: 'last_name'
-    }
-}, {
-    sequelize,
-    modelName: 'Customer',
-    tableName: 'customers'
-});
-Account.init({
+    },
+    username: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        unique: true
+    },
     email: {
         type: DataTypes.STRING,
-        allowNull: false
+        allowNull: false,
+        unique: true
     },
     password: {
         type: DataTypes.STRING,
         allowNull: false
-    }
+    },
 }, {
-    sequelize,
-    modelName: 'Account',
-    tableName: 'accounts'
-});
-Role.init({
-    name: {
-        type: DataTypes.STRING,
-        allowNull: false
-    }
-}, {
-    sequelize,
-    modelName: 'Role',
-    tableName: 'roles'
-});
-Provider.init({
-    name: {
-        type: DataTypes.STRING,
-        allowNull: false
-    }
-}, {
-    sequelize,
-    modelName: 'Provider',
-    tableName: 'providers'
+    sequelize: localSequelize,
+    modelName: 'User',
+    tableName: 'users',
+    timestamps: true,
+    createdAt: 'created_at',
+    updatedAt: 'updated_at',
 });
 
-// Define the relationships
-Customer.hasOne(Account, {
-    foreignKey: 'customerId',
-    as: 'customer_has_account'
+Role.init({}, {
+    sequelize: localSequelize,
+    modelName: 'Role',
+    tableName: 'roles',
+    timestamps: true,
+    createdAt: 'created_at',
+    updatedAt: 'updated_at',
 });
-Account.belongsTo(Customer, {
-    foreignKey: 'customerId',
-    as: 'customer_has_account'
+
+Permission.init({}, {
+    sequelize: localSequelize,
+    modelName: 'Permission',
+    tableName: 'permissions',
+    timestamps: true,
+    createdAt: 'created_at',
+    updatedAt: 'updated_at',
 });
-Customer.hasMany(Role, {
-    foreignKey: 'customerId',
-    as: 'customer_has_roles'
+
+User.hasMany(Role, {
+    foreignKey: 'userId',
+    as: 'user_has_roles'
 });
-Role.belongsTo(Customer, {
-    foreignKey: 'customerId',
-    as: 'customer_has_roles'
+Role.belongsTo(User, {
+    foreignKey: 'userId',
+    as: 'user_has_roles'
 });
+Role.hasMany(Permission, {
+    foreignKey: 'roleId',
+    as: 'role_has_permissions'
+});
+Permission.belongsTo(Role, {
+    foreignKey: 'roleId',
+    as: 'role_has_permissions'
+});
+

@@ -5,7 +5,6 @@ config({node_env: process.env.NODE_ENV});
 export const configSwagger = () => {
     const swaggerJsdoc = require("swagger-jsdoc");
     const swaggerUi = require("swagger-ui-express");
-    const swaggerDocument = require("../swagger.yaml");
     const options = {
         definition: {
             openapi: "3.0.0",
@@ -23,5 +22,5 @@ export const configSwagger = () => {
         apis: ["./src/routes/*.ts"],
     };
     const specs = swaggerJsdoc(options);
-    return [swaggerUi.serve, swaggerUi.setup(swaggerDocument,specs)];
+    return [swaggerUi.serve, swaggerUi.setup(specs)];
 }
