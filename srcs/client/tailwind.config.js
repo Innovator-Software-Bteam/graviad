@@ -13,7 +13,10 @@ module.exports = withMT({
             borderRadius: graviadTheme.borderRadius,
         },
     },
-    plugins: [],
+    plugins: [
+        require("tailwindcss"),
+        require("autoprefixer"),
+    ],
 });
 
 

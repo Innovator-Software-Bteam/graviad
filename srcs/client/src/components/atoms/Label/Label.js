@@ -20,11 +20,12 @@ const baseLabel = tv({
             text: '!bg-transparent !border-transparent'
         },
         color: {
-            primary: 'bg-graviad-theme/state-layers/primary/opacity-0.1/10 text-graviad-theme/sys/dark/primary border-graviad-theme/sys/dark/primary',
-            secondary: 'bg-graviad-theme/state-layers/secondary/opacity-0.1 text-graviad-theme/sys/dark/secondary border-graviad-theme/sys/dark/secondary',
-            tertiary: 'bg-graviad-theme/state-layers/tertiary/opacity-0.1 text-graviad-theme/sys/dark/tertiary border-graviad-theme/sys/dark/tertiary',
+            primary: 'bg-grvd-theme-sys-dark-primary/10 text-grvd-theme-sys-dark-primary border-grvd-theme-sys-dark-primary',
+            secondary: 'bg-grvd-theme-sys-dark-secondary/10 text-grvd-theme-sys-dark-secondary border-grvd-theme-sys-dark-secondary',
+            tertiary: 'bg-grvd-theme-sys-dark-tertiary/10 text-grvd-theme-sys-dark-tertiary border-grvd-theme-sys-dark-tertiary',
         }
     },
+
     defaultVariants: {
         size: 'lg',
         variant: 'contained',

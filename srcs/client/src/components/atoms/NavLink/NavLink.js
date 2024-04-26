@@ -4,7 +4,7 @@ import classNames from "classnames";
 const baseNavLink = tv({
     base: [
         'font-medium',
-        'hover:text-graviad-theme/sys/dark/secondary',
+        'hover:text-grvd-theme-sys-dark-primary',
         'transition-colors duration-500 ease-in-out',
         'px-2 py-1',
     ],
@@ -17,8 +17,8 @@ const baseNavLink = tv({
         state: {
             enabled: '',
             disabled: 'cursor-not-allowed opacity-50',
-            inactive: 'text-graviad-theme/ref/secondary/secondary-800',
-            active: 'text-graviad-theme/sys/dark/secondary',
+            inactive: 'text-grvd-theme-sys-dark-on-secondary-variant',
+            active: 'text-grvd-theme/sys/dark/primary',
         }
     },
     defaultVariants: {

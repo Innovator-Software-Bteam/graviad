@@ -1,7 +1,8 @@
-import {NavLink} from "../atoms/navitems";
+import {NavLink} from "../atoms/NavLink";
 import classNames from "classnames";
-import {IconBrand, IconSVG} from "../atoms/icons";
-import {Button} from "../atoms/buttons";
+import {IconBrand, IconSVG} from "../atoms/Icon";
+import {Button} from "../atoms/Button";
+import {Link} from "react-router-dom";
 
 export function Header({children, className, ...props}) {
     return (
@@ -17,13 +18,6 @@ export function Header({children, className, ...props}) {
                     className
                 )}
             {...props}>
-            <div className={
-                classNames(
-                    'w-full h-[200px] rounded-[1440px] bg-[linear-gradient(0deg,_rgba(255,_83,_26,_0.50)_25.74%,_#FF531A_73.64%)] filter blur-[150px]',
-                    'absolute top-0 left-0 right-0 -translate-y-3/4',
-                )
-            }>
-            </div>
             <nav
                 className={
                     classNames(
@@ -36,8 +30,8 @@ export function Header({children, className, ...props}) {
                         'rounded-3xl',
                         'w-4/5',
 
-                        'bg-graviad-theme/ref/neutral/neutral-600/50',
-                        'shadow-graviad-theme/shadow/shadow-large',
+                        'bg-dashboard-theme/ref/neutral/neutral-600/50',
+                        'shadow-dashboard-theme/shadow/shadow-large',
                         'backdrop-blur-[10px]',
                     )}
             >
@@ -68,11 +62,11 @@ export function Header({children, className, ...props}) {
                                 'gap-2.5',
                             )
                         }>
-                            <IconBrand size={'base'} className={'text-graviad-theme/sys/dark/primary'}/>
+                            <IconBrand size={'base'} className={'text-dashboard-theme/sys/dark/primary'}/>
                             <p
                                 className={
                                     classNames(
-                                        'text-graviad-theme/sys/dark/secondary',
+                                        'text-dashboard-theme/sys/dark/secondary',
                                         'font-bold',
                                         'text-lg',
                                     )
@@ -108,11 +102,13 @@ export function Header({children, className, ...props}) {
                         }
                     >
                         <ul>
-                            <Button size={'base'} variant={'text'} is3DSimulated={false} color={'secondary'}>
-                                <p>Log in</p>
-                            </Button>
-                            <Button size={'base'} variant={'contained'} color={'primary'}>
-                                <p>Sign Up</p>
+                            <Link to={'login'}>
+                                <Button size={'md'} variant={'text'}  color={'secondary'}>
+                                    Log in
+                                </Button>
+                            </Link>
+                            <Button size={'lg'} variant={'contained'} color={'primary'}>
+                               Sign Up
                             </Button>
                         </ul>
                     </li>

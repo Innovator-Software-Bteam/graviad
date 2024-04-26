@@ -1,21 +1,32 @@
 {
   "name": "client",
-  "version": "0.1.0",
+  "version": "1.0.0",
+  "author": "Innovator Software BTeam",
   "private": true,
   "dependencies": {
     "@material-tailwind/react": "^2.1.9",
+    "@reduxjs/toolkit": "^2.2.3",
     "@testing-library/jest-dom": "^5.17.0",
-    "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
+    "axios": "^1.6.8",
     "classnames": "^2.5.1",
+    "cross-env": "^7.0.3",
+    "dotenv-flow": "^4.1.0",
+    "http-status-codes": "^2.3.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-hook-form": "^7.51.3",
+    "react-redux": "^9.1.1",
+    "react-router-dom": "^6.22.3",
     "react-scripts": "5.0.1",
+    "redux": "^5.0.1",
+    "tailwind-merge": "^2.3.0",
     "tailwindcss": "^3.4.3",
+    "url": "^0.11.3",
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-    "start": "react-scripts start",
+    "start": "cross-env NODE_ENV=development react-scripts start",
     "build": "react-scripts scripts",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
@@ -40,6 +51,7 @@
   },
   "devDependencies": {
     "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
+    "@testing-library/react": "^15.0.2",
     "autoprefixer": "^10.4.19",
     "postcss-import": "^16.1.0",
     "postcss-nested": "^6.0.1",

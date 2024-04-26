@@ -1,122 +1,145 @@
-const graviadTheme = {
-    colors:
-        {
-            'graviad-theme/white': '#ffffff',
-            'graviad-theme/black': '#000000',
-            'graviad-theme/sys/dark/primary': '#ff531a',
-            'graviad-theme/sys/dark/on-primary': '#661a00',
-            'graviad-theme/sys/dark/secondary': '#ffffff',
-            'graviad-theme/sys/dark/on-primary-variant': '#ffd9cc',
-            'graviad-theme/sys/dark/on-secondary': '#333333',
-            'graviad-theme/sys/dark/on-secondary-variant': '#ffffff',
-            'graviad-theme/sys/dark/tertiary': '#d400ff',
-            'graviad-theme/sys/dark/on-tertiary': '#550066',
-            'graviad-theme/sys/dark/error': '#f20d0d',
-            'graviad-theme/sys/dark/on-error': '#610505',
-            'graviad-theme/sys/dark/outline': '#262626',
-            'graviad-theme/sys/dark/background': '#151515',
-            'graviad-theme/sys/dark/on-background': '#ffffff',
-            'graviad-theme/sys/dark/surface': '#151515',
-            'graviad-theme/sys/dark/on-surface': '#ffffff',
-            'graviad-theme/sys/dark/surface-container-lowest': '#060606',
-            'graviad-theme/sys/dark/surface-container-lower': '#080808',
-            'graviad-theme/sys/dark/surface-container-low': '#0d0d0d',
-            'graviad-theme/sys/dark/surface-container': '#1f1f1f',
-            'graviad-theme/sys/dark/surface-container-high': '#252525',
-            'graviad-theme/sys/dark/surface-container-higher': '#2f2f2f',
-            'graviad-theme/sys/dark/surface-container-highest': '#444444',
-            'graviad-theme/ref/primary/primary-50': '#fffcfb',
-            'graviad-theme/ref/primary/primary-200': '#ffe4db',
-            'graviad-theme/ref/primary/primary-300': '#ffcfbf',
-            'graviad-theme/ref/primary/primary-400': '#ffb49b',
-            'graviad-theme/ref/primary/primary-500': '#ff9370',
-            'graviad-theme/ref/primary/primary-600': '#ff6d3c',
-            'graviad-theme/ref/primary/primary-700': '#ff4000',
-            'graviad-theme/ref/primary/primary-800': '#8e2300',
-            'graviad-theme/ref/primary/primary-900': '#4a1200',
-            'graviad-theme/ref/primary/primary-950': '#330d00',
-            'graviad-theme/ref/primary/primary-100': '#fff3ef',
-            'graviad-theme/ref/secondary/secondary-200': '#ffffff',
-            'graviad-theme/ref/secondary/secondary-300': '#ffffff',
-            'graviad-theme/ref/secondary/secondary-400': '#ffffff',
-            'graviad-theme/ref/secondary/secondary-500': '#ffffff',
-            'graviad-theme/ref/secondary/secondary-600': '#ffffff',
-            'graviad-theme/ref/secondary/secondary-700': '#ffffff',
-            'graviad-theme/ref/secondary/secondary-800': '#808080',
-            'graviad-theme/ref/secondary/secondary-900': '#333333',
-            'graviad-theme/ref/secondary/secondary-950': '#1a1a1a',
-            'graviad-theme/ref/secondary/secondary-50': '#ffffff',
-            'graviad-theme/ref/secondary/secondary-100': '#ffffff',
-            'graviad-theme/ref/tertiary/tertiary-50': '#fefbff',
-            'graviad-theme/ref/tertiary/tertiary-100': '#fcefff',
-            'graviad-theme/ref/tertiary/tertiary-200': '#f9dbff',
-            'graviad-theme/ref/tertiary/tertiary-300': '#f4bfff',
-            'graviad-theme/ref/tertiary/tertiary-400': '#ee9bff',
-            'graviad-theme/ref/tertiary/tertiary-500': '#e770ff',
-            'graviad-theme/ref/tertiary/tertiary-600': '#de3cff',
-            'graviad-theme/ref/tertiary/tertiary-700': '#d400ff',
-            'graviad-theme/ref/tertiary/tertiary-800': '#76008e',
-            'graviad-theme/ref/tertiary/tertiary-900': '#3d004a',
-            'graviad-theme/ref/tertiary/tertiary-950': '#2a0033',
-            'graviad-theme/ref/neutral/neutral-50': '#fbfbfb',
-            'graviad-theme/ref/neutral/neutral-100': '#f0f0f0',
-            'graviad-theme/ref/neutral/neutral-200': '#dedede',
-            'graviad-theme/ref/neutral/neutral-300': '#a6a6a6',
-            'graviad-theme/ref/neutral/neutral-400': '#4d4d4d',
-            'graviad-theme/ref/neutral/neutral-500': '#333333',
-            'graviad-theme/ref/neutral/neutral-600': '#262626',
-            'graviad-theme/ref/neutral/neutral-700': '#141414',
-            'graviad-theme/ref/neutral/neutral-800': '#090909',
-            'graviad-theme/ref/neutral/neutral-900': '#020202',
-            'graviad-theme/ref/neutral/neutral-950': '#000000',
-            'graviad-theme/extended/sys/dark/color-button': '#34b530',
-            'graviad-theme/extended/sys/dark/on-color-button': '#175115',
-            'graviad-theme/state-layers/primary/opacity-0.1': '#ff531a',
-            'graviad-theme/state-layers/primary/opacity-0.05': '#ff4000',
-            'graviad-theme/state-layers/primary/opacity-0.15': '#ff4000',
-            'graviad-theme/state-layers/secondary/opacity-0.1': '#d9d9d9',
-            'graviad-theme/state-layers/secondary/opacity-0.05': '#ffffff',
-            'graviad-theme/state-layers/secondary/opacity-0.15': '#ffffff',
-            'graviad-theme/state-layers/tertiary/opacity-0.05': '#d400ff',
-            'graviad-theme/state-layers/tertiary/opacity-0.1': '#d400ff',
-            'graviad-theme/state-layers/tertiary/opacity-0.15': '#d400ff'
-        },
+const grvdTheme = {
+    "colors": {
+        "black": "#000000",
+        "white": "#ffffff",
+        "grvd-theme": {
+            "white": "#ffffff",
+            "black": "#000000",
+            "sys": {
+                "dark": {
+                    "primary": "#f2f2f2",
+                    "on-primary": "#151515",
+                    "secondary": "#1a1a1a",
+                    "on-primary-variant": "#9A9A9A",
+                    "on-secondary": "#ffffff",
+                    "tertiary": "#33aaff",
+                    "on-tertiary": "#006382",
+                    "error": "#cc0000",
+                    "on-error": "#610505",
+                    "outline": "#262626",
+                    "background": "#0d0d0d",
+                    "on-background": "#ffffff",
+                    "surface": "#151515",
+                    "on-surface": "#ffffff",
+                    "surface-container-lowest": "#060606",
+                    "surface-container-lower": "#080808",
+                    "surface-container-low": "#0d0d0d",
+                    "surface-container": "#1f1f1f",
+                    "surface-container-high": "#252525",
+                    "surface-container-higher": "#2f2f2f",
+                    "surface-container-highest": "#444444",
+                    "on-secondary-variant": "#8F8F8F"
+                }
+            },
+            "ref": {
+                "primary": {
+                    "50": "#f8f8f8",
+                    "100": "#f2f2f2",
+                    "200": "#dcdcdc",
+                    "300": "#bdbdbd",
+                    "400": "#989898",
+                    "500": "#7c7c7c",
+                    "600": "#656565",
+                    "700": "#525252",
+                    "800": "#464646",
+                    "900": "#3d3d3d",
+                    "950": "#292929"
+                },
+                "secondary": {
+                    "50": "#f6f6f6",
+                    "100": "#e7e7e7",
+                    "200": "#d1d1d1",
+                    "300": "#b0b0b0",
+                    "400": "#888888",
+                    "500": "#6d6d6d",
+                    "600": "#5d5d5d",
+                    "700": "#4f4f4f",
+                    "800": "#454545",
+                    "900": "#3d3d3d",
+                    "950": "#1a1a1a"
+                },
+                "neutral": {
+                    "neutral-50": "#fbfbfb",
+                    "neutral-100": "#f0f0f0",
+                    "neutral-200": "#dedede",
+                    "neutral-300": "#a6a6a6",
+                    "neutral-400": "#4d4d4d",
+                    "neutral-500": "#333333",
+                    "neutral-600": "#262626",
+                    "neutral-700": "#141414",
+                    "neutral-800": "#090909",
+                    "neutral-900": "#020202",
+                    "neutral-950": "#000000"
+                },
+                "tertiary": {
+                    "50": "#eff7ff",
+                    "100": "#dfeeff",
+                    "200": "#b8dfff",
+                    "300": "#78c6ff",
+                    "400": "#33aaff",
+                    "500": "#068ef1",
+                    "600": "#006fce",
+                    "700": "#0059a7",
+                    "800": "#024b8a",
+                    "900": "#083f72",
+                    "950": "#06274b"
+                }
+            },
+            "extended": {
+                "sys": {
+                    "dark": {
+                        "color-button": "#34b530",
+                        "on-color-button": "#175115"
+                    }
+                }
+            },
+            "state-layers": {
+                "primary": {
+                    "opacity-0.1": "#8c8c8c",
+                    "opacity-0.05": "#ff4000",
+                    "opacity-0.15": "#ff4000"
+                },
+                "secondary": {
+                    "opacity-0.1": "#d9d9d9",
+                    "opacity-0.05": "#ffffff",
+                    "opacity-0.15": "#ffffff"
+                },
+                "tertiary": {
+                    "opacity-0.05": "#d400ff",
+                    "opacity-0.1": "#d400ff",
+                    "opacity-0.15": "#d400ff"
+                }
+            }
+        }
+    }
+    ,
     fontSize:
         {
-            '3xs': '0.625rem',
-            '2xs': '0.75rem',
-            xs: '0.8125rem',
-            sm: '0.875rem',
-            base: '1rem',
-            lg: '1.1875rem',
-            xl: '1.25rem',
-            '2xl': '1.4375rem',
-            '3xl': '1.75rem',
-            '4xl': '2.0625rem',
-            '5xl': '2.5rem',
-            '6xl': '3rem'
+            xs: ['0.75rem', {lineHeight: '1rem'}],
+            sm: ['0.875rem', {lineHeight: '1.2rem'}],
+            base: ['1rem', {lineHeight: '1.5rem'}],
+            lg: ['1.125rem', {lineHeight: '1.75rem'}],
+            xl: ['1.25rem', {lineHeight: '1.75rem'}],
+            '2xl': ['1.5rem', {lineHeight: '2rem'}],
+            '3xl': ['1.875rem', {lineHeight: '2.25rem'}],
+            '4xl': ['2.25rem', {lineHeight: '2.5rem'}],
+            '5xl': ['3rem', {lineHeight: '1'}],
+
         },
     fontFamily: {inter: 'Inter', sans: 'sans-serif'},
     boxShadow:
         {
-            'graviad-theme/shadow/shadow-medium': '2px 2px 4px 0px rgba(0,0,0,0.25)',
-            'graviad-theme/shadow/shadow-large': '2px 2px 8px 0px rgba(0,0,0,0.3)',
-            'graviad-theme/shadow/shadow-small': '2px 2px 2px 0px rgba(0,0,0,0.1)'
+            'grvd-theme/shadow/shadow-medium': '2px 2px 4px 0px rgba(0,0,0,0.25)',
+            'grvd-theme/shadow/shadow-large': '2px 2px 8px 0px rgba(0,0,0,0.3)',
+            'grvd-theme/shadow/shadow-small': '2px 2px 2px 0px rgba(0,0,0,0.1)'
         },
     borderRadius:
         {
             none: '0',
-            xs: '0.03125rem',
-            sm: '0.0625rem',
-            default: '0.15625rem',
-            lg: '0.21875rem',
-            xl: '0.3125rem',
-            '2xl': '0.375rem',
-            '3xl': '0.5rem',
-            '4xl': '0.625rem',
-            '5xl': '0.75rem',
-            '6xl': '3.125rem',
+            sm: '0.375rem',
+            md: '0.563rem',
+            lg: '0.875rem',
             full: '9999px'
-        },
+        }
 };
-export default graviadTheme;
+export default grvdTheme;

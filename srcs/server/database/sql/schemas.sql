@@ -1,51 +1,60 @@
-CREATE TABLE IF NOT EXISTS accounts
+/*
+===============================================================================
+DATABASE INFORMATION
+===============================================================================
+- Description: This is a simple database schema for a user management system of Graviad Project.
+- Created by: Hoang Duc Bach
+- Creation Date: 2021-04-16
+- Version: 1.1.0
+- Last updated: 2021-04-16
+
+===============================================================================
+CODE TAGS
+===============================================================================
+- @TODO: Used to mark the tasks that need to be done.
+- @NOTE: Used to mark important notes.
+- @FIXME: Used to mark bugs that need to be fixed.
+- @OPTIMIZE: Used to mark code that needs to be optimized.
+- @HACK: Used to mark code that is a hack and needs to be refactored.
+- @REVIEW: Used to mark code that needs to be reviewed.
+
+Note: This is a simple database schema for a user management system of Graviad Project.
+*/
+
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+CREATE TABLE users
 (
-    account_id SERIAL PRIMARY KEY,
-    email      VARCHAR(255) NOT NULL,
-    password   VARCHAR(255) NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE (email),
-    CHECK (email <> '')
-);
-CREATE TABLE IF NOT EXISTS roles
-(
-    role_id SERIAL PRIMARY KEY,
-    name    VARCHAR(255) NOT NULL,
-    UNIQUE (name),
-    CHECK (name <> '')
-);
-drop table if exists customers;
-CREATE TABLE IF NOT EXISTS customers
-(
-    customer_id SERIAL PRIMARY KEY,
-    account_id  SERIAL       NOT NULL,
-    first_name  VARCHAR(255) NOT NULL,
-    last_name   VARCHAR(255) NOT NULL,
-    created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (account_id) REFERENCES accounts (account_id)
-);
-CREATE TABLE IF NOT EXISTS customer_has_roles
-(
-    customer_id SERIAL NOT NULL,
-    role_id     SERIAL NOT NULL,
-    PRIMARY KEY (customer_id, role_id),
-    FOREIGN KEY (customer_id) REFERENCES customers (customer_id),
-    FOREIGN KEY (role_id) REFERENCES roles (role_id)
-);
-CREATE TABLE IF NOT EXISTS customer_authentications
-(
-    customer_id SERIAL NOT NULL,
-    account_id  SERIAL NOT NULL,
-    provider_id SERIAL NOT NULL,
-    FOREIGN KEY (customer_id) REFERENCES customers (customer_id),
-    FOREIGN KEY (account_id) REFERENCES accounts (account_id),
-    FOREIGN KEY (provider_id) REFERENCES providers (provider_id)
+    id         UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    first_name VARCHAR(255),
+    last_name  VARCHAR(255),
+    username   VARCHAR(255)             NOT NULL UNIQUE,
+    email      VARCHAR(255)             NOT NULL UNIQUE,
+    password   VARCHAR(255)             NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL,
+    updated_at TIMESTAMP WITH TIME ZONE NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS providers
+/*
+ @OPTIMIZE: Remove not null constraint for last_name and first_name.
+ - Date: 2021-04-16
+ - Reason: The first name and last name can be null.
+ - Author: Hoang Duc Bach
+ */
+CREATE TABLE roles
 (
-    provider_id SERIAL PRIMARY KEY,
-    name        VARCHAR(255) NOT NULL
-)
+    id          SERIAL PRIMARY KEY,
+    name        VARCHAR(255)             NOT NULL,
+    description TEXT,
+    created_at  TIMESTAMP WITH TIME ZONE NOT NULL,
+    updated_at  TIMESTAMP WITH TIME ZONE NOT NULL
+);
+
+CREATE TABLE permissions
+(
+    id          SERIAL PRIMARY KEY,
+    name        VARCHAR(255)             NOT NULL,
+    description TEXT,
+    created_at  TIMESTAMP WITH TIME ZONE NOT NULL,
+    updated_at  TIMESTAMP WITH TIME ZONE NOT NULL
+);
+

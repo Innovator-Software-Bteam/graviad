@@ -35,9 +35,6 @@ export class User extends ABaseEntity<string> implements IUser {
 
     constructor(values?: any, options?: any) {
         super(values, options);
-        if (!this.id) {
-            this.id = uuidv4();
-        }
     }
 
     logout = (email: string) => {
