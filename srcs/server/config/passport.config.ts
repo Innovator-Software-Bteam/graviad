@@ -1,28 +1,28 @@
 import passport from "passport";
 import {Strategy as LocalStrategy} from "passport-local";
-import {Strategy as GoogleStrategy} from 'passport-google-oauth20';
+import {Profile, Strategy as GoogleStrategy} from 'passport-google-oauth20';
 import {Strategy as FacebookStrategy} from 'passport-facebook';
-import {Customer} from "../models/auth/auth.model";
-import {CustomerManager} from "../models/auth/authManager.model";
 import path from "path";
+import {serverURL} from "./graviad.config";
+import {User} from "../models/auth/auth.model";
 
 export const configPassport = () => {
     // Local Strategy
     passport.use(new LocalStrategy({
-        usernameField: 'email',
-        passwordField: 'password'
-    }, async (email, password, done) => {
+        usernameField: 'username',
+        passwordField: 'password',
+        passReqToCallback: true,
+    }, async (req,email, password, done) => {
         try {
-            const customer = await Customer.findOne({
-                where: {email}
-            });
-            if (!customer) {
-                return done(null, false, {message: 'Customer not found'});
+            console.log(email, password);
+            const user = await User.findOne({where: {email}});
+            if (user) {
+                const isValid = user.login(password);
+                if (!isValid) {
+                    return done(null, false);
+                }
+                return done(null, user);
             }
-            if (!await CustomerManager.validatorPassword(customer, password)) {
-                return done(null, false, {message: 'Password is incorrect'});
-            }
-            return done(null, customer);
         } catch (error) {
             return done(error);
         }
@@ -30,14 +30,30 @@ export const configPassport = () => {
 
     // Google Strategy
     passport.use(new GoogleStrategy({
-            clientID: "GOOGLE_CLIENT_ID",
-            clientSecret: "GOOGLE_CLIENT_SECRET",
-            callbackURL: path.join(process.env.GRAVIAD_SERVER_HOST as any, "auth/google/callback"),
+            clientID: process.env.GRAVIAD_GOOGLE_CLIENT_ID as any,
+            clientSecret: process.env.GRAVIAD_GOOGLE_CLIENT_SECRET as any,
+            callbackURL: '/auth/google/callback',
         },
-        function (accessToken, refreshToken, profile, cb) {
-            return cb(null, profile);
-        }
-    ));
+        async function (accessToken, refreshToken, profile: any, done) {
+            const {id, username, name, emails} = profile;
+            await User.findOrCreate({
+                where: {
+                    email: emails[0].value
+                },
+                defaults: {
+                    username: username || emails[0].value,
+                    firstName: name.familyName,
+                    lastName: name.givenName,
+                    password: id
+                }
+            })
+                .then(([user, created]) => {
+                    return done(null, user);
+                })
+                .catch((error) => {
+                    return done(error);
+                });
+        }));
 
     // Facebook Strategy
     passport.use(new FacebookStrategy({
@@ -45,25 +61,16 @@ export const configPassport = () => {
             clientSecret: "FACEBOOK_APP_SECRET",
             callbackURL: path.join(process.env.GRAVIAD_SERVER_HOST as any, "auth/facebook/callback"),
         },
-        function (accessToken, refreshToken, profile, cb) {
+        async function (accessToken, refreshToken, profile, cb) {
             return cb(null, profile);
-        }
-    ));
+        }));
 
     // Serialize and Deserialize
-    passport.serializeUser((customer: any, done) => {
-        done(null, customer.id);
+    passport.serializeUser(function (user, done) {
+        return done(null, user);
     });
-    passport.deserializeUser(async (id: number, done) => {
-        try {
-            const customer = await Customer.findByPk(id);
-            if (!customer) {
-                return done(null, false);
-            }
-            return done(null, customer);
-        } catch (error) {
-            return done(error);
-        }
+    passport.deserializeUser(async (user: any, done) => {
+        return done(null, user);
     });
 
 }

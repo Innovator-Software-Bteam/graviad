@@ -1,24 +1,22 @@
 // Define interface of customer
 
 /**
- * Customer interface
- * @method logIn
- * @method signUp
- * @method logOut
+ * Interface for a customer
+ * @method login - Method for logging in a user. Takes an email and password as parameters.
+ * @method logout - Method for logging out a user. Takes an email as a parameter.
+ * @method signUp - Method for signing up a new user. Takes an email and password as parameters.
  */
-export interface IAuth {
-    logIn: (email: string, password: string) => any;
-    logOut: (email: string) => any;
+export interface IUser {
+    login: (email: string, password: string) => any;
+    logout: (email: string) => any;
     signUp: (email: string, password: string) => any;
 }
-export class CustomerService implements IAuth {
-    logIn(email: string, password: string): any {
-    }
+export interface ICustomer extends IUser {
 
-    logOut(email: string): any {
-    }
+}
+export interface IDesigner extends IUser {
 
-    signUp(email: string, password: string): any {
-    }
+}
+export interface IEnterprise extends IUser {
 
 }

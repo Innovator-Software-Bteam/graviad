@@ -1,93 +1,51 @@
 import express from "express";
 import passport from "passport";
+import {User} from "../../models/auth/auth.model";
+import {clientURL} from "../../config/graviad.config";
+import {StatusCodes} from "http-status-codes";
+import {AuthMessage} from "../../interfaces/auth.controller";
 
 export const router = express.Router();
-/**
- * @swagger
- * /auth/login:
- *   post:
- *     summary: Login by local strategy
- *     tags:
- *       - Authentication
- *     description: Login by local strategy with email and password
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               email:
- *                 type: string
- *                 description: Email of the customer
- *               password:
- *                 type: string
- *                 description: Password of the customer
- *     responses:
- *       200:
- *         description: Login successfully
- *       401:
- *         description: Unauthorized
- */
-router.post('/login', passport.authenticate('local'), (req, res) => {
-    res.json(req.user);
+router.get('/login/success', (req, res) => {
+    if (!req.isAuthenticated()) return;
+    res.status(StatusCodes.OK).json({message: AuthMessage.LOGIN_SUCCESS, user: req.user});
+});
+router.get('/login/failed', (req, res) => {
+    res.status(StatusCodes.UNAUTHORIZED).json({message: AuthMessage.LOGIN_FAILED});
+});
+router.post('logout', (req, res, next) => {
+    req.logout(function (err) {
+        if (err) {
+            return next(err);
+        }
+        res.redirect('/');
+    });
+    res.status(StatusCodes.OK).json({message: AuthMessage.LOGOUT_SUCCESS});
+});
+router.post('/signup', async (req, res) => {
+    const {email, password} = req.body;
+    const user = await User.create({email, password});
+    res.json(user);
+    /**
+     * TODO: Add OTP verification
+     */
+});
+router.post('/graviad', passport.authenticate('local', {
+    // successRedirect: '/',
+    failureRedirect: '/auth/login/failed'
+}), (req, res) => {
+    res.status(StatusCodes.OK).json({message: AuthMessage.LOGIN_SUCCESS});
 });
 
-/**
- * @swagger
- * /auth/google:
- *   get:
- *     summary: Authenticate with Google
- *     tags:
- *       - Authentication
- *     description: Authenticate with Google account
- *     responses:
- *       '302':
- *         description: Redirect to Google authentication page
- *
- * /auth/google/callback:
- *   get:
- *     summary: Google authentication callback
- *     tags:
- *       - Authentication
- *     description: Callback endpoint after successful authentication with Google account
- *     responses:
- *       '302':
- *         description: Redirect to the main page of the application after successful authentication
- *       '401':
- *         description: Unauthorized
- */
 router.get('/google', passport.authenticate('google', {scope: ['profile', 'email']}));
-router.get('/google/callback', passport.authenticate('google'), (req, res) => {
-    res.redirect('/');
-});
+router.get('/google/callback', passport.authenticate('google',
+    {
+        successRedirect: clientURL.toString(),
+        failureRedirect: '/auth/login/failed'
+    }
+));
 
-/**
- * @swagger
- * /auth/facebook:
- *   get:
- *     summary: Authenticate with Facebook
- *     tags:
- *       - Authentication
- *     description: Authenticate with Facebook account
- *     responses:
- *       '302':
- *         description: Redirect to Facebook authentication page
- *
- * /auth/facebook/callback:
- *   get:
- *     summary: Facebook authentication callback
- *     tags:
- *       - Authentication
- *     description: Callback endpoint after successful authentication with Facebook account
- *     responses:
- *       '302':
- *         description: Redirect to the main page of the application after successful authentication
- *       '401':
- *         description: Unauthorized
- */
+
 router.get('/facebook', passport.authenticate('facebook', {scope: ['email']}));
-router.get('/facebook/callback', passport.authenticate('facebook'), (req, res) => {
-    res.redirect('/');
-});
+router.get('/facebook/callback', passport.authenticate('facebook'));
 
