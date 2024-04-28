@@ -6,7 +6,7 @@ export function RequiredAuth({
                                  component: Component,
                              }) {
     const user = useSelector(state => state.User);
-    if (user.user === null) {
+    if (user.profile === null) {
         return (
             <Navigate to={'/login'}/>
         )

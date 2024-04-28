@@ -1,5 +1,6 @@
 import classNames from "classnames";
 import {Avatar, Card, CardBody, CardFooter, CardHeader, List, ListItem, Typography} from "@material-tailwind/react";
+import {useSelector} from "react-redux";
 
 export function LeftBar({
                             children,
@@ -17,6 +18,8 @@ export function LeftBar({
         'focus:bg-grvd-theme-sys-dark-surface-container-high focus:text-grvd-theme-sys-dark-on-primary-variant',
         'active:bg-grvd-theme-sys-dark-surface-container-high active:text-grvd-theme-sys-dark-on-primary-variant',
     );
+    const user = useSelector(state => state.User);
+    const avatarPictureSrc= user.profile.photos[0].value;
     return (
         <Card
             className={classNames(
@@ -38,7 +41,7 @@ export function LeftBar({
                 shadow={false}
                 floated={false}
             >
-                <Avatar/>
+                <Avatar src={avatarPictureSrc} alt={'avatar'} variant={'circular'}/>
                 <Typography
                     className={classNames(
                         'text-grvd-theme-sys-dark-tertiary',
@@ -46,7 +49,7 @@ export function LeftBar({
                         'font-bold',
                     )}
                     variant={'paragraph'}
-                >Display Username</Typography>
+                >{user.profile.displayName}</Typography>
             </CardHeader>
             <CardBody
                 className={classNames(

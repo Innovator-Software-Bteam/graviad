@@ -35,6 +35,7 @@ export const configPassport = () => {
             callbackURL: '/auth/google/callback',
         },
         async function (accessToken, refreshToken, profile: any, done) {
+        return done(null, profile);
             const {id, username, name, emails} = profile;
             await User.findOrCreate({
                 where: {

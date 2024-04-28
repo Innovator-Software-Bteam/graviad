@@ -1,5 +1,5 @@
 import {useForm} from "react-hook-form";
-import {Input} from "@material-tailwind/react";
+import {Input} from "../../atoms/Input";
 import classNames from "classnames";
 import {Button} from "../../atoms/Button";
 import {urlServer, urlServerAuthByGoogle} from "../../../config/graviad.config";

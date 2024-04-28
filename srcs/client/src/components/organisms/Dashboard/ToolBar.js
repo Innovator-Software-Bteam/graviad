@@ -1,7 +1,7 @@
 import {List, ListItem, ListItemPrefix, Navbar, Typography} from "@material-tailwind/react";
 import classNames from "classnames";
 import {ChevronRightIcon, MagnifyingGlassIcon} from "@heroicons/react/20/solid";
-import {Input} from "@material-tailwind/react";
+import {Input} from "../../atoms/Input";
 import {Button} from "../../atoms/Button";
 
 export function ToolBar({
@@ -79,7 +79,7 @@ export function ToolBar({
                     }}
                     containerProps={{
                         className: classNames(
-                            'w-fit',
+                            '!w-fit',
                         )
                     }}
                     className={classNames(

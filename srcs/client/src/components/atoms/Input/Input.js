@@ -22,16 +22,21 @@ const baseInput = tv({
     }
 });
 
-//
 export const Input = forwardRef(({className, size, ...props}, ref) => {
-    className = classNames(baseInput({
-        size: size,
-    }), className);
     return (
         <MTInput
-            className={className}
-            ref={ref}
-            icon={props.icon}
+            className={classNames(
+                'rounded-md',
+                'text-grvd-theme-sys-dark-on-surface',
+                '!bg-grvd-theme-sys-dark-surface-container',
+                '!border-grvd-theme-ref-neutral-neutral-400 !border',
+                'outline-none',
+
+                'focus:!border-grvd-theme-sys-dark-primary',
+                'placeholder:text-grvd-theme-sys-dark-primary placeholder:opacity-100',
+                'transition-colors duration-200 ease-in-out',
+                'hover:!border-grvd-theme-sys-dark-primary',
+            )}
             {...props}
         />
     );
