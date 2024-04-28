@@ -4,6 +4,7 @@
   "author": "Innovator Software BTeam",
   "private": true,
   "dependencies": {
+    "@heroicons/react": "^2.1.3",
     "@material-tailwind/react": "^2.1.9",
     "@reduxjs/toolkit": "^2.2.3",
     "@testing-library/jest-dom": "^5.17.0",

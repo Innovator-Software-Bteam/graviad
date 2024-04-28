@@ -2,6 +2,7 @@ import {tv} from "tailwind-variants";
 import {PropTypes} from "prop-types";
 import classNames from 'classnames';
 import {forwardRef} from 'react';
+import {Input as MTInput} from "@material-tailwind/react";
 
 const baseInput = tv({
     base: [
@@ -27,9 +28,10 @@ export const Input = forwardRef(({className, size, ...props}, ref) => {
         size: size,
     }), className);
     return (
-        <input
+        <MTInput
             className={className}
             ref={ref}
+            icon={props.icon}
             {...props}
         />
     );

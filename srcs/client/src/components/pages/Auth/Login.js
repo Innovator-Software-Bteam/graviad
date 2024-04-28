@@ -1,5 +1,5 @@
 import {useForm} from "react-hook-form";
-import {Input} from "../../atoms/Input";
+import {Input} from "@material-tailwind/react";
 import classNames from "classnames";
 import {Button} from "../../atoms/Button";
 import {urlServer, urlServerAuthByGoogle} from "../../../config/graviad.config";
@@ -44,19 +44,46 @@ export function LoginForm({className, ...props}) {
                 'w-full h-fit', className)}
             {...props}
         >
-            <Input className={'w-full'}
-                   type={'text'}
-                   placeholder={'Username'}
-                   onChange={(e) => setUsername(e.target.value)}
-                   {...register('username', {
-                       required: true
-                   })}
+            <Input
+                className={classNames(
+                    'rounded-md',
+                    'text-grvd-theme-sys-dark-on-surface',
+                    '!bg-grvd-theme-sys-dark-surface-container',
+                    '!border-grvd-theme-ref-neutral-neutral-400 !border',
+                    'focus:!border-grvd-theme-sys-dark-primary',
+                    'placeholder:text-grvd-theme-sys-dark-primary placeholder:opacity-100',
+                    'outline-none',
+                )}
+                labelProps={{
+                    className: classNames(
+                        'hidden',
+                    )
+                }}
+
+                type={'text'}
+                placeholder={'Username'}
+                onChange={(e) => setUsername(e.target.value)}
+                {...register('username', {
+                    required: true
+                })}
             />
             <Input
-                className={'w-full'}
+                className={classNames(
+                    'rounded-md',
+                    'text-grvd-theme-sys-dark-on-surface',
+                    '!bg-grvd-theme-sys-dark-surface-container',
+                    '!border-grvd-theme-ref-neutral-neutral-400 !border',
+                    'focus:!border-grvd-theme-sys-dark-primary',
+                    'placeholder:text-grvd-theme-sys-dark-primary placeholder:opacity-100',
+                    'outline-none',
+                )}
+                labelProps={{
+                    className: classNames(
+                        'hidden',
+                    )
+                }}
                 type={'password'}
                 placeholder={'Password'}
-                defaultValue={'hoangbach'}
                 onChange={(e) => setPassword(e.target.value)}
                 {...register('password', {
                     required: true
@@ -95,7 +122,7 @@ export function Login() {
                     'gap-5',
                     'w-[25em]',
                     'mx-auto',
-                    'my-[10%]',
+                    'my-[7vh]',
                     'flex',
                     'flex-col',
                     'justify-between',

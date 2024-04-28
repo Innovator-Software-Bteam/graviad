@@ -8,7 +8,7 @@ import classNames from "classnames";
 
 
 const baseButton = tv({
-    base: 'font-semibold',
+    base: 'font-semibold w-fit',
     variants: {
         color: {
             primary: 'text-grvd-theme-sys-dark-on-primary bg-grvd-theme-sys-dark-primary',
@@ -61,6 +61,7 @@ Button.propTypes = {
     className: PropTypes.string,
     size: PropTypes.oneOf(['sm', 'md', 'lg']),
     color: PropTypes.oneOf(['primary', 'secondary', 'tertiary', 'auxiliary']),
+    variant: PropTypes.oneOf(['contained', 'outlined', 'text']),
     disabled: PropTypes.bool,
 
 };

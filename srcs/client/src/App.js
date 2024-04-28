@@ -1,6 +1,6 @@
 import './App.css';
-import {Header} from "./components/organisms/Header";
-import {Main} from "./components/organisms/Main";
+import {Header} from "./components/organisms/App/Header";
+import {Main} from "./components/organisms/App/Main";
 import {Outlet} from "react-router-dom";
 import {useDispatch, useSelector} from "react-redux";
 import {useEffect} from "react";

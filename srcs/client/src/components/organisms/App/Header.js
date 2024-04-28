@@ -1,7 +1,7 @@
-import {NavLink} from "../atoms/NavLink";
+import {NavLink} from "../../atoms/NavLink";
 import classNames from "classnames";
-import {IconBrand, IconSVG} from "../atoms/Icon";
-import {Button} from "../atoms/Button";
+import {IconBrand, IconSVG} from "../../atoms/Icon";
+import {Button} from "../../atoms/Button";
 import {Link} from "react-router-dom";
 
 export function Header({children, className, ...props}) {
@@ -30,8 +30,7 @@ export function Header({children, className, ...props}) {
                         'rounded-3xl',
                         'w-4/5',
 
-                        'bg-dashboard-theme/ref/neutral/neutral-600/50',
-                        'shadow-dashboard-theme/shadow/shadow-large',
+                        'bg-grvd-theme-sys-dark-surface-container/20',
                         'backdrop-blur-[10px]',
                     )}
             >
@@ -66,7 +65,7 @@ export function Header({children, className, ...props}) {
                             <p
                                 className={
                                     classNames(
-                                        'text-dashboard-theme/sys/dark/secondary',
+                                        'text-grvd-theme-sys-dark-primary',
                                         'font-bold',
                                         'text-lg',
                                     )
@@ -103,13 +102,10 @@ export function Header({children, className, ...props}) {
                     >
                         <ul>
                             <Link to={'login'}>
-                                <Button size={'md'} variant={'text'}  color={'secondary'}>
-                                    Log in
+                                <Button size={'lg'} variant={'contained'}  color={'primary'}>
+                                    Get Started
                                 </Button>
                             </Link>
-                            <Button size={'lg'} variant={'contained'} color={'primary'}>
-                               Sign Up
-                            </Button>
                         </ul>
                     </li>
                 </ul>
