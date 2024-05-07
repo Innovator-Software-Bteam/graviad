@@ -4,6 +4,7 @@ import {User} from "../../models/auth/auth.model";
 import {clientURL} from "../../config/graviad.config";
 import {StatusCodes} from "http-status-codes";
 import {AuthMessage} from "../../interfaces/auth.controller";
+import * as url from "url";
 
 export const router = express.Router();
 router.get('/login/success', (req, res) => {
@@ -13,13 +14,13 @@ router.get('/login/success', (req, res) => {
 router.get('/login/failed', (req, res) => {
     res.status(StatusCodes.UNAUTHORIZED).json({message: AuthMessage.LOGIN_FAILED});
 });
-router.post('logout', (req, res, next) => {
+router.get('/logout', (req, res, next) => {
     req.logout(function (err) {
         if (err) {
             return next(err);
         }
-        res.redirect('/');
     });
+    res.clearCookie('connect.sid', {path: '/'});
     res.status(StatusCodes.OK).json({message: AuthMessage.LOGOUT_SUCCESS});
 });
 router.post('/signup', async (req, res) => {

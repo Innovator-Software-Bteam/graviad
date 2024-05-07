@@ -1,16 +1,15 @@
 /**
- * @module auth.model.ts
- * @version 1.1.0
+ * @file auth.model.ts
+ * @module Authentication
+ * @version 0.0.2
  * @description This is the model for the authentication module.
  * It includes all models from the root database and initializes the connections to map them.
- * @author Hoang Duc Bach
- * @updated on 2021/10/06
+ * @updated on 04/05/2024
  */
-import {v4 as uuidv4} from 'uuid';
 import {ABaseEntity} from "../base.model";
 import {DataTypes} from "sequelize";
-import {localSequelize} from "../../config/database.config";
-import {IUser} from "../../interfaces/customer.interface";
+import {localSequelize} from "../../config";
+import {IUser} from "../../declare";
 
 export class Role extends ABaseEntity<number> {
     declare name: string;
@@ -50,10 +49,10 @@ export class User extends ABaseEntity<string> implements IUser {
     };
 }
 User.init({
-    id: {
-        type: DataTypes.UUID,
-        primaryKey: true,
-        defaultValue: DataTypes.UUIDV4
+    email: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        primaryKey: true
     },
     firstName: {
         type: DataTypes.STRING,
@@ -66,11 +65,6 @@ User.init({
         field: 'last_name'
     },
     username: {
-        type: DataTypes.STRING,
-        allowNull: false,
-        unique: true
-    },
-    email: {
         type: DataTypes.STRING,
         allowNull: false,
         unique: true
@@ -107,11 +101,11 @@ Permission.init({}, {
 });
 
 User.hasMany(Role, {
-    foreignKey: 'userId',
+    foreignKey: 'email',
     as: 'user_has_roles'
 });
 Role.belongsTo(User, {
-    foreignKey: 'userId',
+    foreignKey: 'email',
     as: 'user_has_roles'
 });
 Role.hasMany(Permission, {
