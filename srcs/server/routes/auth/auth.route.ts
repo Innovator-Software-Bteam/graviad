@@ -13,7 +13,7 @@ router.get('/login/success', (req, res) => {
 router.get('/login/failed', (req, res) => {
     res.status(StatusCodes.UNAUTHORIZED).json({message: AuthMessage.LOGIN_FAILED});
 });
-router.post('logout', (req, res, next) => {
+router.get('logout', (req, res, next) => {
     req.logout(function (err) {
         if (err) {
             return next(err);
@@ -22,6 +22,7 @@ router.post('logout', (req, res, next) => {
     });
     res.status(StatusCodes.OK).json({message: AuthMessage.LOGOUT_SUCCESS});
 });
+
 router.post('/signup', async (req, res) => {
     const {email, password} = req.body;
     const user = await User.create({email, password});

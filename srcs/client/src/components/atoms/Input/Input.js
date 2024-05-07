@@ -46,7 +46,7 @@ Input.propTypes = {
     className: PropTypes.string,
     size: PropTypes.oneOf(['sm', 'md', 'lg']),
 
-    //Base props for input
+    //Base props for Input
     type: PropTypes.string,
     value: PropTypes.string,
     placeholder: PropTypes.string,
