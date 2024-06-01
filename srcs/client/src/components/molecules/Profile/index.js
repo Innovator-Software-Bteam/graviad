@@ -1,0 +1,1 @@
+export {ProfileShortcut} from "./ProfileShortcut";
