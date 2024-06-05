@@ -1,11 +1,11 @@
-import {TMerchant, TProduct, TProductFeature} from "grvd";
+import {TMediaFromSpline, TMerchant, TProduct, TProductFeature} from "grvd";
 import {IProductProps} from "./ProductDetailForPreview";
 import React from "react";
 import {UseFormRegisterReturn} from "react-hook-form";
 import {ProductDetailFileUploadArea, ProductDetailPreviewArea, ProductFeatureEditArea} from "./ProductDetailForEdit";
 
 /**
- * @description [Product] Product Card
+ * @description [ProductPage] ProductPage Card
  */
 export interface IProductCardProps extends React.ComponentProps<"div"> {
     id?: string;
@@ -25,7 +25,7 @@ export interface IProductSpecificationsAreaProps extends IProductProps {
 }
 
 /**
- * @description [Product] Product Detail
+ * @description [ProductPage] ProductPage Detail
  */
 export interface IProductDetailsAreaProps extends IProductProps {
 
@@ -41,7 +41,7 @@ export interface IProductOwnerAreaProps extends IProductProps {
 }
 
 /**
- * @description [Product] Product Create Form
+ * @description [ProductPage] ProductPage Create Form
  */
 export interface IProductCreateFormProps extends React.ComponentProps<"div"> {
 
@@ -54,7 +54,7 @@ export type TProductCreateForm = {
     version: string;
     brief: string;
     fileThumbnail: File;
-    // fileModel: File;
+    mediaFromSpline: TMediaFromSpline;
 };
 export type TInput = {
     title: string;
@@ -66,7 +66,7 @@ export type TInputProps = {
 }
 
 /**
- * @description [Product] Product Detail For Edit
+ * @description [ProductPage] ProductPage Detail For Edit
  */
 export interface IProductDetailForEditProps extends IProductProps {
 

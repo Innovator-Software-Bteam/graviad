@@ -60,7 +60,7 @@ export function ProfileDetailForPreview() {
                 <Typography
                     className={'flex flex-row gap-2 text-grvd-theme-sys-dark-primary items-center justify-start w-full'}>
                     <FaTwitter size={20}/>
-                    {merchant?.socialLinks?.find(link => link.provider === 'twitter')?.data || 'No Twitter justify-start w-full'}
+                    {merchant?.socialLinks?.find(link => link.provider === 'twitter')?.data || 'No Twitter'}
                 </Typography>
                 <Typography
                     className={'flex flex-row gap-2 text-grvd-theme-sys-dark-primary items-center justify-start w-full'}>

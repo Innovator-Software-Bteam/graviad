@@ -2,12 +2,10 @@ import {
     Entity,
     Column,
     PrimaryColumn,
-    OneToMany,
-    Exclusion,
     OneToOne,
     JoinColumn,
 } from 'typeorm';
-import {TProfile} from "@app/modules/user";
+import {Merchant, TProfile} from "@app/modules/user";
 
 /**
  * @version 2.0
@@ -40,6 +38,16 @@ export class User {
     updatedAt: Date;
 
     @OneToOne(() => Profile)
-    @JoinColumn({name: 'profile_id'})
+    @JoinColumn({name: 'profile_id', referencedColumnName: 'id', foreignKeyConstraintName: 'fk_users_profiles'})
     profile: Profile;
+
+    @Column({type: 'varchar', nullable: false, name: 'profile_id'})
+    profileId: string;
+
+    @OneToOne(() => Merchant)
+    @JoinColumn({name: 'merchant_id', referencedColumnName: 'id', foreignKeyConstraintName: 'fk_users_merchant_id'})
+    merchant: Merchant;
+
+    @Column({type: 'uuid', nullable: true, name: 'merchant_id'})
+    merchantId: string;
 }

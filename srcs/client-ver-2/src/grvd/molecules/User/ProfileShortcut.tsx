@@ -1,5 +1,3 @@
-import {useSelector} from "react-redux";
-import {UserCounterState} from "../../storage/counters/UserCounter";
 import {Avatar, Card, Menu, MenuHandler, MenuItem, MenuList, Typography} from "@material-tailwind/react";
 import {twJoin, twMerge} from "tailwind-merge";
 import {Button} from "grvd/components";
@@ -7,7 +5,9 @@ import {FaAngleDown, FaUser} from "react-icons/fa";
 import {useEffect, useState} from "react";
 import {IoLogOut} from "react-icons/io5";
 import config from "../../../config";
-import {useProfile} from "grvd/pages";
+import {useMerchant, useProfile} from "grvd/pages";
+import {useSelector} from "react-redux";
+import {RootState} from "grvd/storage";
 
 export type TProfileItem = {
     title: string;
@@ -15,14 +15,21 @@ export type TProfileItem = {
     link: string;
 }
 
-export function UserProfileShortcut() {
+export function ProfileShortcut() {
+    const [loginWindow, setLoginWindow] = useState<Window | null>(null);
     const profile = useProfile();
+    const merchant = useMerchant();
+    const state=useSelector((state: RootState) => state.state.state);
+    const handleLogin = () => {
+        const win = window.open(config.server.url + '/auth/google','_self', 'width=500,height=600,toolbar=0,menubar=0,location=0,status=1,scrollbars=1,resizable=1,left=50%,top=50%');
+        setLoginWindow(win);
+    }
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const profileItems: TProfileItem[] = [
         {
             title: 'Profile',
             icon: <FaUser size={16}/>,
-            link: '/dashboard/profile'
+            link:  `/dashboard/profile/${merchant?.id}`,
         },
         {
             title: 'Logout',
@@ -53,22 +60,25 @@ export function UserProfileShortcut() {
         )
     };
     useEffect(() => {
-    }, [profile]);
+    }, [state]);
+    if(!state.isAuthenticated) return (
+        <Button colorcustom={'primary'} sizecustom={'lg'} onClick={handleLogin}>
+            Login
+        </Button>
+    )
     return (
         <Card className={twJoin(
-            'flex flex-row gap-4',
-            'items-center',
-            'justify-between',
-            'p-4',
+            'flex flex-row gap-2 items-center justify-between',
+            'p-4 w-fit',
             'rounded-lg',
-            'w-fit',
-            'bg-grvd-theme-sys-dark-surface-container',
+            'bg-transparent',
         )}
+              shadow={false}
               onClick={() => setIsMenuOpen(!isMenuOpen)}
         >
             <Menu
                 placement={'bottom-end'}
-                offset={20}
+                offset={30}
                 handler={setIsMenuOpen}
                 open={isMenuOpen}
                 allowHover={true}
@@ -87,7 +97,7 @@ export function UserProfileShortcut() {
                     />
                 }
                 <MenuHandler>
-                    <Button colorCustom={'secondary'} className={'!bg-transparent'}>
+                    <Button colorcustom={'secondary'} sizecustom={'sm'} className={'!bg-transparent outline-none border-none'}>
                         <FaAngleDown
                             size={20}
                             className={twJoin(
@@ -102,7 +112,7 @@ export function UserProfileShortcut() {
                     </Button>
                 </MenuHandler>
                 <MenuList className={twJoin(
-                    'bg-grvd-theme-sys-dark-surface-container/90',
+                    'bg-grvd-theme-sys-dark-surface-container/50',
                     'backdrop-blur-lg',
                     'rounded-lg',
                     'border-none',
@@ -115,5 +125,5 @@ export function UserProfileShortcut() {
                 </MenuList>
             </Menu>
         </Card>
-    )
+    );
 }

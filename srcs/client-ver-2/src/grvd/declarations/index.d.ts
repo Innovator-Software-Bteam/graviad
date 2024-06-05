@@ -56,7 +56,7 @@
 //     type TRole = "user" | "customer" | "enterprise";
 //
 //     /**
-//      * @description [Product] Type of product to fetch json.
+//      * @description [ProductPage] Type of product to fetch json.
 //      */
 //     type TThumbnail2D = {
 //         id?: string;

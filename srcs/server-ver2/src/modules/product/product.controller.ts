@@ -23,8 +23,8 @@ export class ProductController {
     }
 
     @Get()
-    async findAll() {
-        return this.productService.findAll();
+    async findAll(@Query() query: any){
+        return this.productService.findAll(query);
     }
 
     // get by query
@@ -50,30 +50,18 @@ export class ProductController {
     async create(@Body() body: any) {
         return this.productService
             .create(body)
-            .catch(err => {
-                console.log(err);
-                return err;
-            })
     }
 
     @Put(':id')
-    @UseGuards(OwnerGuard)
+    // @UseGuards(OwnerGuard)
     async update(id: any, @Body() dto: UpdateProductDto) {
         return this.productService
             .update(id, dto)
-            .catch(err => {
-                console.log(err);
-                return err;
-            });
     }
 
     @Patch(':id')
-    @UseGuards(OwnerGuard)
+    // @UseGuards(OwnerGuard)
     async updatePartial(@Param('id') id: any, @Body() dto: UpdateProductDto) {
         return this.productService.updatePartial(id, dto)
-            .catch(err => {
-            console.log(err);
-            return err;
-        });
     }
 }

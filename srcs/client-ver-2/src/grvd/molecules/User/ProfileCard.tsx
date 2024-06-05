@@ -63,7 +63,8 @@ export function ProfileCard({typeCustom}: IProfileCardProps) {
         <div className={twJoin(
             baseCard({className: typeCustom}),
             'bg-[rgb(255,255,255)]/10 backdrop-blur-[50px]',
-            'shadow-2xl overflow-clip z-10',
+            'shadow-xl overflow-clip z-10',
+            'relative'
         )}>
             {typeCustom === 'glass' && (
                 <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 501 300"
@@ -79,15 +80,15 @@ export function ProfileCard({typeCustom}: IProfileCardProps) {
                         <filter id="filter0_f_1099_349" x="-79.3247" y="-93.9878" width="583.743"
                                 height="429.142" filterUnits="userSpaceOnUse"
                                 color-interpolation-filters="sRGB">
-                            <feFlood flood-opacity="0" result="BackgroundImageFix"/>
+                            <feFlood floodOpacity="0" result="BackgroundImageFix"/>
                             <feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
                             <feGaussianBlur stdDeviation="50" result="effect1_foregroundBlur_1099_349"/>
                         </filter>
                         <linearGradient id="paint0_linear_1099_349" x1="83.5325" y1="1.03662" x2="251.374"
                                         y2="173.106" gradientUnits="userSpaceOnUse">
-                            <stop stop-color="#F14FFF"/>
-                            <stop offset="0.495" stop-color="#866DFE"/>
-                            <stop offset="1" stop-color="#0093FD"/>
+                            <stop stopColor="#F14FFF"/>
+                            <stop offset="0.495" stopColor="#866DFE"/>
+                            <stop offset="1" stopColor="#0093FD"/>
                         </linearGradient>
                     </defs>
                 </svg>
@@ -115,7 +116,7 @@ export function ProfileCard({typeCustom}: IProfileCardProps) {
                         <Avatar
                             src={profile?.photos[0].value}
                             variant={'rounded'}
-                            size={'lg'}
+                            size={'xl'}
                             className={'shadow'}
                         />
                     )

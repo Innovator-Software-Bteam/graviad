@@ -1,13 +1,14 @@
 import {registerAs} from "@nestjs/config";
 import * as url from "url";
+import {TGraviadConfig} from './index'
 
-export default registerAs('graviad', () => ({
+export default registerAs('graviad', (): TGraviadConfig => ({
     server: {
         url: new URL(url.format({
             hostname: process.env.GRAVIAD_SERVER_HOST,
             port: process.env.GRAVIAD_SERVER_PORT,
             protocol: process.env.GRAVIAD_SERVER_SCHEMA,
-        }))
+        })),
     },
     client: {
         url: new URL(url.format({

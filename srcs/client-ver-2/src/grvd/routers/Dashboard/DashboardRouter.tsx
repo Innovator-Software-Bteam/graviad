@@ -4,23 +4,23 @@ import {Dashboard} from "../../../Dashboard";
 
 
 const DashboardHome = React.lazy(() =>
-    import('grvd/pages/Dashboard/DashboardHome')
-        .then(module => ({default: module.DashboardHome})
+    import('grvd/pages/Dashboard/home/DashboardHomePage')
+        .then(module => ({default: module.DashboardHomePage})
         ));
 const Profile = React.lazy(() =>
-    import('grvd/pages/Dashboard/Profile')
-        .then(module => ({default: module.Profile})
+    import('grvd/pages/Dashboard/profile/ProfilePage')
+        .then(module => ({default: module.ProfilePage})
         ));
 const Product = React.lazy(() =>
-    import('grvd/pages/Dashboard/Product')
-        .then(module => ({default: module.Product})
+    import('grvd/pages/Dashboard/product/ProductPage')
+        .then(module => ({default: module.ProductPage})
         ));
 
 export const DashboardRouter =
     <Route path={'dashboard'} element={<Dashboard/>}>\
         <Route path={''} element={<Navigate to={'home'}/>}/>
         <Route path={'home'} element={<DashboardHome/>}/>
-        <Route path={'profile'} element={<Profile/>}/>
+        <Route path={'profile/:id'} element={<Profile/>}/>
         <Route path={'products/:id'} element={<Product/>}/>
     </Route>
 ;

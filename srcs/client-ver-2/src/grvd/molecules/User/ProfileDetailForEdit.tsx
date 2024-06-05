@@ -9,15 +9,16 @@ import {AiOutlineLike} from "react-icons/ai";
 import {BiPackage} from "react-icons/bi";
 import axios from "axios";
 import config from "../../../config";
-import {Button, InputWithTitle, Label} from "grvd/components";
-import {useMerchant, useProfile, useUser} from "grvd/pages/Dashboard";
+import {Button, InputWithTitle, Label, TextareaWithTitle} from "grvd/components";
+import {useMerchant, useProfile, useUser} from "grvd/pages";
+import {TInput} from "grvd/molecules"
 import {IPageProps} from "grvd/pages/types";
 import {PiExportBold} from "react-icons/pi";
-export type TInput = {
-    title: string;
-    name?: string;
-    register: UseFormRegisterReturn<any>;
-}
+// export type TInput = {
+//     title: string;
+//     name?: string;
+//     register: UseFormRegisterReturn<any>;
+// }
 export type TFormInput = {
     email: string;
     phone: string;
@@ -129,8 +130,8 @@ export function ProfileAvatarArea() {
                 </div>
             </div>
             <Button
-                colorCustom={'secondary'}
-                sizeCustom={'lg'}
+                colorcustom={'secondary'}
+                sizecustom={'lg'}
                 className={'bg-[rgb(157,157,157)]/25 flex flex-row gap-2 items-center justify-center w-fit h-fit backdrop-blur-[25px] relative'}
             >
                 Export Profile
@@ -263,7 +264,6 @@ export function ProfileFormArea() {
         },
         twitterLink: {
             title: 'Twitter',
-            name: 'twitterLink',
             register: register('twitterLink', {})
         },
         instagramLink: {
@@ -301,8 +301,14 @@ export function ProfileFormArea() {
             )}
             onSubmit={handleSubmit(onSubmit)}
         >
-            <InputWithTitle
+            <TextareaWithTitle
+                variant={'static'}
                 title={inputItems.description.title}
+                style={{
+                    scrollbarGutter: 'hidden',
+                    scrollbarWidth: 'thin',
+                    scrollbarColor: 'rgba(0,0,0,0.1) transparent',
+                }}
                 {...inputItems.description.register}
             />
             <div>
@@ -347,7 +353,7 @@ export function ProfileFormArea() {
                     {...inputItems.instagramLink.register}
                 />
             </div>
-            <Button type={'submit'} sizeCustom={'lg'} colorCustom={'primary'} className={'w-fit'}>Save</Button>
+            <Button type={'submit'} sizecustom={'lg'} colorcustom={'primary'} className={'w-fit'}>Save</Button>
         </form>
     );
 }

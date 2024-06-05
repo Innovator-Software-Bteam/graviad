@@ -1,20 +1,17 @@
 import {
-    IProductDetailFileUploadAreaProps,
     IProductDetailForEditProps,
     IProductDetailForm,
     IProductFeatureEditAreaProps, ProductCard,
     ProductContext,
-    TProductCreateForm,
     TProductDetailForm, useProduct
 } from "grvd/molecules/Product";
-import {useUser} from "grvd/pages";
 import {useForm} from "react-hook-form";
-import {TMerchant, TProduct, TProductFeature, TProductFeatureKey, TThumbnail2D} from "grvd";
+import {TProduct, TProductFeature, TProductFeatureKey, TThumbnail2D} from "grvd";
 import {Typography} from "@material-tailwind/react";
 import React, {useContext, useEffect, useState} from "react";
 import axios from "axios";
 import config from "../../../config";
-import {Button, Input, InputTypeFile, InputWithTitle, Textarea, TextareaWithTitle} from "grvd/components";
+import {Button, InputTypeFile, InputWithTitle, TextareaWithTitle} from "grvd/components";
 import {CiHeart} from "react-icons/ci";
 import {twJoin} from "tailwind-merge";
 import {MdDeleteForever} from "react-icons/md";
@@ -106,8 +103,8 @@ export function ProductFeatureEditArea({features, setFeatures}: IProductFeatureE
                 {features && features.map((feature, index) => renderFeature(feature, index))}
                 <Button
                     onClick={handleAddFeature}
-                    colorCustom={'secondary'}
-                    sizeCustom={'lg'}
+                    colorcustom={'secondary'}
+                    sizecustom={'lg'}
                 >
                     Add feature
                 </Button>
@@ -116,7 +113,7 @@ export function ProductFeatureEditArea({features, setFeatures}: IProductFeatureE
     )
 }
 
-export function ProductDetailFileUploadArea({className}: IProductDetailFileUploadAreaProps) {
+export function ProductDetailFileUploadArea() {
     return (
         <div>
             <InputTypeFile
@@ -351,8 +348,8 @@ export function ProductDetailFormArea({className}: IProductDetailForm) {
             />
             <Button
                 type={'submit'}
-                colorCustom={'primary'}
-                sizeCustom={'lg'}
+                colorcustom={'primary'}
+                sizecustom={'lg'}
             >
                 Save
             </Button>
@@ -364,7 +361,6 @@ export function ProductDetailFormArea({className}: IProductDetailForm) {
 export function ProductDetailPreviewArea({className, product}: any) {
     const {productForm} = useContext(ProductFormContext);
     useEffect(() => {
-        console.log(productForm);
     }, [productForm]);
     return (
         <div className={twJoin(

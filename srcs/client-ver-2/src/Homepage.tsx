@@ -1,5 +1,5 @@
 import {ComponentProps} from "react";
-import {Outlet} from "react-router-dom";
+import {Outlet, useNavigate} from "react-router-dom";
 import {twJoin, twMerge} from "tailwind-merge";
 import {Button} from "grvd/components";
 import {Link} from "react-router-dom";
@@ -16,6 +16,7 @@ interface IHomepageMainProps extends ComponentProps<'main'> {
 }
 
 export function HomepageHeader({...props}: IHomepageHeaderProps) {
+    const navigate = useNavigate();
     const navItems = [
         {
             label: 'About',
@@ -30,9 +31,9 @@ export function HomepageHeader({...props}: IHomepageHeaderProps) {
             href: '/homepage/team',
         }
     ];
-    const renderNavItems = ({label, href}: any) => {
+    const renderNavItems = ({label, href, index}: any) => {
         return (
-            <div>
+            <div key={index}>
                 <a href={href} className={twMerge(
                     'text-grvd-theme-sys-dark-on-primary-variant font-medium',
                     'hover:text-grvd-theme-sys-dark-primary',
@@ -41,12 +42,19 @@ export function HomepageHeader({...props}: IHomepageHeaderProps) {
             </div>
         )
     }
-
+    const handleGuessButton = () => {
+        navigate('/dashboard',{
+            state: {
+                role: 'guest'
+            }
+        })
+    }
     return (
         <header className={twMerge(
-            'static mt-10 z-50 w-[80vw] min-w-fit',
+            'mt-10 z-50 w-[80vw] min-w-fit py-4',
             'flex justify-center items-center',
-            'relative',
+            'sticky top-0 z-50',
+            'backdrop-blur-[50px]',
         )}>
             <div className={twMerge(
                 'w-full !left-0 flex items-center justify-between ',
@@ -55,7 +63,8 @@ export function HomepageHeader({...props}: IHomepageHeaderProps) {
                     'flex flex-col justify-between items-center',
                     'max-w-screen-lg'
                 )}>
-                    <Typography variant={'h4'} className={'text-grvd-theme-sys-dark-primary !font-bold'}>Graviad</Typography>
+                    <Typography variant={'h4'}
+                                className={'text-grvd-theme-sys-dark-primary !font-bold'}>Graviad</Typography>
                 </div>
                 <div className={twMerge(
                     'absolute left-1/2 -translate-x-1/2',
@@ -64,26 +73,31 @@ export function HomepageHeader({...props}: IHomepageHeaderProps) {
                     'py-2 px-5',
                     'rounded-lg'
                 )}>
-                    {navItems.map((navItem) => renderNavItems(navItem))}
+                    {navItems.map((navItem, index) => renderNavItems({
+                        label: navItem.label,
+                        href: navItem.href,
+                        index: index
+                    }))}
                 </div>
                 <div
                     className={twJoin(
-                    'flex flex-row gap-4 justify-end items-center',
-                )}
+                        'flex flex-row gap-4 justify-end items-center',
+                    )}
                 >
                     <Button
-                        sizeCustom={'lg'}
-                        colorCustom={'secondary'}
+                        sizecustom={'lg'}
+                        colorcustom={'secondary'}
                         className={twJoin(
                             '!bg-grvd-theme-sys-dark-primary/10 !text-grvd-theme-sys-dark-primary !font-medium',
                         )}
+                        onClick={handleGuessButton}
                     >
                         Guess
                     </Button>
                     <Link to={'/homepage/login'}>
                         <Button
-                            colorCustom={'primary'}
-                            sizeCustom={'lg'}
+                            colorcustom={'primary'}
+                            sizecustom={'lg'}
                         >
                             Get started
                         </Button>

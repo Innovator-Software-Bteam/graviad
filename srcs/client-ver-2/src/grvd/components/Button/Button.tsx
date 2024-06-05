@@ -1,10 +1,13 @@
 import React from "react";
 
 import {tv, TVReturnType} from "tailwind-variants";
-import {twMerge} from "tailwind-merge";
+import {twJoin, twMerge} from "tailwind-merge";
 import * as MT from "@material-tailwind/react";
-import {IButtonProps} from "grvd/components/Button";
-
+import {IButtonProps, IButtonWithLoadingProps} from "grvd/components";
+import {Spinner} from "grvd/components/Spinner";
+import {useSpring, animated} from "react-spring";
+import {FaCircleCheck} from "react-icons/fa6";
+import {SyncLoader} from "react-spinners";
 
 const baseButtonClass: TVReturnType<any, any, any, any, any, any> = tv({
     base: "font-bold normal-case",
@@ -39,8 +42,8 @@ export const Button = React.forwardRef((props: IButtonProps, ref) => {
         <MT.Button
             className={twMerge(
                 baseButtonClass({
-                    color: props.colorCustom,
-                    size: props.sizeCustom,
+                    color: props.colorcustom,
+                    size: props.sizecustom,
                 }),
                 className,
             )}
@@ -49,5 +52,41 @@ export const Button = React.forwardRef((props: IButtonProps, ref) => {
         >
             {children}
         </MT.Button>
+    );
+});
+
+export const ButtonWithLoading = React.forwardRef((props: IButtonWithLoadingProps, ref) => {
+    const {isloading = false, children, isdone = false, textdone, textloading, ...otherProps} = props;
+    const doneRef = React.useRef(false);
+    const doneAnimation=useSpring({
+        top: isdone ? 0 : -30,
+        config: { tension: 220, friction: 20 },
+    })
+    return (
+        <Button
+            ref={ref as any}
+            {...otherProps}
+            // disabled={isloading}
+            className={twJoin(
+                'flex flex-row gap-2 items-center justify-center',
+                'transition-all duration-300 ease-in-out',
+                props.className
+            )}
+        >
+            {isloading && textloading}
+            <animated.div
+                ref={doneRef as any}
+                style={{
+                    translateY: doneAnimation.top.to((top) => `${top}px`),
+                    transition: 'top 0.3s ease-in-out',
+                }}
+                className={'flex flex-row gap-2 items-center'}
+            >
+                {isdone && textdone}
+                {isdone && <FaCircleCheck size={20}/>}
+            </animated.div>
+            {!isloading && !isdone && children}
+            {isloading && <SyncLoader size={5}/>}
+        </Button>
     );
 });

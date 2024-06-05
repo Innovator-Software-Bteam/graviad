@@ -1,17 +1,31 @@
-export interface ICrud<T = any, D = any, U = any> {
-    create?(dto?: D): Promise<T>;
+export interface ICrud<E = any, C = any, U = any> {
+    create?(dto?: C): Promise<E>;
 
-    update?(id: any, dto?: U): Promise<T>;
+    findAll?(option?: any): Promise<E[]>;
 
-    update?(id: any, dto?: U): Promise<any>;
+    findBy?(option?: any): Promise<E>;
 
-    delete?(id: any): Promise<T>;
+    findById?(id: any): Promise<E>;
+
+    /**
+     * @description Update entity by id, if not found, create new entity
+     * @param id
+     * @param dto
+     */
+    update?(id?: any, dto?: U): Promise<any>;
+
+    /**
+     * @description Update entity by id, entity must be existed. Can update only partial fields
+     * @param id
+     * @param dto
+     */
+    updatePartial?(id: any, dto?: U): Promise<any>;
+
+    findOrCreate?(id?: any, dto?: C): Promise<E>;
+
+    delete?(id: any): Promise<E>;
 
     delete?(id: any): Promise<any>;
 
-    findAll?(option?: any): Promise<T[]>;
-
-    findBy?(option?: any): Promise<T>;
-
-    findById?(id: any): Promise<T>;
+    deleteAll?(): Promise<any>;
 }

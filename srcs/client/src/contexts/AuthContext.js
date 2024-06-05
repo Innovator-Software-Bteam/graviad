@@ -5,7 +5,7 @@ import url from 'url';
 import {urlServer} from "../config/graviad.config";
 import {useDispatch} from "react-redux";
 
-// Create a new context
+// Create a new contexts
 export const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {

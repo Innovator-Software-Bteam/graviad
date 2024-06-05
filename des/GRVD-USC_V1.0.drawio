@@ -203,10 +203,10 @@
         <mxCell id="QdUmvHCU_gGnPU_W8vJt-254" value="Mastercard Bank Service" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;container=0;" vertex="1" parent="1">
           <mxGeometry x="833" y="-1882" width="30" height="60" as="geometry" />
         </mxCell>
-        <mxCell id="QdUmvHCU_gGnPU_W8vJt-255" value="Modify Profile" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+        <mxCell id="QdUmvHCU_gGnPU_W8vJt-255" value="Modify ProfilePage" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
           <mxGeometry x="157" y="-670" width="140" height="70" as="geometry" />
         </mxCell>
-        <mxCell id="QdUmvHCU_gGnPU_W8vJt-256" value="Preview Profile" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+        <mxCell id="QdUmvHCU_gGnPU_W8vJt-256" value="Preview ProfilePage" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
           <mxGeometry x="106" y="-581" width="140" height="70" as="geometry" />
         </mxCell>
         <mxCell id="QdUmvHCU_gGnPU_W8vJt-257" value="Preview Ads" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
@@ -515,10 +515,10 @@
         <mxCell id="QdUmvHCU_gGnPU_W8vJt-372" value="Mastercard Bank Service" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;container=0;" vertex="1" parent="1">
           <mxGeometry x="1013" y="-40" width="30" height="60" as="geometry" />
         </mxCell>
-        <mxCell id="QdUmvHCU_gGnPU_W8vJt-373" value="Modify Profile" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+        <mxCell id="QdUmvHCU_gGnPU_W8vJt-373" value="Modify ProfilePage" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
           <mxGeometry x="355" y="1044" width="140" height="70" as="geometry" />
         </mxCell>
-        <mxCell id="QdUmvHCU_gGnPU_W8vJt-374" value="Preview Profile" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+        <mxCell id="QdUmvHCU_gGnPU_W8vJt-374" value="Preview ProfilePage" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
           <mxGeometry x="304" y="1133" width="140" height="70" as="geometry" />
         </mxCell>
         <mxCell id="QdUmvHCU_gGnPU_W8vJt-375" value="Preview Ads" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">

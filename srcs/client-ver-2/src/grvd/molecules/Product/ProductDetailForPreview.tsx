@@ -4,25 +4,17 @@ import {
     OwnerContext,
     TProductPreviewProps,
     IProductPreview3DAreaProps,
-    IProductSpecificationsAreaProps, IProductDetailsAreaProps, TProductTerms, IProductOwnerAreaProps
+    IProductSpecificationsAreaProps, IProductDetailsAreaProps, TProductTerms, useProduct
 } from "grvd/molecules/Product";
 import {ComponentProps, useEffect, useState, useContext} from "react";
 import axios from "axios";
 import config from "../../../config";
-import {Avatar, Card, Typography} from "@material-tailwind/react";
+import {Avatar, Card, Spinner, Typography} from "@material-tailwind/react";
 import {twJoin} from "tailwind-merge";
 import {Label, Button} from "grvd/components";
 import {GiTwoCoins} from "react-icons/gi";
-import {AiOutlineLike} from "react-icons/ai";
+import {LuHeart} from "react-icons/lu";
 
-export function ProductOwnerArea({}: IProductOwnerAreaProps) {
-    const owner = useContext(OwnerContext);
-    return (
-        <div>
-            <OwnerShortcutArea/>
-        </div>
-    );
-}
 
 export function ProductDetailForPreview({id, product}: TProductPreviewProps) {
     const [owner, setOwner] = useState<TMerchant>();
@@ -67,11 +59,11 @@ export function ProductDetailForPreview({id, product}: TProductPreviewProps) {
         <ProductContext.Provider value={prod}>
             <OwnerContext.Provider value={owner}>
                 <div className={twJoin(
-                    'grid grid-cols-3 grid-row-2 gap-4'
+                    'flex flex-row justify-between items-center gap-32 w-full h-full',
+                    'p-16'
                 )}>
-                    <ProductPreview3DArea product={prod} id={id} className={'col-span-full'}/>
-                    <ProductContentArea product={prod} id={id} className={'row-span-1 col-span-2'}/>
-                    <ProductOwnerArea product={product} id={id} owner={owner} className={'col-start-3 row-span-1'}/>
+                    <ProductContentArea/>
+                    <ProductPreview3DArea/>
                 </div>
             </OwnerContext.Provider>
         </ProductContext.Provider>
@@ -91,31 +83,38 @@ export interface IProductContentAreaProps extends IProductProps {
 export function ProductContentArea({product, id, className, ...props}: IProductContentAreaProps) {
     return (
         <div className={twJoin(
-            'flex flex-col gap-4 w-full h-full',
             className
         )}>
             <ProductSpecificationsArea product={product} id={id}/>
-            <ProductDetailsArea product={product} id={id}/>
+            {/*<ProductDetailsArea product={product} id={id}/>*/}
         </div>
     )
 }
 
 
 export function ProductPreview3DArea({id, className, ...props}: IProductPreview3DAreaProps) {
-    const product = useContext(ProductContext);
+    const product = useProduct();
     return (
         <Card
             className={twJoin(
                 'relative',
-                'w-full h-full min-h-[50vh] rounded-3xl',
+                'w-2/3 aspect-video rounded-3xl',
                 'bg-grvd-theme-sys-dark-surface-container-lowest',
+                'overflow-clip',
                 className
             )}
         >
-            <Label className={'absolute top-8 left-8'}>{product?.highlightLabel}</Label>
+            {product?.mediaFromSpline?
+                <iframe src={product?.mediaFromSpline?.data}
+                        width='100%' height='100%'></iframe>
+                :
+                <div className={'absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2'}>
+                    <Spinner className="h-12 w-12"/>
+                </div>
+            }
             <Card
                 className={twJoin(
-                    'absolute bottom-8 right-8',
+                    'absolute top-8 left-8 aspect-[1/1]',
                     'p-4 rounded-2xl',
                     'bg-grvd-theme-sys-dark-surface-container/50 backdrop-blur-[10px]',
                 )}
@@ -145,12 +144,11 @@ export function ProductSpecificationsArea({
         window.open(product?.link, '_blank');
     }
     return (
-        <Card className={twJoin(
-            'p-6 rounded-3xl',
-            'bg-grvd-theme-sys-dark-surface-container',
-            'flex flex-row justify-between items-center gap-4',
+        <div className={twJoin(
+            'flex flex-col gap-8 w-[30em] max-w-[50em]',
             className
         )}>
+            <Label border={true} className={'top-8 left-8'}>{product?.highlightLabel}</Label>
             <div className={'flex flex-col w-full'}>
                 <Typography
                     variant={'h1'}
@@ -159,29 +157,48 @@ export function ProductSpecificationsArea({
                     {product?.name}
                 </Typography>
                 <Typography
-                    variant={'lead'}
+                    variant={'paragraph'}
+                    className={'text-grvd-theme-sys-dark-primary'}>
+                    {product?.description}
+                </Typography>
+            </div>
+            <div className={'flex flex-row items-center w-full gap-4'}>
+                <Typography
+                    variant={'paragraph'}
                     className={twJoin(
-                        'text-yellow-500 font-bold text-2xl',
+                        'text-[#FAC600] font-bold text-3xl',
                         'flex flex-row items-center gap-2'
                     )}
                 >
                     {product?.price}
-                    <GiTwoCoins size={32} color={'yellow'}/>
+                    <GiTwoCoins size={32} color={'#FAC600'}/>
                 </Typography>
+                <svg xmlns="http://www.w3.org/2000/svg" width="2" height="30%" viewBox="0 0 2 37" fill="none">
+                    <path d="M0.784668 0.5L0.784666 36.5" stroke="#9A9A9A" strokeLinecap="round"/>
+                </svg>
+                <div>
+                    <Typography
+                        variant={'small'}
+                        className={twJoin(
+                            'text-grvd-theme-sys-dark-primary font-medium',
+                            'flex flex-row items-center gap-2'
+                        )}
+                    >
+                        <LuHeart size={20}/>
+                        {product?.price}
+                    </Typography>
+                </div>
             </div>
-            <div className={'flex flex-row gap-4 justify-end w-full'}>
-                <Typography
-                    variant={'small'}
-                    className={twJoin(
-                        'flex flex-row gap-2 items-center',
-                        'text-grvd-theme-sys-dark-primary font-medium'
-                    )}>
-                    <AiOutlineLike size={20}/>
-                    {product?.numberOfLikes}
-                </Typography>
-                <Button colorCustom={'primary'} sizeCustom={'lg'} onClick={handleGoToProductLink}>Go to product link</Button>
-            </div>
-        </Card>
+            <OwnerShortcutArea/>
+            <Button
+                colorcustom={'primary'}
+                sizecustom={'lg'}
+                className={'w-fit'}
+                onClick={handleGoToProductLink}
+            >
+                Go to product link
+            </Button>
+        </div>
     );
 }
 
@@ -220,8 +237,8 @@ export function ProductDetailsArea({product: availableProduct, id, ...props}: IP
 export function OwnerShortcutArea() {
     const owner = useContext(OwnerContext);
     const [user, setUser] = useState<TUser>();
-    const loadUser = async () => {
-        await axios.get(`${config.server.url}/users/search?email=${owner?.email}`, {
+    const loadUser = () => {
+        axios.get(`${config.server.url}/users/search?email=${owner?.email}`, {
             withCredentials: true,
         })
             .then(res => {
@@ -259,7 +276,7 @@ export function OwnerShortcutArea() {
                     <Typography variant={'small'}>{owner?.numberOfProducts}</Typography>
                 </div>
             </div>
-            <Button colorCustom={'secondary'} sizeCustom={'lg'}>+ Follow</Button>
+            <Button colorcustom={'secondary'} sizecustom={'lg'}>+ Follow</Button>
         </Card>
     );
 }

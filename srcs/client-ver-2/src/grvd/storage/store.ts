@@ -3,7 +3,7 @@ import {userCounterSlice} from "./counters/UserCounter";
 
 export const store = configureStore({
     reducer: {
-        user: userCounterSlice.reducer,
+        state: userCounterSlice.reducer,
     },
 });
 

@@ -29,7 +29,7 @@ export function LoginForm({className, ...props}) {
         await axios.post(url.resolve(urlServer.toString(), '/auth/grvd'), data, {withCredentials: true})
             .then((res) => {
                 if (res.status === 200) {
-                    console.log('Login success');
+                    console.log('LoginPage success');
                     window.location.href = '/';
                 }
             })

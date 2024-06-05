@@ -1,6 +1,6 @@
 import {Column, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne, PrimaryColumn} from "typeorm";
 import {Merchant} from "@app/modules/user/entities";
-import {ProductThumbnail2D} from "@app/modules/product/entities/productImages.entity";
+import {ProductMediaFromSpline, ProductThumbnail2D} from "@app/modules/product/entities/productMedia.entity";
 
 @Entity('products')
 export class Product {
@@ -40,9 +40,12 @@ export class Product {
     @Column({type: 'int', nullable: false, name: 'merchant_id'})
     merchantId: number;
 
-    // Product has many product_features
+    // ProductPage has many product_features
     @OneToMany(()=> ProductFeature, ProductFeature => ProductFeature.product)
     features: ProductFeature[];
+
+    @OneToOne(()=>ProductMediaFromSpline, ProductMediaFromSpline => ProductMediaFromSpline.product)
+    mediaFromSpline: ProductMediaFromSpline;
 
 }
 

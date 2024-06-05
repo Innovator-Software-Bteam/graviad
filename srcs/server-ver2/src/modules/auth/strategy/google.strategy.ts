@@ -28,21 +28,15 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
 
     async validate(accessToken: string, refreshToken: string, profile: any, done: VerifyCallback): Promise<any> {
         const {emails} = profile;
-        console.log(profile)
-        const user: User = await this.userService.findBy({
-            email: emails[0].value,
-        });
-        if (!user) {
-            const newProfile = await this.profileService.create(profile as TProfile);
-            await this.userService.create({
-                email: emails[0].value,
-                profile: newProfile as any,
-            });
-            done(null, user);
-        } else if (!user.profile || !user.profile.id) {
-            user.profile = await this.profileService.create(profile as any);
-            await this.userService.update(user.id, user);
-            done(null, user);
-        }
+        const email = emails[0].value;
+        const newProfile = await this.profileService.findOrCreate(profile.id, {
+            ...profile
+        })
+
+        const user: User = await this.userService.findOrCreateByEmail(email, {
+            email: email,
+            profileId: newProfile.id,
+        })
+        done(null, user);
     }
 }

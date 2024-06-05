@@ -5,18 +5,17 @@ import {
     Delete,
     forwardRef,
     Get,
-    Inject,
-    Param,
+    Inject, Param, Patch,
     Post,
     Put,
     Query, UseGuards
 } from '@nestjs/common';
 import {MerchantService, SocialLinkService, UserService} from "@app/modules/user";
-import {UpdateMerchantDto} from "@app/modules/user/dto/create-merchant.dto";
-import {CreateUserDto} from "@app/modules/user/dto";
+import {CreateUserDto, UpdateMerchantDto} from "@app/modules/user";
+import {IMerchantQuery, IUserQuery} from "@app/modules/user";
+import {MerchantGuard, UserGuard} from "@app/modules/user/guards";
 import {AuthGuard} from "@app/modules/auth";
 
-@UseGuards(AuthGuard)
 @Controller('users')
 export class UserController {
     constructor(
@@ -25,21 +24,15 @@ export class UserController {
     }
 
     @Get()
-    async findAll() {
+    async findAll(@Query() query: IUserQuery) {
         return await this.userService
-            .findAll()
-            .catch((e) => {
-                throw new BadRequestException(e);
-            });
+            .findAll({query});
     }
 
     @Get('search')
-    async findAllWithQuery(@Query() query: any) {
+    async findAllWithQuery(@Query() query: IUserQuery) {
         return await this.userService
-            .findAllByQuery(query)
-            .catch((e) => {
-                throw new BadRequestException(e);
-            });
+            .findAllByQuery(query);
     }
 
     @Get(':id')
@@ -49,35 +42,37 @@ export class UserController {
         });
     }
 
+    @Get('email/:email')
+    async findByEmail(@Param('email') email: string, @Query() query: IUserQuery) {
+        return await this.userService.findOneBy({
+            email: email,
+        }, query);
+    }
+
     @Post()
+    @UseGuards(AuthGuard)
     async create(@Body() body: CreateUserDto) {
         return await this.userService
-            .create(body)
-            .catch((e) => {
-                throw new BadRequestException(e);
-            });
+            .create(body);
     }
 
     @Put(':id')
+    @UseGuards(AuthGuard)
+    @UseGuards(UserGuard)
     async update(@Param('id') id: string, @Body() body: CreateUserDto) {
         return await this.userService
             .update(id, body)
-            .catch((e) => {
-                throw new BadRequestException(e);
-            });
     }
 
     @Delete(':id')
+    @UseGuards(AuthGuard)
+    @UseGuards(UserGuard)
     async remove(@Param('id') id: string) {
         return await this.userService
             .delete(id)
-            .catch((e) => {
-                throw new BadRequestException(e);
-            });
     }
 }
 
-@UseGuards(AuthGuard)
 @Controller('merchants')
 export class MerchantController {
     constructor(
@@ -88,21 +83,15 @@ export class MerchantController {
     }
 
     @Get()
-    async findAll() {
+    async findAll(@Query() query: IMerchantQuery) {
         return await this.merchantService
-            .findAll()
-            .catch((e) => {
-                throw new BadRequestException(e);
-            });
+            .findAll(query);
     }
 
     @Get('search')
-    async findAllWithQuery(@Query() query: any) {
+    async findAllWithQuery(@Query() query: IMerchantQuery) {
         return await this.merchantService
             .findAllByQuery(query)
-            .catch((e) => {
-                throw new BadRequestException(e);
-            });
     }
 
     @Get(':id')
@@ -111,23 +100,19 @@ export class MerchantController {
             .findBy({
                 id: id,
             })
-            .catch((e) => {
-                throw new BadRequestException(e);
-            });
-
     }
 
     @Post()
+    @UseGuards(AuthGuard)
     async create(@Body() body: any) {
         return this.merchantService
             .create(body)
-            .catch((e) => {
-                throw new BadRequestException(e);
-            });
     }
 
 
     @Put(':id')
+    @UseGuards(AuthGuard)
+    @UseGuards(MerchantGuard)
     async replace(@Param('id') id: string, @Body() body: UpdateMerchantDto) {
         console.log(id, body);
         if (!id || !body) {
@@ -136,20 +121,23 @@ export class MerchantController {
         return await this.merchantService
             .update(id, {
                 ...body,
-            })
-            .catch((e) => {
-                console.log('eror update merchant', e);
-                throw new BadRequestException(e);
             });
     }
 
+    @Patch(':id')
+    @UseGuards(AuthGuard)
+    @UseGuards(MerchantGuard)
+    async updatePartial(@Param('id') id: string, @Body() body: UpdateMerchantDto) {
+        return this.merchantService
+            .updatePartial(id, body)
+    }
+
     @Delete(':email')
+    @UseGuards(AuthGuard)
+    @UseGuards(MerchantGuard)
     async remove(@Param('email') email: string) {
         return this.merchantService
             .delete(email)
-            .then(() => this.socialLinkService.delete(email))
-            .catch((e) => {
-                throw new BadRequestException(e);
-            });
+            .then(() => this.socialLinkService.delete(email));
     }
 }

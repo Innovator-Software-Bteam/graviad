@@ -179,7 +179,7 @@
         <mxCell id="77pTD7eTiRxtilX6csrS-113" style="edgeStyle=elbowEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=openThin;endFill=0;" edge="1" parent="l6AXEJIedwvJvGxH8fS5-97" source="77pTD7eTiRxtilX6csrS-112" target="77pTD7eTiRxtilX6csrS-107">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="77pTD7eTiRxtilX6csrS-112" value="Login successful" style="html=1;rounded=1;absoluteArcSize=1;arcSize=10;whiteSpace=wrap;" vertex="1" parent="l6AXEJIedwvJvGxH8fS5-97">
+        <mxCell id="77pTD7eTiRxtilX6csrS-112" value="LoginPage successful" style="html=1;rounded=1;absoluteArcSize=1;arcSize=10;whiteSpace=wrap;" vertex="1" parent="l6AXEJIedwvJvGxH8fS5-97">
           <mxGeometry x="290" y="900" width="130" height="30" as="geometry" />
         </mxCell>
         <mxCell id="l6AXEJIedwvJvGxH8fS5-106" value="System" style="swimlane;html=1;startSize=20;" parent="l6AXEJIedwvJvGxH8fS5-96" vertex="1">
