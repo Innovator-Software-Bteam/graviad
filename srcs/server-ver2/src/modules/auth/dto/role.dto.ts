@@ -1,6 +1,7 @@
 import {IsEnum} from "class-validator";
 
-export class CreatePermissionDto {
+export class RoleDto {
+    @IsEnum(['admin', 'user', 'customer'])
     readonly name: string;
     readonly description: string;
 }

@@ -1,13 +1,15 @@
 import {
     Column,
-    Entity, JoinColumn,
+    Entity, JoinColumn, JoinTable, ManyToMany,
     ManyToOne,
     OneToMany,
     OneToOne,
-    PrimaryColumn, Unique
+    PrimaryColumn, RelationId, Unique
 } from "typeorm";
-import {TSocialLinkProvider} from "@app/modules/user";
-import {Avatar2D} from "@app/modules/user";
+import {TSocialLinkProvider} from "../user.interface";
+
+import {Avatar2D} from "./image.entity";
+import {Product} from "@app/modules/product/entities";
 
 @Entity('merchants')
 export class Merchant {
@@ -44,6 +46,26 @@ export class Merchant {
     @OneToOne(() => Avatar2D)
     @JoinColumn({name: 'avatar_id', referencedColumnName: 'id', foreignKeyConstraintName: 'fk_merchants_avatar_id'})
     avatar: Avatar2D;
+
+    @OneToMany(() => Product, product => product.merchant)
+    products: Product[];
+
+    @ManyToMany(() => Product, product => product.likedBy)
+    // @JoinTable({
+    //     name: 'merchant_likes_products',
+    //     inverseJoinColumn: {
+    //         name: 'product_id',
+    //         referencedColumnName: 'id'
+    //     },
+    //     joinColumn: {
+    //         name: 'merchant_id',
+    //         referencedColumnName: 'id'
+    //     }
+    // })
+    likedProducts: Product[];
+
+    @RelationId((merchant: Merchant) => merchant.likedProducts)
+    likedProductIds: number [];
 }
 
 @Entity('social_links')
@@ -52,7 +74,7 @@ export class SocialLink {
     @PrimaryColumn({type: 'int', nullable: false, name: 'id'})
     id: number;
 
-    @Column({type: 'varchar', nullable: false, name: 'provider',})
+    @Column({type: 'varchar', nullable: false, name: 'provider'})
     provider: TSocialLinkProvider;
 
     @Column({type: 'varchar', nullable: false, name: 'data'})

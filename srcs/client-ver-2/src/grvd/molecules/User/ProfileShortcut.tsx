@@ -1,6 +1,6 @@
 import {Avatar, Card, Menu, MenuHandler, MenuItem, MenuList, Typography} from "@material-tailwind/react";
 import {twJoin, twMerge} from "tailwind-merge";
-import {Button} from "grvd/components";
+import {AvatarBase64, Button} from "grvd/components";
 import {FaAngleDown, FaUser} from "react-icons/fa";
 import {useEffect, useState} from "react";
 import {IoLogOut} from "react-icons/io5";
@@ -15,9 +15,11 @@ export type TProfileItem = {
     link: string;
 }
 
-export function ProfileShortcut() {
-    const [loginWindow, setLoginWindow] = useState<Window | null>(null);
-    const profile = useProfile();
+export interface IProfileShortcutProps extends React.ComponentProps<'div'> {
+
+}
+export function ProfileShortcut(props: IProfileShortcutProps) {
+    const [, setLoginWindow] = useState<Window | null>(null);
     const merchant = useMerchant();
     const state=useSelector((state: RootState) => state.state.state);
     const handleLogin = () => {
@@ -71,6 +73,7 @@ export function ProfileShortcut() {
             'flex flex-row gap-2 items-center justify-between',
             'p-4 w-fit',
             'rounded-lg',
+            'cursor-pointer',
             'bg-transparent',
         )}
               shadow={false}
@@ -84,11 +87,11 @@ export function ProfileShortcut() {
                 allowHover={true}
             >
                 {
-                    profile?.photos &&
-                    <Avatar
+                    merchant?.avatar &&
+                    <AvatarBase64
+                        data={merchant?.avatar?.data}
                         withBorder={true}
-                        src={profile.photos[0].value || undefined}
-                        alt={profile.displayName}
+                        alt={merchant?.name}
                         variant={'circular'}
                         size={'sm'}
                         className={twJoin(

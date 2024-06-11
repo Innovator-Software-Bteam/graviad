@@ -1,2 +1,2 @@
-export * from './create-permission.dto';
-export * from './create-role.dto';
+export * from './permission.dto';
+export * from './role.dto';

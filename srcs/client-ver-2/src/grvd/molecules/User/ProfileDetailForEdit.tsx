@@ -1,24 +1,32 @@
 import {twJoin} from "tailwind-merge";
-import {Avatar, Typography} from "@material-tailwind/react";
+import {Card, Typography} from "@material-tailwind/react";
 import {FaExternalLinkAlt} from "react-icons/fa";
 import classNames from "classnames";
-import {useForm, UseFormRegisterReturn} from 'react-hook-form';
-import {useEffect, useState} from "react";
+import {useForm} from 'react-hook-form';
+import React, {useEffect, useRef, useState} from "react";
 import {FaCircleExclamation} from "react-icons/fa6";
 import {AiOutlineLike} from "react-icons/ai";
 import {BiPackage} from "react-icons/bi";
 import axios from "axios";
 import config from "../../../config";
-import {Button, InputWithTitle, Label, TextareaWithTitle} from "grvd/components";
-import {useMerchant, useProfile, useUser} from "grvd/pages";
+import {AvatarBase64, ButtonWithLoading, InputWithTitle, TextareaWithTitle} from "grvd/components";
+import {MerchantContext, useMerchant, useUser} from "grvd/pages";
 import {TInput} from "grvd/molecules"
 import {IPageProps} from "grvd/pages/types";
-import {PiExportBold} from "react-icons/pi";
-// export type TInput = {
-//     title: string;
-//     name?: string;
-//     register: UseFormRegisterReturn<any>;
-// }
+import {ProfileCard} from "grvd/molecules/User";
+import {TAvatar2D, TMerchant, TSocialLink} from "grvd";
+import {IoIosAdd} from "react-icons/io";
+
+type TProfileFormContext = {
+    profileForm: TMerchant | null;
+    setProfileForm: React.Dispatch<React.SetStateAction<TMerchant | null>>;
+}
+const ProfileFormContext = React.createContext<TProfileFormContext>({
+    profileForm: null,
+    setProfileForm: () => {
+    }
+});
+const useProfileForm = () => React.useContext(ProfileFormContext);
 export type TFormInput = {
     email: string;
     phone: string;
@@ -28,20 +36,24 @@ export type TFormInput = {
     facebookLink: string;
     twitterLink: string;
     instagramLink: string;
-}
-export type TSocialLink = {
-    provider: string;
-    data: string;
+    avatar: TAvatar2D;
 }
 
-export function ProfileAvatarArea() {
-    const profile = useProfile();
+export interface IProfileAvatarAreaProps extends React.HTMLAttributes<HTMLDivElement> {
+    onAvatarChange: (file: File) => void;
+}
+export function ProfileAvatarArea({onAvatarChange}: IProfileAvatarAreaProps) {
+    const {profileForm} = useProfileForm();
     const merchant = useMerchant();
     const user = useUser();
-
     const [numberOfLikes, setNumberOfLikes] = useState(merchant?.numberOfLikes);
     const [numberOfProducts, setNumberOfProducts] = useState(merchant?.numberOfProducts);
 
+    const inputFileRef = useRef<HTMLInputElement>(null);
+
+    const handleAvatarClick = () => {
+        inputFileRef.current?.click();
+    };
     useEffect(() => {
         setNumberOfLikes(merchant?.numberOfLikes);
         setNumberOfProducts(merchant?.numberOfProducts);
@@ -52,19 +64,49 @@ export function ProfileAvatarArea() {
             'h-full w-fit',
             'items-center justify-start',
         )}>
+            <input
+                ref={inputFileRef}
+                type="file"
+                accept="image/*"
+                style={{display: "none"}}
+                multiple={false}
+                onChange={(e) => {
+                    if (e.target.files) {
+                        onAvatarChange(e.target.files[0]);
+                    }
+                }}
+            />
             {
-                profile?.photos &&
-                <Avatar
-                    withBorder={true}
-                    src={profile.photos[0].value || undefined}
-                    alt={profile.displayName}
-                    variant={'rounded'}
-                    size={'sm'}
-                    className={twJoin(
-                        'mx-auto rounded-[30px]',
-                        'h-[200px] aspect-[1/1] w-fit'
-                    )}
-                />
+                (merchant?.avatar || profileForm?.avatar) ?
+                    <AvatarBase64
+                        data={profileForm?.avatar?.data || merchant?.avatar?.data}
+                        alt={merchant?.avatar?.alt_texts?.toString() || 'avatar'}
+                        variant={'rounded'}
+                        size={'sm'}
+                        className={twJoin(
+                            'mx-auto rounded-[30px]',
+                            'h-[200px] aspect-[1/1] w-fit'
+                        )}
+                        onClick={handleAvatarClick}
+                        loading={'lazy'}
+                    />
+                    :
+                    <Card
+                        className={twJoin(
+                            'flex flex-col items-center justify-center',
+                            'bg-grvd-theme-sys-dark-surface-container',
+                            'text-grvd-theme-sys-dark-primary',
+                            'mx-auto rounded-[30px]',
+                            'h-[200px] aspect-[1/1] w-fit',
+                            'cursor-pointer',
+                        )}
+                        onClick={handleAvatarClick}
+                    >
+                        <IoIosAdd size={32}/>
+                        <Typography variant={'lead'}>Add avatar</Typography>
+                        <Typography variant={'small'} className={'text-grvd-theme-sys-dark-on-primary-variant'}>JPEG,
+                            PNG, GIF, JPG</Typography>
+                    </Card>
             }
             <div>
                 <div className={classNames(
@@ -81,7 +123,7 @@ export function ProfileAvatarArea() {
                             'whitespace-nowrap'
                         )}
                     >
-                        {user?.profile?.displayName}
+                        {merchant?.name}
                     </Typography>
                     <Typography
                         className={'w-fit bg-white/5 px-5 py-1 rounded-md text-white font-medium'}
@@ -129,24 +171,13 @@ export function ProfileAvatarArea() {
                     </div>
                 </div>
             </div>
-            <Button
-                colorcustom={'secondary'}
-                sizecustom={'lg'}
-                className={'bg-[rgb(157,157,157)]/25 flex flex-row gap-2 items-center justify-center w-fit h-fit backdrop-blur-[25px] relative'}
-            >
-                Export Profile
-                <PiExportBold size={20}/>
-                <div className={twJoin(
-                    'absolute top-0 left-0 right-0 bottom-0 w-full h-full',
-                    'bg-[rgb(176,13,253)]/25 blur-[25px] -z-20'
-                )}/>
-            </Button>
         </div>
     );
 }
 
 
 export function ProfileFormArea() {
+    const {setProfileForm} = React.useContext(ProfileFormContext);
     const merchant = useMerchant();
 
     const [email, setEmail] = useState(merchant?.email);
@@ -158,12 +189,19 @@ export function ProfileFormArea() {
     const [facebookLink, setFacebookLink] = useState(merchant?.socialLinks?.find((socialLink: any) => socialLink.provider === 'facebook')?.link);
     const [twitterLink, setTwitterLink] = useState(merchant?.socialLinks?.find((socialLink: any) => socialLink.provider === 'twitter')?.link);
     const [instagramLink, setInstagramLink] = useState(merchant?.socialLinks?.find((socialLink: any) => socialLink.provider === 'instagram')?.link);
+    const [avatar, setAvatar] = useState<TAvatar2D>(merchant?.avatar?.data);
+    const [fileAvatar, setFileAvatar] = useState<File | null>(null);
 
     const {
         register,
         handleSubmit,
-        formState: {errors},
-        reset
+        formState: {
+            isLoading,
+            isSubmitting,
+            isSubmitSuccessful
+        },
+        reset,
+        setValue,
     } = useForm<TFormInput>({
         mode: 'onChange',
         reValidateMode: 'onChange',
@@ -176,34 +214,39 @@ export function ProfileFormArea() {
             facebookLink,
             twitterLink,
             instagramLink,
-
         },
         criteriaMode: 'firstError',
     });
     const onSubmit = async (data: any) => {
-        console.log('data', data)
         const socialLinks: TSocialLink[] = [
             {
+                id: merchant?.socialLinks?.find((socialLink: any) => socialLink.provider === 'facebook')?.id,
                 provider: 'facebook',
                 data: data.facebookLink
             },
             {
+                id: merchant?.socialLinks?.find((socialLink: any) => socialLink.provider === 'twitter')?.id,
                 provider: 'twitter',
                 data: data.twitterLink
             },
             {
+                id: merchant?.socialLinks?.find((socialLink: any) => socialLink.provider === 'instagram')?.id,
                 provider: 'instagram',
                 data: data.instagramLink
             }
         ];
         await axios
-            .put(`${config.server.url}/merchants/${merchant?.id}`, {
+            .patch(`${config.server.url}/merchants/${merchant?.id}`, {
                 email: data.email,
                 phone: data.phone,
                 address: data.address,
                 description: data.description,
                 slogan: data.slogan,
                 socialLinks: socialLinks,
+                avatar: {
+                    id: merchant?.avatar?.id,
+                    data: avatar?.data,
+                },
             }, {
                 withCredentials: true,
             })
@@ -270,6 +313,22 @@ export function ProfileFormArea() {
             title: 'Instagram',
             register: register('instagramLink', {})
         },
+
+    };
+    const handleAvatarChange = (file: File) => {
+        if (file) {
+            const reader = new FileReader();
+            reader.onloadend = (e) => {
+                const data = e.target?.result;
+                if (data) {
+                    setAvatar({
+                        data: data as ArrayBuffer,
+                    });
+                    setFileAvatar(file);
+                }
+            }
+            reader.readAsArrayBuffer(file);
+        }
     }
     useEffect(() => {
         setEmail(merchant?.email);
@@ -281,97 +340,156 @@ export function ProfileFormArea() {
         setFacebookLink(merchant?.socialLinks?.find((socialLink: any) => socialLink.provider === 'facebook')?.data);
         setTwitterLink(merchant?.socialLinks?.find((socialLink: any) => socialLink.provider === 'twitter')?.data);
         setInstagramLink(merchant?.socialLinks?.find((socialLink: any) => socialLink.provider === 'instagram')?.data);
+
+        setValue('email', merchant?.email as string);
+        setValue('phone', merchant?.phone as string);
+        setValue('address', merchant?.address as string);
+        setValue('description', merchant?.description as string);
+        setValue('slogan', merchant?.slogan as string);
+        setValue('facebookLink', merchant?.socialLinks?.find((socialLink: any) => socialLink.provider === 'facebook')?.data as string);
+        setValue('twitterLink', merchant?.socialLinks?.find((socialLink: any) => socialLink.provider === 'twitter')?.data as string);
+        setValue('instagramLink', merchant?.socialLinks?.find((socialLink: any) => socialLink.provider === 'instagram')?.data as string);
+
     }, [merchant]);
     useEffect(() => {
-        reset({
-            address,
-            email,
-            phone,
-            description,
-            slogan,
-            facebookLink,
-            twitterLink,
-            instagramLink,
+        setProfileForm({
+            name: merchant?.name,
+            email: email || merchant?.email,
+            phone: phone || merchant?.phone,
+            address: address || merchant?.address,
+            description: description || merchant?.description,
+            slogan: slogan || merchant?.slogan,
+            socialLinks: socialLinks || merchant?.socialLinks,
+            avatar: avatar || merchant?.avatar,
+            numberOfLikes: merchant?.numberOfLikes,
+            numberOfProducts: merchant?.numberOfProducts,
         })
-    }, [merchant]);
+    }, [email, phone, address, description, slogan, socialLinks, avatar]);
     return (
-        <form
-            className={classNames(
-                'flex flex-col flex-wrap gap-4',
-            )}
-            onSubmit={handleSubmit(onSubmit)}
-        >
-            <TextareaWithTitle
-                variant={'static'}
-                title={inputItems.description.title}
-                style={{
-                    scrollbarGutter: 'hidden',
-                    scrollbarWidth: 'thin',
-                    scrollbarColor: 'rgba(0,0,0,0.1) transparent',
-                }}
-                {...inputItems.description.register}
+        <div className={twJoin(
+            'w-full h-fit flex flex-col gap-4',
+        )}>
+            <ProfileAvatarArea
+                onAvatarChange={handleAvatarChange}
             />
-            <div>
-                <InputWithTitle
-                    title={inputItems.slogan.title}
-                    {...inputItems.slogan.register}
+            <form
+                className={classNames(
+                    'flex flex-col flex-wrap gap-4',
+                )}
+                onSubmit={handleSubmit(onSubmit)}
+            >
+                <TextareaWithTitle
+                    variant={'static'}
+                    title={inputItems.description.title}
+                    style={{
+                        scrollbarGutter: 'hidden',
+                        scrollbarWidth: 'thin',
+                        scrollbarColor: 'rgba(0,0,0,0.1) transparent',
+                    }}
+                    {...inputItems.description.register}
                 />
-                <Typography
-                    variant="small"
-                    color="gray"
-                    className="mt-2 flex items-center gap-2 font-normal"
-                >
-                    <FaCircleExclamation size={16}/>
-                    Slogan should have a maximum of 100 characters
-                </Typography>
-            </div>
-            <div className={'flex flex-row gap-4 justify-between w-full'}>
+                <div>
+                    <InputWithTitle
+                        title={inputItems.slogan.title}
+                        {...inputItems.slogan.register}
+                    />
+                    <Typography
+                        variant="small"
+                        color="gray"
+                        className="mt-2 flex items-center gap-2 font-normal"
+                    >
+                        <FaCircleExclamation size={16}/>
+                        Slogan should have a maximum of 100 characters
+                    </Typography>
+                </div>
+                <div className={'flex flex-row gap-4 justify-between w-full'}>
+                    <InputWithTitle
+                        title={inputItems.email.title}
+                        {...inputItems.email.register}
+                    />
+                    <InputWithTitle
+                        title={inputItems.phone.title}
+                        {...inputItems.phone.register}
+                    />
+                </div>
                 <InputWithTitle
-                    title={inputItems.email.title}
-                    {...inputItems.email.register}
+                    title={inputItems.address.title}
+                    {...inputItems.address.register}
                 />
-                <InputWithTitle
-                    title={inputItems.phone.title}
-                    {...inputItems.phone.register}
-                />
-            </div>
-            <InputWithTitle
-                title={inputItems.address.title}
-                {...inputItems.address.register}
-            />
-            <div className={'flex flex-col gap-4 w-full h-full'}>
-                <InputWithTitle
-                    title={inputItems.facebookLink.title}
-                    {...inputItems.facebookLink.register}
-                />
-                <InputWithTitle
-                    title={inputItems.twitterLink.title}
-                    {...inputItems.twitterLink.register}
-                />
-                <InputWithTitle
-                    title={inputItems.instagramLink.title}
-                    {...inputItems.instagramLink.register}
-                />
-            </div>
-            <Button type={'submit'} sizecustom={'lg'} colorcustom={'primary'} className={'w-fit'}>Save</Button>
-        </form>
+                <div className={'flex flex-col gap-4 w-full h-full'}>
+                    <InputWithTitle
+                        title={inputItems.facebookLink.title}
+                        {...inputItems.facebookLink.register}
+                    />
+                    <InputWithTitle
+                        title={inputItems.twitterLink.title}
+                        {...inputItems.twitterLink.register}
+                    />
+                    <InputWithTitle
+                        title={inputItems.instagramLink.title}
+                        {...inputItems.instagramLink.register}
+                    />
+                </div>
+                <ButtonWithLoading
+                    type={'submit'}
+                    sizecustom={'lg'}
+                    colorcustom={'primary'}
+                    className={'w-fit'}
+
+                    isloading={isSubmitting && isLoading}
+                    isdone={isSubmitSuccessful}
+                    label={{
+                        labelDefault: 'Save',
+                        labelLoading: 'Saving...',
+                        labelDone: 'Saved',
+                    }}
+                >Save
+                </ButtonWithLoading>
+            </form>
+        </div>
     );
 }
 
 export function ProfileDetailForEdit({className, ...props}: IPageProps) {
+    const merchant = useMerchant();
+    const [profileForm, setProfileForm] = useState<TMerchant | null>(merchant as TMerchant);
+
     return (
-        <div>
-            <div className={twJoin(
-                'flex flex-row justify-between'
-            )}>
+        <ProfileFormContext.Provider value={{profileForm, setProfileForm}}>
+            <div>
                 <div className={twJoin(
-                    'w-full h-fit flex flex-col gap-4',
+                    'flex flex-row justify-between gap-16',
+                    'w-full h-full',
+                    'relative',
                 )}>
-                    <ProfileAvatarArea/>
                     <ProfileFormArea/>
+                    <MerchantContext.Provider value={profileForm as TMerchant}>
+                        <div className={twJoin(
+                            'flex flex-col items-center px-8 gap-8',
+                            'h-full',
+                            'sticky top-12',
+                        )}>
+                            <ProfileCard typeCustom={'glass'}/>
+                            <div className={'w-full flex flex-col gap-2'}>
+                                <Typography
+                                    variant={'h4'}
+                                    className={'text-grvd-theme-sys-dark-primary font-bold'}
+                                >
+                                    Business Card
+                                </Typography>
+                                <Typography
+                                    variant={'paragraph'}
+                                    className={'text-grvd-theme-sys-dark-primary'}
+                                >
+                                    Use collection of template business,
+                                    export and share with everyone
+                                </Typography>
+                            </div>
+                        </div>
+                    </MerchantContext.Provider>
                 </div>
             </div>
-        </div>
+        </ProfileFormContext.Provider>
     );
 
 }

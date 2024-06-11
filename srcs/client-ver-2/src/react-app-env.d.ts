@@ -42,8 +42,20 @@ declare module 'grvd' {
         merchant?: TMerchant;
 
     }
+    type TAvatar2D = {
+        id?: string;
+        data: any;
+        alt_texts?: string[];
+    }
+
+    type TSocialLink = {
+        id?: string;
+        provider: string;
+        data: string;
+    };
+
     type TMerchant = {
-        id: string;
+        id?: string;
         name?: string;
         description?: string;
         slogan?: string;
@@ -53,6 +65,8 @@ declare module 'grvd' {
         socialLinks?: any [];
         numberOfLikes?: number;
         numberOfProducts?: number;
+        avatar?: TAvatar2D;
+        avatarId?: string;
     }
     type TProfileGoogle = {
         id: string;
@@ -113,6 +127,8 @@ declare module 'grvd' {
         thumbnail2D?: TThumbnail2D;
         features: TProductFeature[];
         mediaFromSpline?: TMediaFromSpline;
+        merchant?: TMerchant;
+        likedByIds?: string [];
     };
     type TProductFeatureKey = 'name' | 'description';
     type TProductFeature = {

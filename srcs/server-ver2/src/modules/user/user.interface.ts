@@ -1,6 +1,6 @@
 import {IQuery} from "@app/interfaces";
 
-export type TSocialLinkProvider = 'Facebook' | 'Twitter' | 'Instagram' | 'Website';
+export type TSocialLinkProvider = 'facebook' | 'twitter' | 'instagram' | 'website';
 
 export enum ErrorUserMessage {
     USER_NOT_FOUND = 'User not found',

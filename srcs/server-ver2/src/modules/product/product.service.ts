@@ -1,14 +1,16 @@
-import {forwardRef, Inject, Injectable} from '@nestjs/common';
+import {BadRequestException, forwardRef, Inject, Injectable} from '@nestjs/common';
 import {Product, ProductFeature, ProductMediaFromSpline, ProductThumbnail2D} from "@app/modules/product/entities";
 import {InjectRepository} from "@nestjs/typeorm";
 import {Repository} from "typeorm";
-import {ICrud} from "@app/interfaces";
+import {ICrud, IQuery} from "@app/interfaces";
 import {
-    CreateProductDto,
+    ProductDto,
     CreateProductFeatureDto, CreateProductMediaFromSplineDto,
     UpdateProductDto,
     UpdateProductFeatureDto, UpdateProductMediaFromSplineDto
 } from "@app/modules/product/dto";
+import {IProductInteraction, IProductQuery} from "@app/modules/product/product.interface";
+import {MerchantService} from "@app/modules/user";
 
 @Injectable()
 export class ProductFeatureService implements ICrud<ProductFeature, CreateProductFeatureDto> {
@@ -17,6 +19,9 @@ export class ProductFeatureService implements ICrud<ProductFeature, CreateProduc
         private readonly productFeatureRepository: Repository<ProductFeature>,
         @InjectRepository(Product)
         private readonly productRepository: Repository<Product>,
+
+        @Inject(forwardRef(() => MerchantService))
+        private readonly merchantService: MerchantService,
     ) {
     }
 
@@ -100,7 +105,8 @@ export class ProductMediaFromSplineService implements ICrud<ProductMediaFromSpli
 }
 
 @Injectable()
-export class ProductService implements ICrud<Product, CreateProductDto> {
+export class ProductService implements ICrud<Product, ProductDto>,
+    IProductInteraction {
     constructor(
         @InjectRepository(Product)
         private readonly productRepository: Repository<Product>,
@@ -110,10 +116,12 @@ export class ProductService implements ICrud<Product, CreateProductDto> {
         private readonly productFeatureService: ProductFeatureService,
         @Inject(forwardRef(() => ProductMediaFromSplineService))
         private readonly productMediaFromSplineService: ProductMediaFromSplineService,
+        @Inject(forwardRef(() => MerchantService))
+        private readonly merchantService: MerchantService,
     ) {
     }
 
-    async create(dto?: CreateProductDto): Promise<Product> {
+    async create(dto?: ProductDto): Promise<Product> {
         const product: Product = new Product();
         const thumbnail2D = new ProductThumbnail2D();
         for (const key in dto) {
@@ -144,38 +152,25 @@ export class ProductService implements ICrud<Product, CreateProductDto> {
         return this.productRepository.delete(id);
     }
 
-    async findAll(options: any): Promise<Product[]> {
-        const {thumbnail2D} = options;
-        const relations = ['features', 'mediaFromSpline'];
-        if (thumbnail2D) relations.push('thumbnail2D');
-        return this.productRepository.find({
-            relations: relations
-        });
+    async findAll(query: IProductQuery): Promise<Product[]> {
+        return this.productRepository.find(query);
     }
 
-    async findAllByQuery(query: any): Promise<Product[]> {
-        const {limit, page, ...where} = query;
+    async findAllByQuery(query: IProductQuery): Promise<Product[]> {
+        const {limit, page, where, relations} = query;
         const take = limit && Number(limit);
         const skip = page && Number(page) * take;
         return this.productRepository.find({
-            relations: ['thumbnail2D'],
+            relations,
             where,
             take,
             skip
-        })
-            .catch(err => {
-                console.log(err);
-                return [];
-            });
+        });
     }
 
-    async findBy(id: any): Promise<any> {
-        return this.productRepository.findOne({
-            where: {
-                id: id
-            },
-            relations: ['thumbnail2D', 'features', 'mediaFromSpline'],
-        })
+    // 'thumbnail2D', 'features', 'mediaFromSpline'
+    async findBy(query: IQuery): Promise<any> {
+        return this.productRepository.findOne(query)
     }
 
     async update(id: any, dto?: UpdateProductDto): Promise<Product> {
@@ -215,7 +210,12 @@ export class ProductService implements ICrud<Product, CreateProductDto> {
         product.dateRelease = dto.dateRelease || product.dateRelease;
         product.highlightLabel = dto.highlightLabel || product.highlightLabel;
         product.numberOfLikes = dto.numberOfLikes || product.numberOfLikes;
-
+        if (dto.likedByIds) {
+            product.likedByIds = dto.likedByIds;
+            for (const id1 of product.likedByIds) {
+                await this.likesProduct(product.id, id1);
+            }
+        }
         if (dto.features) {
 
             const currentFeatureIds = product.features.map(feature => feature.id);
@@ -237,8 +237,7 @@ export class ProductService implements ICrud<Product, CreateProductDto> {
         }
 
         if (dto.mediaFromSpline && dto.mediaFromSpline.data) {
-            console.log('product', product);
-            if(!product.mediaFromSpline) {
+            if (!product.mediaFromSpline) {
                 await this.productMediaFromSplineService.create({
                     productId: product.id,
                     data: dto.mediaFromSpline.data,
@@ -249,5 +248,25 @@ export class ProductService implements ICrud<Product, CreateProductDto> {
         }
         await this.productRepository.save(product);
         return product;
+    }
+
+    async likesProduct(productId: number, merchantId: string): Promise<boolean> {
+        const product = await this.findBy({
+            where: {
+                id: productId
+            }
+        });
+        const merchant = await this.merchantService.findBy({
+            where: {
+                id: merchantId
+            }
+        });
+        if (!product || !merchant) throw new BadRequestException('Product or merchant not found');
+
+        if (!product.likedByIds) product.likedByIds = [];
+        if (!product.likedBy) product.likedBy = [];
+
+        product.likedBy.push(merchant);
+        return await this.productRepository.save(product);
     }
 }

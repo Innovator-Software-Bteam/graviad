@@ -1,8 +1,10 @@
-import React from 'react';
-import {useMerchant, useProfile} from "grvd/pages";
+import React, {useEffect} from 'react';
+import {useMerchant} from "grvd/pages";
 import {tv} from "tailwind-variants";
 import {Avatar, Typography} from "@material-tailwind/react";
 import {twJoin} from "tailwind-merge";
+import {Buffer} from "buffer";
+import {AvatarBase64} from "grvd/components/Avatar";
 
 export type TStyleCard = 'simple' | 'luxury' | 'glass' | 'modern';
 
@@ -24,8 +26,8 @@ const baseCard = tv({
     }
 });
 
-export function ProfileCard({typeCustom}: IProfileCardProps) {
-    const profile = useProfile();
+export function ProfileCard(props: IProfileCardProps) {
+    const {typeCustom, className} = props;
     const merchant = useMerchant();
     const contactItems = {
         phone: {
@@ -59,13 +61,18 @@ export function ProfileCard({typeCustom}: IProfileCardProps) {
             </div>
         );
     }
+    useEffect(() => {
+    }, [merchant]);
     return (
         <div className={twJoin(
             baseCard({className: typeCustom}),
             'bg-[rgb(255,255,255)]/10 backdrop-blur-[50px]',
             'shadow-xl overflow-clip z-10',
-            'relative'
-        )}>
+            'relative',
+            className
+        )}
+             id={'profile-card-' + merchant?.id}
+        >
             {typeCustom === 'glass' && (
                 <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 501 300"
                      fill="none"
@@ -112,12 +119,13 @@ export function ProfileCard({typeCustom}: IProfileCardProps) {
                     </Typography>
                 </div>
                 {
-                    profile?.photos && (
-                        <Avatar
-                            src={profile?.photos[0].value}
+                    merchant?.avatar && (
+                        <AvatarBase64
+                            data={merchant.avatar.data}
                             variant={'rounded'}
-                            size={'xl'}
-                            className={'shadow'}
+                            className={twJoin(
+                                'w-16 h-16',
+                            )}
                         />
                     )
                 }

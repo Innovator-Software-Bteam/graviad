@@ -1,2 +1,3 @@
-export * from './create-user.dto';
-export * from './create-merchant.dto';
+export * from './user.dto';
+export * from './merchant.dto';
+export * from './image.dto';

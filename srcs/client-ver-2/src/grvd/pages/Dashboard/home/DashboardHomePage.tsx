@@ -38,9 +38,11 @@ export function DashboardHomePage() {
             className: 'sticky top-0',
         },
     ];
-    const renderBoard = (board: TDashboardBoard) => {
+    const renderBoard = (board: TDashboardBoard, key: any) => {
         return (
-            <div className={twJoin(
+            <div
+                key={key}
+                className={twJoin(
                 'flex flex-col gap-4',
                 `col-start-${board.col}`,
                 `row-start-${board.row}`,
@@ -63,7 +65,7 @@ export function DashboardHomePage() {
             'gap-16'
         )}>
             {
-                boards.map((board) => renderBoard(board)
+                boards.map((board, index) => renderBoard(board,index)
                 )}
         </div>
     )

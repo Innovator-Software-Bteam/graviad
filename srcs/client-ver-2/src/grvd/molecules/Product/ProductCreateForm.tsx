@@ -81,7 +81,7 @@ export function ProductCreateTipsArea({className}: IProductCreateFormProps) {
 
 export function ProductCreateForm() {
     const merchant = useMerchant();
-    const state= useSelector((state: RootState) => state.state.state);
+    const state = useSelector((state: RootState) => state.state.state);
 
     const [open, setOpen] = React.useState(false);
     const [fileThumbnail, setFileThumbnail] = React.useState<File | null>(null);
@@ -126,7 +126,7 @@ export function ProductCreateForm() {
                             await axios
                                 .post<any, any, TProduct>(`${config.server.url}/products`, {
                                     name: data.name,
-                                    merchantId: merchant?.id,
+                                    merchantId: merchant?.id as string,
                                     price: data.price,
                                     highlightLabel: data.label,
                                     version: data.version,
@@ -232,7 +232,7 @@ export function ProductCreateForm() {
     }
 
     const handleOpen = () => setOpen(!open);
-    if(!state.isAuthenticated) return null;
+    if (!state.isAuthenticated) return null;
     return (
         <>
             <Button colorcustom={'primary'} sizecustom={'lg'} onClick={handleOpen}>+ Create Ad</Button>
@@ -408,8 +408,13 @@ export function ProductCreateForm() {
                                     type={'submit'}
                                     isloading={isSubmitting}
                                     isdone={isSubmitSuccessful}
-                                    textloading={'Creating'}
-                                    textdone={'Created'}
+                                    label={
+                                        {
+                                            labelDefault: 'Create',
+                                            labelLoading: 'Creating',
+                                            labelDone: 'Created'
+                                        }
+                                    }
                                 >
                                     Create
                                 </ButtonWithLoading>

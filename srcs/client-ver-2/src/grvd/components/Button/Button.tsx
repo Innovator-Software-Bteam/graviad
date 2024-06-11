@@ -56,36 +56,45 @@ export const Button = React.forwardRef((props: IButtonProps, ref) => {
 });
 
 export const ButtonWithLoading = React.forwardRef((props: IButtonWithLoadingProps, ref) => {
-    const {isloading = false, children, isdone = false, textdone, textloading, ...otherProps} = props;
+    const {isdone, isloading, iserror, children, ...otherProps} = props;
+    const {
+        labelDefault,
+        labelLoading,
+        labelDone,
+        labelError = 'Error',
+    } = props.label;
     const doneRef = React.useRef(false);
-    const doneAnimation=useSpring({
+    const doneAnimation = useSpring({
         top: isdone ? 0 : -30,
-        config: { tension: 220, friction: 20 },
+        config: {tension: 220, friction: 20},
     })
     return (
         <Button
             ref={ref as any}
             {...otherProps}
-            // disabled={isloading}
+            disabled={isloading}
             className={twJoin(
                 'flex flex-row gap-2 items-center justify-center',
                 'transition-all duration-300 ease-in-out',
                 props.className
             )}
         >
-            {isloading && textloading}
-            <animated.div
-                ref={doneRef as any}
-                style={{
-                    translateY: doneAnimation.top.to((top) => `${top}px`),
-                    transition: 'top 0.3s ease-in-out',
-                }}
-                className={'flex flex-row gap-2 items-center'}
-            >
-                {isdone && textdone}
-                {isdone && <FaCircleCheck size={20}/>}
-            </animated.div>
+            {isloading && labelLoading}
+            {isdone && (
+                <animated.div
+                    ref={doneRef as any}
+                    style={{
+                        translateY: doneAnimation.top.to((top) => `${top}px`),
+                        transition: 'top 0.3s ease-in-out',
+                    }}
+                    className={'flex flex-row gap-2 items-center w-fit'}
+                >
+                    {isdone && labelDone}
+                    {isdone && <FaCircleCheck size={20}/>}
+                </animated.div>
+            )}
             {!isloading && !isdone && children}
+            {iserror && labelError}
             {isloading && <SyncLoader size={5}/>}
         </Button>
     );

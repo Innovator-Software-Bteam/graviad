@@ -1,11 +1,16 @@
+import {IQuery} from "./rest.interface";
+
+/**
+ * @deprecated Use IDatabaseCRUD instead
+ */
 export interface ICrud<E = any, C = any, U = any> {
     create?(dto?: C): Promise<E>;
 
-    findAll?(option?: any): Promise<E[]>;
+    findAll?(query: IQuery): Promise<E[]>;
 
-    findBy?(option?: any): Promise<E>;
+    findBy?(query: IQuery): Promise<E>;
 
-    findById?(id: any): Promise<E>;
+    findById?(id: any, query: IQuery): Promise<E>;
 
     /**
      * @description Update entity by id, if not found, create new entity
@@ -28,4 +33,46 @@ export interface ICrud<E = any, C = any, U = any> {
     delete?(id: any): Promise<any>;
 
     deleteAll?(): Promise<any>;
+}
+
+export interface IDatabaseCRUD<E = any, C = any, U = any> {
+    /**
+     * Create new entity
+     * @param dto
+     */
+    create?(dto?: C): Promise<E> | E;
+
+    /**
+     * Find all entities
+     * @param query
+     */
+    find?(query: IQuery): Promise<E[]> | E[];
+
+    /**
+     * Find one entity
+     * @param query
+     */
+    findOne?(query: IQuery): Promise<E> | E;
+
+    /**
+     * Update entity by id
+     * @param id
+     * @param dto
+     */
+    update?(id: string | number, dto?: U): Promise<E> | E;
+
+    /**
+     * Replace entity by id, require all fields
+     * @param id
+     * @param dto
+     */
+    replace?(id: string | number, dto?: C): Promise<E> | E;
+
+    /**
+     * Delete entity by id
+     * @param id
+     */
+    delete?(id: string | number): Promise<E> | E;
+
+
 }

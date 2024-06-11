@@ -1,13 +1,13 @@
 import {PartialType} from "@nestjs/mapped-types";
-import {CreateUserDto} from "@app/modules/user/dto/create-user.dto";
+import {UserDto} from "@app/modules/user/dto/user.dto";
 import {TSocialLinkProvider} from "@app/modules/user/user.interface";
 import {IsArray, IsEmail, IsEnum, IsNotEmpty, IsNumber, IsPhoneNumber, IsString, IsUUID, Max} from "class-validator";
-import {CreateAvatar2DDto} from "@app/modules/user/dto/create-image.dto";
+import {CreateAvatar2DDto} from "@app/modules/user/dto/image.dto";
 
 /**
  * @version 2.0
  */
-export class CreateMerchantDto {
+export class MerchantDto {
     @IsUUID()
     readonly id?: string;
 
@@ -19,7 +19,7 @@ export class CreateMerchantDto {
 
     readonly description: string;
 
-    @Max(60, {message: 'Slogan must be less than 60 characters'})
+    // @Max(60, {message: 'Slogan must be less than 60 characters'})
     readonly slogan: string;
 
     readonly address: string;
@@ -37,7 +37,7 @@ export class CreateMerchantDto {
     readonly avatar: CreateAvatar2DDto;
 }
 
-export class UpdateMerchantDto extends PartialType(CreateMerchantDto) {
+export class UpdateMerchantDto extends PartialType(MerchantDto) {
 
 }
 

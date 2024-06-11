@@ -11,11 +11,18 @@
     "outDir": "./dist",
     "baseUrl": "src",
     "paths": {
-      "@app/modules": ["modules"],
-      "@app/modules/*": ["modules/*"],
-      "@app/interfaces": ["interfaces"],
-      "@app/config": ["config"],
-
+      "@app/modules": [
+        "modules"
+      ],
+      "@app/modules/*": [
+        "modules/*"
+      ],
+      "@app/interfaces": [
+        "interfaces"
+      ],
+      "@app/config": [
+        "config"
+      ]
     },
     "incremental": true,
     "skipLibCheck": true,
@@ -28,5 +35,6 @@
     "esModuleInterop": true,
     "skipDefaultLibCheck": true,
     "noLib": false
-  }
+  },
+
 }

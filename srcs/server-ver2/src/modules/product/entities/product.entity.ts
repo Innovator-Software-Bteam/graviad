@@ -1,4 +1,14 @@
-import {Column, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne, PrimaryColumn} from "typeorm";
+import {
+    Column,
+    Entity,
+    JoinColumn,
+    JoinTable,
+    ManyToMany,
+    ManyToOne,
+    OneToMany,
+    OneToOne,
+    PrimaryColumn, RelationId
+} from "typeorm";
 import {Merchant} from "@app/modules/user/entities";
 import {ProductMediaFromSpline, ProductThumbnail2D} from "@app/modules/product/entities/productMedia.entity";
 
@@ -40,13 +50,34 @@ export class Product {
     @Column({type: 'int', nullable: false, name: 'merchant_id'})
     merchantId: number;
 
+    // Product belongs to a merchant
+    @ManyToOne(() => Merchant, merchant => merchant.products)
+    @JoinColumn({name: 'merchant_id'})
+    merchant: Merchant;
+
     // ProductPage has many product_features
-    @OneToMany(()=> ProductFeature, ProductFeature => ProductFeature.product)
+    @OneToMany(() => ProductFeature, ProductFeature => ProductFeature.product)
     features: ProductFeature[];
 
-    @OneToOne(()=>ProductMediaFromSpline, ProductMediaFromSpline => ProductMediaFromSpline.product)
+    @OneToOne(() => ProductMediaFromSpline, ProductMediaFromSpline => ProductMediaFromSpline.product)
     mediaFromSpline: ProductMediaFromSpline;
 
+    @ManyToMany(() => Merchant, merchant => merchant.likedProducts, {cascade: true})
+    @JoinTable({
+        name: 'merchant_likes_products',
+        joinColumn: {
+            name: 'product_id',
+            referencedColumnName: 'id'
+        },
+        inverseJoinColumn: {
+            name: 'merchant_id',
+            referencedColumnName: 'id'
+        }
+    })
+    likedBy: Merchant[];
+
+    @RelationId((product: Product) => product.likedBy)
+    likedByIds: string [];
 }
 
 @Entity('product_features')

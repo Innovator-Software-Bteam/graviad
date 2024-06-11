@@ -1,7 +1,7 @@
 import {
     CreateProductMediaFromSplineDto,
     CreateProductThumbnail2D
-} from "@app/modules/product/dto/create-productMedia.dto";
+} from "@app/modules/product/dto/productMedia.dto";
 import {IsArray, IsCurrency, IsDate, IsNumber, IsObject, IsString, Length, Max} from "class-validator";
 import {PartialType} from "@nestjs/mapped-types";
 
@@ -24,7 +24,7 @@ export class UpdateProductFeatureDto extends PartialType(CreateProductFeatureDto
 
 }
 
-export class CreateProductDto {
+export class ProductDto {
     @IsNumber({}, {message: 'Id must be a number'})
     readonly id?: number;
 
@@ -62,7 +62,10 @@ export class CreateProductDto {
 
     @IsArray({message: 'Features must be an array'})
     readonly features?: CreateProductFeatureDto[];
+
+    @IsArray({message: 'Liked by ids must be an array'})
+    readonly likedByIds?: string[];
 }
 
-export class UpdateProductDto extends PartialType(CreateProductDto) {
+export class UpdateProductDto extends PartialType(ProductDto) {
 }

@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from "react";
-import {Outlet, useLocation, useNavigate} from 'react-router-dom';
+import {Outlet, useLocation, useNavigate, useParams} from 'react-router-dom';
 import {CiSearch} from "react-icons/ci";
 import {HiChevronRight} from "react-icons/hi";
 import {twJoin, twMerge} from "tailwind-merge";
@@ -23,7 +23,7 @@ import axios from "axios";
 import config from "./config";
 import {MerchantContext, ProfileContext, UserContext} from "grvd/pages";
 import {useDispatch, useSelector} from "react-redux";
-import {setIsAuthenticated, setRoles} from "grvd/storage/counters/UserCounter";
+import {setIsAuthenticated} from "grvd/storage/counters/UserCounter";
 import {RootState} from "grvd/storage";
 
 interface IDashboardHeaderProps extends React.ComponentProps<"header"> {
@@ -36,11 +36,11 @@ interface IDashboardFooterProps {
 interface IDashboardMainProps extends React.ComponentProps<"main"> {
 }
 
-function DashboardHeaderTop({className, ...props}: IDashboardHeaderProps) {
+function DashboardHeaderTop({className}: IDashboardHeaderProps) {
     const location = useLocation();
     const currentRoute = location.pathname.split('/');
     const dashboardTitle = currentRoute[2];
-    const state= useSelector((state: RootState) => state.state.state);
+    const state = useSelector((state: RootState) => state.state.state);
 
     const routerList = new Set<any>();
     currentRoute.map((route, index) => {
@@ -51,19 +51,21 @@ function DashboardHeaderTop({className, ...props}: IDashboardHeaderProps) {
             });
         }
     });
-    const renderRouterListItem = (route: string, path: string) => {
+    const renderRouterListItem = (route: string, path: string, key: any) => {
         return (
-            <div className={twMerge(
-                'text-grvd-theme-sys-dark-on-primary-variant',
-                'active:text-grvd-theme-sys-dark-primary',
-                'font-medium',
-                'text-md',
-                'flex flex-row items-center justify-start gap-2',
+            <div
+                key={key}
+                className={twMerge(
+                    'text-grvd-theme-sys-dark-on-primary-variant',
+                    'active:text-grvd-theme-sys-dark-primary',
+                    'font-medium',
+                    'text-md',
+                    'flex flex-row items-center justify-start gap-2',
 
-                'hover:text-grvd-theme-sys-dark-primary',
-                'focus:text-grvd-theme-sys-dark-primary',
-                'transition-colors duration-200 ease-in-out',
-            )}>
+                    'hover:text-grvd-theme-sys-dark-primary',
+                    'focus:text-grvd-theme-sys-dark-primary',
+                    'transition-colors duration-200 ease-in-out',
+                )}>
                 <a href={path} className={'capitalize'}>
                     {route}
                 </a>
@@ -101,7 +103,7 @@ function DashboardHeaderTop({className, ...props}: IDashboardHeaderProps) {
                 <div className={twMerge(
                     'flex flex-row items-center justify-start gap-2',
                 )}>
-                    {Array.from(routerList).map((item, index) => renderRouterListItem(item.title, item.path))}
+                    {Array.from(routerList).map((item, index) => renderRouterListItem(item.title, item.path, index))}
                 </div>
             </div>
             <div className={'grow-[2] w-full'}>
@@ -171,9 +173,10 @@ function DashboardHeaderLeft({className, ...props}: IDashboardHeaderProps) {
             ]
         }
     ];
-    const renderListItems = ({title, path, icon}: any) => {
+    const renderListItems = ({title, path, icon, key}: any) => {
         return (
             <ListItem
+                key={key}
                 className={twJoin(
                     'hover:bg-grvd-theme-sys-dark-surface-container-high hover:text-grvd-theme-sys-dark-on-secondary hover:font-medium',
                     'focus:bg-grvd-theme-sys-dark-surface-container-high focus:text-grvd-theme-sys-dark-on-secondary focus:font-medium',
@@ -217,7 +220,7 @@ function DashboardHeaderLeft({className, ...props}: IDashboardHeaderProps) {
                             className={'flex flex-col gap-4'}>
                             <Typography variant={'h6'}
                                         className={'font-medium text-grvd-theme-sys-dark-on-primary-variant'}>{listGroup.title}</Typography>
-                            {listGroup.list.map((item) => renderListItems(item))}
+                            {listGroup.list.map((item, index) => renderListItems({...item, key: index}))}
                         </div>
                     )
                 })}
@@ -240,7 +243,7 @@ function DashboardHeaderLeft({className, ...props}: IDashboardHeaderProps) {
 
 }
 
-function DashboardFooter({props}: any) {
+function DashboardFooter({...props}: IDashboardFooterProps) {
     return (
         <div>
             <h1>{props.title}</h1>
@@ -260,6 +263,8 @@ export function DashboardMain({className, children}: IDashboardMainProps) {
 }
 
 export function Dashboard() {
+    const location = useLocation();
+    const forEmbed = new URLSearchParams(location.search).get('forEmbed') || 'false';
     const [user, setUser] = useState<TUser>();
     const [merchant, setMerchant] = useState<TMerchant>();
     const [profile, setProfile] = useState<TProfile>();
@@ -279,40 +284,42 @@ export function Dashboard() {
         axios.get(`${config.server.url}/users/email/${email}`, {
             withCredentials: true,
             params: {
-                merchant: true,
-                profile: true
+                relations: ['profile', 'merchant']
             }
         }).then(res => {
             res.data.profile = res.data.profile.data;
             setUser(res.data);
             setProfile(res.data.profile);
-            setMerchant(res.data.merchant);
             dispatch(setIsAuthenticated(true));
         }).catch(err => {
             console.error(err);
         });
     };
-    // const loadMerchant = async () => {
-    //     axios.get(`${config.server.url}/merchants/search`, {
-    //         withCredentials: true,
-    //         params: {
-    //             email: profile?.emails[0].value
-    //         }
-    //     }).then(res => {
-    //         setMerchant(res.data[0]);
-    //     }).catch(err => {
-    //         console.error(err);
-    //     });
-    // };
+    const loadMerchant = async () => {
+        if (!user?.merchant?.id) return;
+        axios.get(`${config.server.url}/merchants/${user?.merchant?.id}`, {
+            withCredentials: true,
+            params: {
+                relations: ['avatar', 'socialLinks']
+            }
+        }).then(res => {
+            setMerchant(res.data);
+        }).catch(err => {
+            console.error(err);
+        });
+    }
     useEffect(() => {
         loadAuthenticator().then().catch();
     }, []);
     useEffect(() => {
         loadUser().then().catch();
     }, [email]);
-    // useEffect(() => {
-    //     loadMerchant().then().catch();
-    // }, [user]);
+    useEffect(() => {
+        loadMerchant().then().catch();
+    }, [user]);
+    useEffect(() => {
+        console.log('For Embed: ', forEmbed)
+    }, [forEmbed]);
     return (
         <ProfileContext.Provider value={profile as any}>
             <MerchantContext.Provider value={merchant as any}>
@@ -325,8 +332,10 @@ export function Dashboard() {
                             'transition-all duration-200 ease-in-out',
                         )}
                     >
-                        <DashboardHeaderLeft className={'col-start-1 row-start-1 row-span-full col-span-1'}/>
-                        <DashboardHeaderTop className={'col-start-2 row-start-1 col-span-2'}/>
+                        {forEmbed === 'false' &&
+                            <DashboardHeaderLeft className={'col-start-1 row-start-1 row-span-full col-span-1'}/>}
+                        {forEmbed === 'false' &&
+                            <DashboardHeaderTop className={'col-start-2 row-start-1 col-span-2'}/>}
                         <DashboardMain className={'col-start-2 row-start-2 row-span-2 col-span-2'}>
                             <Outlet/>
                         </DashboardMain>

@@ -5,21 +5,19 @@ export interface IButtonProps extends MT.ButtonProps {
     colorcustom?: color;
     sizecustom?: size;
 }
+
+export type TButtonWithLoadingLabel = {
+    labelDefault: string;
+    labelLoading: string;
+    labelDone: string;
+    labelError?: string;
+}
+
 export interface IButtonWithLoadingProps extends IButtonProps {
     isloading: boolean;
     isdone?: boolean;
+    iserror?: boolean;
     textloading?: string;
     textdone?: string;
-}
-export enum ButtonColor {
-    PRIMARY = 'primary',
-    SECONDARY = 'secondary',
-    TERTIARY_A = 'tertiary_a',
-    TERTIARY_B = 'tertiary_b',
-}
-
-export enum ButtonSize {
-    SMALL = 'sm',
-    MEDIUM = 'md',
-    LARGE = 'lg',
+    label: TButtonWithLoadingLabel;
 }

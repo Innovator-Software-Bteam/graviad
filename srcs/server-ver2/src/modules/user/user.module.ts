@@ -1,27 +1,27 @@
 import {
     Avatar2DService,
-    MerchantController,
     MerchantService,
     ProfileService,
     SocialLinkService,
     UserService
-} from "@app/modules/user";
-import {UserController} from "@app/modules/user";
-import {Merchant, Profile, SocialLink, User, Avatar2D} from "@app/modules/user/entities";
+} from "./user.service";
+import {MerchantController, SocialLinkController} from "@app/modules/user/user.controller";
+import {UserController} from "./user.controller";
+import {Merchant, Profile, SocialLink, User, Avatar2D} from "./entities";
 import {TypeOrmModule} from "@nestjs/typeorm";
 import {Module} from "@nestjs/common";
 
 @Module({
     imports: [
         TypeOrmModule.forFeature([
-            User,
+            Profile,
             Avatar2D,
+            User,
             Merchant,
             SocialLink,
-            Profile,
         ]),
     ],
-    controllers: [UserController, MerchantController],
+    controllers: [UserController, MerchantController, SocialLinkController],
     providers: [UserService, ProfileService, MerchantService, SocialLinkService, Avatar2DService],
     exports: [UserService, ProfileService, MerchantService]
 })

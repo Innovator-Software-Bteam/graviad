@@ -10,9 +10,9 @@ import {
     Put,
     Query, UseGuards
 } from '@nestjs/common';
-import {MerchantService, SocialLinkService, UserService} from "@app/modules/user";
-import {CreateUserDto, UpdateMerchantDto} from "@app/modules/user";
-import {IMerchantQuery, IUserQuery} from "@app/modules/user";
+import {MerchantService, SocialLinkService, UserService} from "@app/modules/user/user.service";
+import {UserDto, UpdateMerchantDto} from "@app/modules/user/dto";
+import {IMerchantQuery, IUserQuery} from "@app/modules/user/user.interface";
 import {MerchantGuard, UserGuard} from "@app/modules/user/guards";
 import {AuthGuard} from "@app/modules/auth";
 
@@ -26,32 +26,37 @@ export class UserController {
     @Get()
     async findAll(@Query() query: IUserQuery) {
         return await this.userService
-            .findAll({query});
+            .findAll(query);
     }
 
     @Get('search')
     async findAllWithQuery(@Query() query: IUserQuery) {
         return await this.userService
-            .findAllByQuery(query);
+            .findAllByQuery({query});
     }
 
     @Get(':id')
     async findBy(@Param('id') id: string) {
         return await this.userService.findBy({
-            id: id,
+            where: {
+                id: id,
+            }
         });
     }
 
     @Get('email/:email')
     async findByEmail(@Param('email') email: string, @Query() query: IUserQuery) {
         return await this.userService.findOneBy({
-            email: email,
-        }, query);
+            ...query,
+            where: {
+                email: email,
+            }
+        });
     }
 
     @Post()
     @UseGuards(AuthGuard)
-    async create(@Body() body: CreateUserDto) {
+    async create(@Body() body: UserDto) {
         return await this.userService
             .create(body);
     }
@@ -59,7 +64,7 @@ export class UserController {
     @Put(':id')
     @UseGuards(AuthGuard)
     @UseGuards(UserGuard)
-    async update(@Param('id') id: string, @Body() body: CreateUserDto) {
+    async update(@Param('id') id: string, @Body() body: UserDto) {
         return await this.userService
             .update(id, body)
     }
@@ -95,11 +100,9 @@ export class MerchantController {
     }
 
     @Get(':id')
-    async findBy(@Param('id') id: string) {
+    async findBy(@Param('id') id: string, @Query() query: IMerchantQuery) {
         return await this.merchantService
-            .findBy({
-                id: id,
-            })
+            .findById(id, query);
     }
 
     @Post()
@@ -119,14 +122,12 @@ export class MerchantController {
             throw new BadRequestException('Email and body must be provided');
         }
         return await this.merchantService
-            .update(id, {
-                ...body,
-            });
+            .update(id, body);
     }
 
     @Patch(':id')
-    @UseGuards(AuthGuard)
-    @UseGuards(MerchantGuard)
+    // @UseGuards(AuthGuard)
+    // @UseGuards(MerchantGuard)
     async updatePartial(@Param('id') id: string, @Body() body: UpdateMerchantDto) {
         return this.merchantService
             .updatePartial(id, body)
@@ -139,5 +140,53 @@ export class MerchantController {
         return this.merchantService
             .delete(email)
             .then(() => this.socialLinkService.delete(email));
+    }
+}
+
+@Controller('social-links')
+export class SocialLinkController {
+    constructor(
+        @Inject(forwardRef(() => SocialLinkService))
+        private readonly socialLinkService: SocialLinkService) {
+    }
+
+    @Get()
+    async findAll() {
+        return await this.socialLinkService
+            .findAll();
+    }
+
+    @Get(':id')
+    async findBy(@Param('id') id: number) {
+        return await this.socialLinkService
+            .findOne(id);
+    }
+
+    @Post()
+    @UseGuards(AuthGuard)
+    async create(@Body() body: any) {
+        return await this.socialLinkService
+            .create(body);
+    }
+
+    @Put(':id')
+    @UseGuards(AuthGuard)
+    async replace(@Param('id') id: string, @Body() body: any) {
+        return await this.socialLinkService
+            .update(id, body);
+    }
+
+    @Patch(':id')
+    @UseGuards(AuthGuard)
+    async updatePartial(@Param('id') id: string, @Body() body: any) {
+        return await this.socialLinkService
+            .updatePartial(id, body);
+    }
+
+    @Delete(':id')
+    @UseGuards(AuthGuard)
+    async remove(@Param('id') id: string) {
+        return await this.socialLinkService
+            .delete(id);
     }
 }

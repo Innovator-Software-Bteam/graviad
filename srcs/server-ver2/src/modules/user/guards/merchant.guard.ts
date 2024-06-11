@@ -1,4 +1,4 @@
-import {CanActivate, Injectable} from "@nestjs/common";
+import {BadRequestException, CanActivate, Injectable} from "@nestjs/common";
 
 @Injectable()
 export class MerchantGuard implements CanActivate {
@@ -6,8 +6,13 @@ export class MerchantGuard implements CanActivate {
         context: any,
     ): Promise<boolean> {
         const request = context.switchToHttp().getRequest();
-        return request.user.id === request.params.id
-            || request.user.email === request.params.email
-            || request.user.email === request.body.email;
+        if (!request.user) {
+            throw new BadRequestException('Unauthorized');
+        }
+        if(request.user.id!==request.params.id || request.user.email !== request.params.email || request.user.email !== request.body.email){
+            throw new BadRequestException('Require owner permission');
+        }
+        return true;
+
     }
 }

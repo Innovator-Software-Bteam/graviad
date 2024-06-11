@@ -1,11 +1,13 @@
 import React, {useEffect} from 'react';
 import {TMerchant, TUser} from "grvd";
-import {Avatar, Popover, PopoverContent, PopoverHandler, Typography} from "@material-tailwind/react";
+import {Popover, PopoverContent, PopoverHandler, Typography} from "@material-tailwind/react";
 import {twJoin} from "tailwind-merge";
-import {CiHeart} from "react-icons/ci";
 import {FaRegHeart} from "react-icons/fa6";
 import {ProfileCard} from "grvd/molecules/User/ProfileCard";
 import {MerchantContext, ProfileContext} from "grvd/contexts";
+import axios from "axios";
+import config from "../../../config";
+import {AvatarBase64} from "grvd/components/Avatar";
 
 export interface IProfileOwnerBarProps extends React.ComponentProps<'div'> {
     user: TUser;
@@ -17,11 +19,27 @@ export function ProfileOwnerBar({user, ...props}: IProfileOwnerBarProps) {
         onMouseEnter: () => setOpenPopover(true),
         onMouseLeave: () => setOpenPopover(false),
     };
+    const [merchant, setMerchant] = React.useState<TMerchant | undefined>(undefined);
+    const loadMerchant = () => {
+        axios
+            .get(`${config.server.url}/merchants/${user.merchant?.id}`, {
+                withCredentials: true,
+                params: {
+                    relations: ['avatar', 'socialLinks'],
+                }
+            })
+            .then((res) => {
+                setMerchant(res.data);
+            });
+    }
     const handleNavigate = () => {
         window.location.href = `/dashboard/profile/${user.merchant?.id}`;
     }
     useEffect(() => {
     }, [user, user.profile, user.merchant]);
+    useEffect(() => {
+        loadMerchant();
+    }, []);
     return (
         <ProfileContext.Provider value={user.profile}>
             <MerchantContext.Provider value={user.merchant}>
@@ -34,11 +52,11 @@ export function ProfileOwnerBar({user, ...props}: IProfileOwnerBarProps) {
                      onClick={handleNavigate}
                 >
                     <div className={'flex flex-row gap-4 items-center'}>
-                        {user?.profile?.photos &&
+                        {merchant?.avatar &&
                             <Popover placement={'bottom'} open={openPopover} handler={setOpenPopover} offset={10}>
                                 <PopoverHandler {...triggers}>
-                                    <Avatar
-                                        src={user?.profile?.photos[0].value}
+                                    <AvatarBase64
+                                        data={merchant?.avatar?.data}
                                         variant={'rounded'}
                                         size={'md'}
                                     />
@@ -62,7 +80,7 @@ export function ProfileOwnerBar({user, ...props}: IProfileOwnerBarProps) {
                         '[text-shadow:0px_0px_10px_#1A5DCD]'
                     )}>
                         <FaRegHeart size={20} className={'[filter:drop-shadow(0px_0px_10px_#1A5DCD)]'}/>
-                        {user?.merchant?.numberOfProducts}
+                        {merchant?.numberOfLikes}
                     </Typography>
                     {props.children}
                 </div>

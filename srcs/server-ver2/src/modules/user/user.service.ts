@@ -1,19 +1,18 @@
-import {forwardRef, Inject, Injectable} from "@nestjs/common";
-import {ICrud} from "@app/interfaces";
-import {Avatar2D, Merchant, Profile, SocialLink, User} from "@app/modules/user/entities";
+import {BadRequestException, forwardRef, Inject, Injectable} from "@nestjs/common";
+import {ICrud, IQuery} from "@app/interfaces";
+import {Avatar2D, Merchant, Profile, SocialLink, User} from "./entities";
 import {InjectRepository} from "@nestjs/typeorm";
 import {Repository} from "typeorm";
 import {
-    TProfile,
-    CreateUserDto,
-    CreateMerchantDto,
+    UserDto,
+    MerchantDto,
     CreateSocialLinkDto,
     UpdateMerchantDto,
-    UpdateSocialLinkDto, UpdateUserDto, IAvatarQuery
-} from "@app/modules/user";
-import {FindOptionsWhere} from "typeorm/find-options/FindOptionsWhere";
-import {IMerchantQuery, IUserQuery} from "@app/modules/user/user.interface";
-import {CreateAvatar2DDto, UpdateAvatar2DDto} from "@app/modules/user/dto/create-image.dto";
+    UpdateSocialLinkDto, UpdateUserDto,
+    CreateAvatar2DDto, UpdateAvatar2DDto
+} from "./dto";
+import {TProfile} from "./index";
+import {IMerchantQuery, IUserQuery} from "./user.interface";
 
 @Injectable()
 export class SocialLinkService implements ICrud<SocialLink, CreateSocialLinkDto, UpdateSocialLinkDto> {
@@ -24,26 +23,22 @@ export class SocialLinkService implements ICrud<SocialLink, CreateSocialLinkDto,
     }
 
     async create(dto: CreateSocialLinkDto): Promise<SocialLink> {
-        if (!dto.provider) throw new Error('Provider is required')
-        if (!dto.data) throw new Error('Data is required')
-        if (!dto.merchantId) throw new Error('MerchantId is required')
-
         const socialLink: SocialLink = new SocialLink();
         socialLink.provider = dto.provider;
         socialLink.data = dto.data;
-        return this.socialLinkRepository.save(socialLink);
+        return await this.socialLinkRepository.save(socialLink);
     }
 
     async delete(id: any): Promise<any> {
-        return this.socialLinkRepository.delete(id);
+        return await this.socialLinkRepository.delete(id);
     }
 
     async findAll(): Promise<SocialLink[]> {
-        return this.socialLinkRepository.find();
+        return await this.socialLinkRepository.find();
     }
 
     async findOne(id: any): Promise<SocialLink> {
-        return this.socialLinkRepository.findOneBy({id});
+        return await this.socialLinkRepository.findOneBy({id});
     }
 
     async update(id?: any, dto?: UpdateSocialLinkDto): Promise<any> {
@@ -54,11 +49,12 @@ export class SocialLinkService implements ICrud<SocialLink, CreateSocialLinkDto,
     }
 
     async updatePartial(id: any, dto?: UpdateSocialLinkDto): Promise<any> {
-        if (!id) throw new Error('id is required');
-        return this.socialLinkRepository.update(id, dto);
+        if(!id) throw new BadRequestException('id is required');
+        await this.socialLinkRepository.update(id, dto);
+        return await this.findOne(id);
     }
 
-    findOrCreate(id?: any, dto?: CreateSocialLinkDto): Promise<SocialLink> {
+    async findOrCreate(id?: any, dto?: CreateSocialLinkDto): Promise<SocialLink> {
         const socialLink = this.socialLinkRepository.findOneBy({id});
         if (socialLink) return socialLink;
         return this.create(dto);
@@ -91,7 +87,8 @@ export class ProfileService implements ICrud<Profile, TProfile> {
         return this.profileRepository.find();
     }
 
-    async findBy(where: FindOptionsWhere<Profile> | FindOptionsWhere<Profile>[]): Promise<Profile> {
+    async findBy(query: IQuery): Promise<Profile> {
+        const {where} = query;
         return await this.profileRepository.findOneBy(where);
     }
 
@@ -103,7 +100,7 @@ export class ProfileService implements ICrud<Profile, TProfile> {
 }
 
 @Injectable()
-export class UserService implements ICrud<User, CreateUserDto, UpdateUserDto> {
+export class UserService implements ICrud<User, UserDto, UpdateUserDto> {
     constructor(
         @InjectRepository(User)
         private readonly userRepository: Repository<User>,
@@ -111,7 +108,7 @@ export class UserService implements ICrud<User, CreateUserDto, UpdateUserDto> {
 
     }
 
-    async create(dto?: CreateUserDto): Promise<User> {
+    async create(dto?: UserDto): Promise<User> {
         if (dto?.id) throw new Error('Id is exist, please use update method');
         const user: User = new User();
         user.email = dto.email;
@@ -122,41 +119,30 @@ export class UserService implements ICrud<User, CreateUserDto, UpdateUserDto> {
         return await this.userRepository.delete(id);
     }
 
-    async findAll({query}: any): Promise<User[]> {
-        const {relations, where} = query as IUserQuery;
+    async findAll(query: IUserQuery): Promise<User[]> {
         return await this.userRepository
-            .find({
-                relations: relations,
-                where: where,
-            })
+            .find(query);
     }
 
     async findAllByQuery({query}: any): Promise<User[]> {
-        const {limit, page, where} = query as IUserQuery;
+        const {limit, page, where, relations} = query as IUserQuery;
         const take = limit && Number(limit);
         const skip = page && Number(page) * take;
         return this.userRepository.find({
             where,
             take,
             skip,
-            relations: ['profile'],
+            relations
         })
     }
 
-    async findBy(option?: any): Promise<User> {
-        return await this.userRepository.findOneBy({
-            ...option
-        });
+    async findBy(query: IQuery): Promise<User> {
+        const {where} = query;
+        return await this.userRepository.findOneBy(where);
     }
 
-    async findOneBy(...option: any): Promise<User> {
-        const [query] = option;
-        const {relations, where} = query as IUserQuery
-
-        return await this.userRepository.findOne({
-            where,
-            relations,
-        });
+    async findOneBy(query: IQuery): Promise<User> {
+        return await this.userRepository.findOne(query);
     }
 
     async update(id: any, dto?: UpdateUserDto): Promise<any> {
@@ -168,16 +154,17 @@ export class UserService implements ICrud<User, CreateUserDto, UpdateUserDto> {
 
     async updatePartial(id: any, dto?: UpdateUserDto): Promise<any> {
         if (!id) throw new Error('id is required');
-        return await this.userRepository.update(id, dto);
+        await this.userRepository.update(id, dto);
+        return await this.userRepository.findOneBy({id});
     }
 
-    async findOrCreate(id?: any, dto?: CreateUserDto): Promise<User> {
+    async findOrCreate(id?: any, dto?: UserDto): Promise<User> {
         const user = await this.userRepository.findOneBy({id});
         if (user) return user;
         return this.create(dto);
     }
 
-    async findOrCreateByEmail(email: string, dto?: CreateUserDto): Promise<User> {
+    async findOrCreateByEmail(email: string, dto?: UserDto): Promise<User> {
         const user = await this.userRepository.findOneBy({
             email
         });
@@ -212,20 +199,12 @@ export class Avatar2DService implements ICrud<Avatar2D, CreateAvatar2DDto, Updat
         return Promise.resolve(undefined);
     }
 
-    async findAll({query}: any): Promise<Avatar2D[]> {
-        const {relations, where} = query as IAvatarQuery;
-        return await this.avatar2DRepository.find({
-            where,
-            relations,
-        });
+    async findAll(query: any): Promise<Avatar2D[]> {
+        return await this.avatar2DRepository.find(query);
     }
 
-    async findBy({query}: any): Promise<Avatar2D> {
-        const {relations, where} = query as IAvatarQuery;
-        return await this.avatar2DRepository.findOne({
-            where,
-            relations,
-        });
+    async findBy(query: any): Promise<Avatar2D> {
+        return await this.avatar2DRepository.findOne(query);
     }
 
     async findById(id: any): Promise<Avatar2D> {
@@ -246,10 +225,12 @@ export class Avatar2DService implements ICrud<Avatar2D, CreateAvatar2DDto, Updat
     }
 
     async updatePartial(id: any, dto?: UpdateAvatar2DDto): Promise<any> {
+
         const avatar2D = await this.findById(id);
         if (!avatar2D) throw new Error('Avatar2D not found');
         avatar2D.data = Buffer.from(dto?.data, 'base64');
         avatar2D.altTexts = dto?.altTexts;
+        console.log('avatar2D', avatar2D);
         return this.avatar2DRepository.save(avatar2D);
     }
 
@@ -257,7 +238,7 @@ export class Avatar2DService implements ICrud<Avatar2D, CreateAvatar2DDto, Updat
 }
 
 @Injectable()
-export class MerchantService implements ICrud<Merchant, CreateMerchantDto, UpdateMerchantDto> {
+export class MerchantService implements ICrud<Merchant, MerchantDto, UpdateMerchantDto> {
     constructor(
         @InjectRepository(Merchant)
         private readonly merchantRepository: Repository<Merchant>,
@@ -268,7 +249,7 @@ export class MerchantService implements ICrud<Merchant, CreateMerchantDto, Updat
     ) {
     }
 
-    async create(dto: CreateMerchantDto): Promise<Merchant> {
+    async create(dto: MerchantDto): Promise<Merchant> {
         // return await this.merchantRepository.save(dto);
         const avatar: Avatar2D = await this.avatar2DService.findOrCreate(dto.avatar?.id, dto.avatar);
         return await this.merchantRepository.save({
@@ -289,18 +270,27 @@ export class MerchantService implements ICrud<Merchant, CreateMerchantDto, Updat
     }
 
 
-    async findAll({query}: any): Promise<Merchant[]> {
-        const {relations, where} = query as IMerchantQuery;
+    async findAll(query: IMerchantQuery): Promise<Merchant[]> {
+        const {relations, where, limit, page} = query;
+        const take = limit && Number(limit);
+        const skip = page && Number(page) * take;
         return this.merchantRepository
             .find({
-                where,
-                relations
+                relations,
+                take,
+                skip,
             });
     }
 
-    async findBy(option?: any): Promise<Merchant> {
-        return await this.merchantRepository.findOneBy({
-            ...option
+    async findBy(query?: any): Promise<Merchant> {
+        return await this.merchantRepository.findOne(query);
+    }
+
+    async findById(id: any, query: IQuery): Promise<Merchant> {
+        const {relations} = query;
+        return await this.merchantRepository.findOne({
+            where: {id},
+            relations,
         });
     }
 
@@ -328,10 +318,25 @@ export class MerchantService implements ICrud<Merchant, CreateMerchantDto, Updat
     }
 
     async updatePartial(id: any, dto?: UpdateMerchantDto): Promise<any> {
-        if(dto.avatar) {
-            await this.avatar2DService.update(dto.avatar.id, dto.avatar);
+        if(!id) throw new BadRequestException('id is required');
+        if (dto.avatar && dto.avatar.data && dto.avatar.data!=='') {
+            const avatar: Avatar2D = await this.avatar2DService.findBy({
+                where: {
+                    id: dto.avatar.id,
+                }
+            });
+            if (!avatar) {
+                await this.avatar2DService.create(dto.avatar);
+            } else {
+                avatar.data = dto.avatar.data;
+                avatar.altTexts = dto.avatar.altTexts;
+                await this.avatar2DService.updatePartial(avatar.id, {
+                    data: avatar.data,
+                    altTexts: avatar.altTexts,
+                });
+            }
         }
-        if (dto.socialLinks) {
+        if (dto.socialLinks && dto.socialLinks.length > 0) {
             for (const socialLink of dto?.socialLinks) {
                 await this.socialLinkService.findOrCreate(socialLink?.id, socialLink);
                 await this.socialLinkService.update(socialLink?.id, {
@@ -342,7 +347,7 @@ export class MerchantService implements ICrud<Merchant, CreateMerchantDto, Updat
             }
         }
 
-        return await this.merchantRepository.update(id, {
+        await this.merchantRepository.update(id, {
             id,
             name: dto?.name,
             address: dto?.address,
@@ -353,6 +358,7 @@ export class MerchantService implements ICrud<Merchant, CreateMerchantDto, Updat
             slogan: dto?.slogan,
             phone: dto?.phone,
         });
+        return await this.findById(id, {relations: ['socialLinks', 'avatar']});
     }
 
     async findAllByQuery({query}: any): Promise<Merchant[]> {

@@ -4,7 +4,7 @@ import {IsEmail, IsUUID} from "class-validator";
 /**
  * @version 2.0
  */
-export class CreateUserDto {
+export class UserDto {
     @IsUUID()
     readonly id?: string;
     @IsEmail({}, {message: 'Invalid email'})
@@ -12,5 +12,5 @@ export class CreateUserDto {
     readonly profileId: string;
 }
 
-export class UpdateUserDto extends PartialType(CreateUserDto) {
+export class UpdateUserDto extends PartialType(UserDto) {
 }

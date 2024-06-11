@@ -14,6 +14,7 @@ import {
 import {ProductService} from "@app/modules/product/product.service";
 import {OwnerGuard, UpdateProductDto} from "@app/modules/product";
 import {AuthGuard} from "@app/modules/auth";
+import {IProductQuery} from "@app/modules/product/product.interface";
 
 @Controller('products')
 export class ProductController {
@@ -23,19 +24,25 @@ export class ProductController {
     }
 
     @Get()
-    async findAll(@Query() query: any){
+    async findAll(@Query() query: IProductQuery){
         return this.productService.findAll(query);
     }
 
     // get by query
     @Get('search')
-    async findAllWithQuery(@Query() query: any) {
+    async findAllWithQuery(@Query() query: IProductQuery) {
         return this.productService.findAllByQuery(query);
     }
 
     @Get(':id')
-    async findOne(@Param('id') id: any) {
-        return this.productService.findBy(id);
+    async findOne(@Param('id') id: any, @Query() query: IProductQuery){
+        return this.productService.findBy({
+            ...query,
+            where: {
+                id,
+                ...query.where
+            },
+        });
     }
 
 

@@ -5,8 +5,8 @@ import {
     OneToOne,
     JoinColumn,
 } from 'typeorm';
-import {Merchant, TProfile} from "@app/modules/user";
-
+import {Merchant} from "./merchant.entity";
+import {TProfile} from "../index"
 /**
  * @version 2.0
  */

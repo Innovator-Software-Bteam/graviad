@@ -8,7 +8,7 @@ import config from "../../../config";
 import {ProfileOwnerBar} from "grvd/molecules/User/ProfileOwnerBar";
 import {TUser} from "grvd";
 
-export function Board({}: IBoardProps) {
+export function Board({children}: IBoardProps) {
     return (
         <Card className={twJoin(
             'bg-grvd-theme-sys-dark-surface-container-lowest',
@@ -16,6 +16,7 @@ export function Board({}: IBoardProps) {
         )}
               shadow={false}
         >
+            {children}
         </Card>
     );
 }
@@ -30,7 +31,7 @@ export function BoardTopMerchant({}: IBoardProps) {
         axios.get(`${config.server.url}/users`, {
             withCredentials: true,
             params: {
-                merchant: true,
+                relations:['profile', 'merchant'],
             }
         })
             .then((res) => {
@@ -50,9 +51,9 @@ export function BoardTopMerchant({}: IBoardProps) {
     }, []);
     return (
         <div className={'flex flex-col gap-8'}>
-            {topMerchants.map((owner: TUser) => {
+            {topMerchants.map((owner: TUser, index) => {
                 return(
-                    <ProfileOwnerBar user={owner as any}/>
+                    <ProfileOwnerBar user={owner as any} key={index}/>
                 )
             })}
         </div>
