@@ -13,6 +13,8 @@ import {IProductCreateFormProps, TInput, TProductCreateForm} from "grvd/molecule
 import {CgDanger} from "react-icons/cg";
 import {useSelector} from "react-redux";
 import {RootState} from "grvd/storage";
+import {useDialog} from "grvd/organisms";
+import {Buffer} from "buffer";
 
 
 export function ProductCreateTipsArea({className}: IProductCreateFormProps) {
@@ -93,7 +95,7 @@ export function ProductCreateForm() {
     const [brief, setBrief] = React.useState('');
 
     const MAX_FILE_THUMBNAIL_SIZE = 300 * 1024;
-
+    const {open: openDialogError} = useDialog();
     const {
         register,
         handleSubmit,
@@ -121,36 +123,33 @@ export function ProductCreateForm() {
             reader.onload = async function (e: ProgressEvent<FileReader>) {
                 if (reader.result instanceof ArrayBuffer) {
                     const arrayBuffer = reader.result;
-                    try {
-                        const response =
-                            await axios
-                                .post<any, any, TProduct>(`${config.server.url}/products`, {
-                                    name: data.name,
-                                    merchantId: merchant?.id as string,
-                                    price: data.price,
-                                    highlightLabel: data.label,
-                                    version: data.version,
-                                    brief: data.brief,
-                                    thumbnail2D: {
-                                        data: encode(arrayBuffer),
-                                    },
-                                    features: [],
-                                    mediaFromSpline: {
-                                        data: data.mediaFromSpline?.data || data.mediaFromSpline,
-                                    },
-                                }, {
-                                    withCredentials: true
-                                })
-                                .then(async (response) => {
-                                    await new Promise((resolve) => setTimeout(resolve, 2000));
-                                    window.location.reload();
-                                })
-                                .catch((err) => console.log(err))
-
-                        console.log(response);
-                    } catch (err) {
-                        console.log(err);
-                    }
+                    await axios
+                        .post<any, any, TProduct>(`${config.server.url}/products`, {
+                            name: data.name,
+                            merchantId: merchant?.id as string,
+                            price: data.price,
+                            highlightLabel: data.label,
+                            version: data.version,
+                            brief: data.brief,
+                            thumbnail2D: {
+                                data: encode(arrayBuffer),
+                            },
+                            features: [],
+                            mediaFromSpline: {
+                                data: data.mediaFromSpline?.data || data.mediaFromSpline,
+                            },
+                        }, {
+                            withCredentials: true
+                        })
+                        .then(async (response) => {
+                            // await new Promise((resolve) => setTimeout(resolve, 2000));
+                            console.log(response);
+                            // window.location.reload();
+                        })
+                        .catch((err) => {
+                            openDialogError('Failed to create product', 'error');
+                            console.log(err)
+                        })
                 }
             };
         }

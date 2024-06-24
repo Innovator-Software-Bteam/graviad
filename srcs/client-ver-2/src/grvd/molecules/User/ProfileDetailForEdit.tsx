@@ -16,6 +16,7 @@ import {IPageProps} from "grvd/pages/types";
 import {ProfileCard} from "grvd/molecules/User";
 import {TAvatar2D, TMerchant, TSocialLink} from "grvd";
 import {IoIosAdd} from "react-icons/io";
+import {encode} from "base64-arraybuffer";
 
 type TProfileFormContext = {
     profileForm: TMerchant | null;
@@ -42,6 +43,7 @@ export type TFormInput = {
 export interface IProfileAvatarAreaProps extends React.HTMLAttributes<HTMLDivElement> {
     onAvatarChange: (file: File) => void;
 }
+
 export function ProfileAvatarArea({onAvatarChange}: IProfileAvatarAreaProps) {
     const {profileForm} = useProfileForm();
     const merchant = useMerchant();
@@ -179,8 +181,9 @@ export function ProfileAvatarArea({onAvatarChange}: IProfileAvatarAreaProps) {
 export function ProfileFormArea() {
     const {setProfileForm} = React.useContext(ProfileFormContext);
     const merchant = useMerchant();
+    const user = useUser();
 
-    const [email, setEmail] = useState(merchant?.email);
+    const [email, setEmail] = useState(merchant?.email || user?.email);
     const [phone, setPhone] = useState(merchant?.phone);
     const [address, setAddress] = useState(merchant?.address);
     const [description, setDescription] = useState(merchant?.description);
@@ -244,8 +247,7 @@ export function ProfileFormArea() {
                 slogan: data.slogan,
                 socialLinks: socialLinks,
                 avatar: {
-                    id: merchant?.avatar?.id,
-                    data: avatar?.data,
+                    data: encode(avatar?.data),
                 },
             }, {
                 withCredentials: true,
@@ -318,13 +320,16 @@ export function ProfileFormArea() {
     const handleAvatarChange = (file: File) => {
         if (file) {
             const reader = new FileReader();
-            reader.onloadend = (e) => {
+            reader.onload = (e) => {
                 const data = e.target?.result;
-                if (data) {
-                    setAvatar({
-                        data: data as ArrayBuffer,
-                    });
-                    setFileAvatar(file);
+                if (reader.result instanceof ArrayBuffer) {
+                    const arrayBuffer = reader.result;
+                    if (data) {
+                        setAvatar({
+                            data: arrayBuffer,
+                        });
+                        setFileAvatar(file);
+                    }
                 }
             }
             reader.readAsArrayBuffer(file);

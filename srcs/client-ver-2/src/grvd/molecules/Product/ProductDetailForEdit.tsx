@@ -2,20 +2,23 @@ import {
     IProductDetailForEditProps,
     IProductDetailForm,
     IProductFeatureEditAreaProps, ProductCard,
-    ProductContext,
-    TProductDetailForm, useProduct
+    TProductDetailForm
 } from "grvd/molecules/Product";
 import {useForm} from "react-hook-form";
 import {TProduct, TProductFeature, TProductFeatureKey, TThumbnail2D} from "grvd";
-import {Typography} from "@material-tailwind/react";
+import {Card, Spinner, Typography} from "@material-tailwind/react";
 import React, {useContext, useEffect, useState} from "react";
 import axios from "axios";
 import config from "../../../config";
-import {Button, InputTypeFile, InputWithTitle, TextareaWithTitle} from "grvd/components";
+import {Button, ButtonWithLoading, InputTypeFile, InputWithTitle, TextareaWithTitle} from "grvd/components";
 import {CiHeart} from "react-icons/ci";
 import {twJoin} from "tailwind-merge";
 import {MdDeleteForever} from "react-icons/md";
 import {TInput} from "grvd/molecules";
+import {ProductContext, useProduct} from "grvd/contexts";
+import {DialogErrorContext, useDialog} from "grvd/organisms";
+import {useParams} from "react-router-dom";
+import {decode, encode} from "base64-arraybuffer";
 
 type TProductFormContext = {
     productForm: TProduct | null;
@@ -159,9 +162,17 @@ export function ProductDetailFormArea({className}: IProductDetailForm) {
         }
     };
     const {
+        open,
+    } = useDialog();
+    const {
         register,
         handleSubmit,
-        formState: {errors}
+        formState: {
+            errors,
+            isSubmitting,
+            isSubmitSuccessful,
+            isSubmitted,
+        }
     } = useForm<TProductDetailForm>({
         mode: 'onBlur',
         reValidateMode: 'onChange',
@@ -220,7 +231,6 @@ export function ProductDetailFormArea({className}: IProductDetailForm) {
         description: {
             title: 'Description',
             register: register('description', {
-                required: 'Description is required',
                 onChange: (e) => setDescription(e.target.value),
             }),
         },
@@ -259,15 +269,18 @@ export function ProductDetailFormArea({className}: IProductDetailForm) {
                 ...data,
                 dateRelease: product?.dateRelease,
                 features: features,
+                thumbnail2D: {
+                    data: encode(thumbnail2D?.data),
+                },
             },
             {
                 withCredentials: true,
             })
             .then(res => {
-                console.log(res);
-                // window.location.reload();
+
             })
             .catch(err => {
+                open('Something went wrong. Please try again!')
                 console.log(err);
             });
     }
@@ -346,39 +359,80 @@ export function ProductDetailFormArea({className}: IProductDetailForm) {
                 file={fileThumbnail}
                 {...inputItems.fileThumbnail.register}
             />
-            <Button
+            <ButtonWithLoading
                 type={'submit'}
                 colorcustom={'primary'}
                 sizecustom={'lg'}
+                isloading={isSubmitting}
+                isdone={isSubmitSuccessful}
+                iserror={isSubmitted && !isSubmitSuccessful}
+                label={{
+                    labelDefault: 'Save',
+                    labelLoading: 'Saving...',
+                    labelDone: 'Saved',
+                    labelError: 'Error',
+                }}
             >
                 Save
-            </Button>
+            </ButtonWithLoading>
         </form>
     );
 
 }
 
-export function ProductDetailPreviewArea({className, product}: any) {
+export function ProductDetailPreviewArea({className}: any) {
     const {productForm} = useContext(ProductFormContext);
+    const product = useProduct();
     useEffect(() => {
     }, [productForm]);
+
+    const handleWheel = (e: React.WheelEvent<HTMLIFrameElement>) => {
+        e.stopPropagation();
+    };
     return (
         <div className={twJoin(
-            'w-fit p-4',
+            'w-fit p-4 h-screen',
             'flex flex-col justify-start items-center gap-4',
             className
-        )}>
+        )}
+        >
             <Typography variant={'lead'} className={'text-grvd-theme-sys-dark-primary font-bold w-full text-left'}>
                 Preview
             </Typography>
-            <ProductCard product={productForm as any}/>
+            <ProductCard id={product?.id}/>
+            <Card
+                className={twJoin(
+                    'relative',
+                    'w-full aspect-video rounded-3xl',
+                    'bg-grvd-theme-sys-dark-surface-container-lowest',
+                    'overflow-clip',
+                    className
+                )}
+            >
+                {product?.mediaFromSpline ?
+                    <iframe src={product?.mediaFromSpline?.data}
+                            width='100%' height='100%'
+                    />
+                    :
+                    <div className={'absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2'}>
+                        <Spinner className="h-12 w-12"/>
+                    </div>
+                }
+            </Card>
         </div>
     );
 }
 
-export function ProductDetailForEdit({id}: IProductDetailForEditProps) {
+export function ProductDetailForEdit({}: IProductDetailForEditProps) {
+    const {id} = useParams();
     const [prod, setProd] = useState<TProduct>();
+    const product = useProduct();
     const [productForm, setProductForm] = useState<TProduct | null>(null);
+    const {
+        open,
+    } = useDialog();
+    useEffect(() => {
+    }, [product]);
     const loadProduct = async () => {
         await axios.get(`${config.server.url}/products/${id}`,
             {
@@ -390,22 +444,21 @@ export function ProductDetailForEdit({id}: IProductDetailForEditProps) {
                 setProductForm(res.data);
             })
             .catch(err => {
+                open('Something went wrong. Please try again!', 'error');
                 console.log(err);
             });
     };
     useEffect(() => {
         loadProduct();
     }, []);
-    if (!prod) {
-        return null;
-    }
+
     return (
         <div>
-            <ProductContext.Provider value={prod}>
+            <ProductContext.Provider value={product}>
                 <div className={'flex flex-row gap-8'}>
                     <ProductFormContext.Provider value={{productForm, setProductForm}}>
                         <ProductDetailFormArea className={'grow-[2]'}/>
-                        <ProductDetailPreviewArea className={'grow]'}/>
+                        <ProductDetailPreviewArea className={'sticky top-0'}/>
                     </ProductFormContext.Provider>
                 </div>
             </ProductContext.Provider>

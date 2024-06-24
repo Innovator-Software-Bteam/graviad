@@ -1,6 +1,5 @@
 import {IQuery} from "@app/interfaces";
 
-export type TSocialLinkProvider = 'facebook' | 'twitter' | 'instagram' | 'website';
 
 export enum ErrorUserMessage {
     USER_NOT_FOUND = 'User not found',
@@ -12,6 +11,7 @@ export enum ErrorUserMessage {
     USER_NOT_FOUND_OR_CREATED = 'User not found or created',
     USER_NOT_UPDATED_PARTIAL = 'User not updated partial',
 }
+
 export enum ErrorMerchantMessage {
     MERCHANT_NOT_FOUND = 'Merchant not found',
     MERCHANT_EXISTED = 'Merchant is existed',
@@ -26,12 +26,16 @@ export enum ErrorMerchantMessage {
 export interface IUserQuery extends IQuery {
 
 }
+
 // array text alt_texts
 type TRelationsUser = 'profile' | 'merchant' | 'avatar2D';
-export interface IMerchantQuery extends IQuery {
-    relations?: TRelationsUser[];
-}
 
-export interface IAvatarQuery extends IQuery {
+export interface IUserAction {
+    likeProduct?(userId: string, productId: number): any;
 
+    unlikeProduct?(userId: string, productId: number): any;
+
+    followMerchant?(userId: string, merchantId: string): any;
+
+    unfollowMerchant?(userId: string, merchantId: string): any;
 }

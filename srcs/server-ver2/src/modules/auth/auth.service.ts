@@ -1,31 +1,43 @@
-import {forwardRef, Inject, Injectable, Req, Res} from "@nestjs/common";
+import {ForbiddenException, forwardRef, Inject, Injectable, Req, Res} from "@nestjs/common";
 import {Request, Response} from "express";
 import {PassportSerializer} from "@nestjs/passport";
 import {UserService} from "@app/modules/user";
 import {User} from "@app/modules/user/entities";
+import {AuthMessage, IAuthAction, TAuthResponse} from "@app/modules/auth/auth.interface";
 
 @Injectable()
-export class AuthService {
+export class AuthService implements IAuthAction {
     constructor() {
     }
 
-    async login(@Req() req: Request, @Res() res: Response) {
-        if (!req.user) {
+    login(@Req() req: Request): TAuthResponse {
+        const status = req.isAuthenticated();
+        if (status) {
             return {
-                message: 'No user from google',
-                user: null
+                message: AuthMessage.LOGIN_SUCCESS,
+                user: req.user,
+                status: status
             }
-        }
-        return {
-            message: 'User from google',
-            user: req.user
+        } else {
+            throw new ForbiddenException({
+                message: AuthMessage.LOGIN_FAILED,
+                status: status
+            });
         }
     }
 
-    async logout(@Req() req: Request, @Res() res: Response, done: any) {
-        req.logout(done);
-        res.redirect('http://localhost:8000/auth/logout/success');
+    logout(req: Request, res: Response): void {
+        req.logout(done => {
+        });
+        req.session.destroy((err) => {
+            if (err) {
+                throw new ForbiddenException(AuthMessage.LOGOUT_FAILED);
+            }
+            res.redirect('/');
+        });
+
     }
+
 }
 
 @Injectable()
@@ -35,17 +47,6 @@ export class SessionSerializer extends PassportSerializer {
     ) {
         super();
     }
-
-    // serializeUser(user: User, done: (err: Error, user: User) => void) {
-    //     console.log('serializeUser');
-    //     done(null, user);
-    // }
-    //
-    // async deserializeUser(user: User, done: (err: Error, user: User) => void) {
-    //     console.log('deserializeUser');
-    //     const userDb = await this.userService.finOneByEmail(user.email);
-    //     done(null, userDb);
-    // }
 
     serializeUser(user: any, done: Function): any {
         done(null, user);

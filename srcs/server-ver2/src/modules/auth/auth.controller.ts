@@ -13,6 +13,8 @@ import {FacebookOAuthGuard, GoogleOAuthGuard, AuthGuard} from "@app/modules/auth
 import {NextFunction, Request, Response} from "express";
 import {ConfigService} from "@nestjs/config";
 import {TClientConfig, TGraviadConfig, TServerConfig} from "@app/config";
+import {AuthService} from "./auth.service";
+
 
 @Controller('auth')
 export class AuthController {
@@ -21,11 +23,11 @@ export class AuthController {
 
     constructor(
         private readonly grvdConfig: ConfigService<TGraviadConfig>,
+        private readonly authService: AuthService
     ) {
+
         this.server = this.grvdConfig.get('server', {infer: true});
         this.client = this.grvdConfig.get('client', {infer: true});
-
-        console.log('Server config:', this.server);
     }
 
     @Get()
@@ -33,35 +35,18 @@ export class AuthController {
         return {message: 'Auth module'}
     }
 
-    // @Get('login')
-    // async login(@Req() req: Request, @Res() res: Response, @Next() next: any) {
-    //     if (req.isAuthenticated()) {
-    //         return {url: '/auth/login/success'};
-    //     } else {
-    //         return {url: '/auth/login/failed'};
-    //     }
-    // }
-
-    @Get('login/success')
-    @UseGuards(AuthGuard)
-    async loginSuccess(@Req() req: Request, @Res() res: Response, @Next() next: NextFunction) {
-        return res.status(200).json({message: 'LoginPage success', user: req.user, status: req.isAuthenticated()});
+    @Get('login')
+    async login(@Req() req: Request) {
+        return this.authService.login(req);
     }
 
-    @Get('login/failed')
-    @UseGuards(AuthGuard)
-    async loginFailed(@Req() req: Request, @Res() res: Response, @Next() next: NextFunction) {
-        return {message: 'LoginPage failed'}
-    }
 
     @Get('logout')
     @Redirect('http://localhost:3000/homepage/login', HttpStatus.FOUND)
     async logout(@Req() req: Request, @Res() res: Response, @Next() next: any) {
-        req.logout((done) => {
-        });
+        this.authService.logout(req, res);
         return {
-            message: 'Logout success',
-            url: `/auth/login/failed`
+            url: `http://localhost:3000/homepage/login`
         };
     }
 
@@ -76,7 +61,6 @@ export class AuthController {
     @UseGuards(GoogleOAuthGuard)
     @Redirect(`http://localhost:8000/auth/login/success`, HttpStatus.FOUND)
     googleAuthRedirect(@Req() req: Request) {
-        console.log('Client config:', this.client)
         return {
             url: `http://localhost:3000/dashboard`
         }

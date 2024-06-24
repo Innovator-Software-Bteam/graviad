@@ -6,4 +6,5 @@ export interface IQuery {
     take?: number;
     limit?: number;
     page?: number;
+    select?: any;
 }

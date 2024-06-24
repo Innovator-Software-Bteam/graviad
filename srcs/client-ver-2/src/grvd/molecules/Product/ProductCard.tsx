@@ -5,18 +5,22 @@ import {TMerchant, TProduct} from "grvd";
 import {Card, Typography} from "@material-tailwind/react";
 import {twJoin} from "tailwind-merge";
 import {useNavigate} from "react-router-dom";
-import {ProductContext, OwnerContext, useOwner, IProductCardProps} from "grvd/molecules/Product";
+import {IProductCardProps} from "grvd/molecules/Product";
 import {Buffer} from 'buffer';
 import LazyLoad from 'react-lazyload';
 import {AvatarBase64} from "grvd/components/Avatar";
-import {LuHeart} from "react-icons/lu";
 import {useUser} from "grvd/contexts";
 import {FaHeart} from "react-icons/fa6";
+import {LuHeart} from "react-icons/lu";
+import {ProductContext, OwnerContext, useOwner} from "grvd/contexts";
+import {ProtectedFeatureRequiredLogin} from "grvd/protected";
+import {useDialog} from "grvd/organisms";
+import {useFilterInput} from "grvd/organisms/SearchInput/FilterInputContext";
 
 export function ImagePlaceholderSkeleton() {
     return (
         <div className={twJoin(
-            "flex aspect-[3/2] w-[300px] rounded-lg border-transparent",
+            "flex aspect-[3/2] w-full rounded-lg border-transparent",
             "bg-grvd-theme-sys-dark-surface-container-lowest animate-pulse",
         )}>
         </div>
@@ -93,7 +97,7 @@ export function ProductCardSkeleton({id}: any) {
         <Card
             key={id}
             className={twJoin(
-                'p-6 w-full relative max-w-fit aspect-[3/4]',
+                'p-6 w-full min-w-fit relative max-w-[350px]',
                 'shadow-[2px_2px_10px_0px_rgba(0,0,0,0.25)] backdrop-blur-[25px] rounded-[20px]',
                 'bg-grvd-theme-sys-dark-surface-container-lower',
                 'justify-between gap-2',
@@ -123,11 +127,12 @@ export function ProductCard({id, className}: IProductCardProps) {
     const [prod, setProd] = useState<TProduct>();
     const [owner, setOwner] = useState<TMerchant>();
 
-    const [numberOfLikes, setNumberOfLikes] = useState<number | undefined>(0);
+    const [numberOfLikes, setNumberOfLikes] = useState<number>(0);
     const [dateRelease, setDateRelease] = useState<Date | undefined>(new Date());
     const [likedByIds, setLikedByIds] = useState<string []>([]);
+    const [like, setLike] = useState<boolean>(likedByIds.includes(user?.id as string));
 
-
+    const {open} = useDialog();
     const loadProduct = async () => {
         await axios.get(`${config.server.url}/products/${id}`, {
             withCredentials: true,
@@ -136,7 +141,11 @@ export function ProductCard({id, className}: IProductCardProps) {
             }
         })
             .then(res => {
-                setProd(res.data);
+                const product = res.data;
+                setProd(product);
+                setLike(product.likedByIds.includes(user?.id as string));
+                setNumberOfLikes(product.numberOfLikes);
+                setLikedByIds(product.likedByIds);
                 setOwner(res.data.merchant);
             })
             .catch(err => {
@@ -148,32 +157,49 @@ export function ProductCard({id, className}: IProductCardProps) {
         navigate(`/dashboard/products/${prod?.id}`);
     }
     const handleUserLike = async (e: any) => {
+        if (!user) {
+            return;
+        }
         e.stopPropagation();
-        let likes = prod?.numberOfLikes || 0;
-        console.log(prod?.id, likes)
-        likes++;
-        await axios.patch(`${config.server.url}/products/${prod?.id}`, {
-            numberOfLikes: likes,
-            likedByIds: [...likedByIds, user?.merchant?.id as string]
-        }, {
-            withCredentials: true,
-        })
-            .then(res => {
-                setNumberOfLikes(res.data.numberOfLikes);
-                console.log(res.data);
+        if (like) {
+            let likes = prod?.numberOfLikes || 0;
+            likes++;
+            await axios.post(`${config.server.url}/users/${user?.id}/unlike_product/${prod?.id}`, {
+                withCredentials: true,
             })
-            .catch(err => {
-                console.log(err);
-            });
+                .then(res => {
+                    setNumberOfLikes(numberOfLikes - 1);
+                })
+                .catch(err => {
+                    console.log(err);
+                });
+            setLike(false);
+        } else {
+            let likes = prod?.numberOfLikes || 0;
+            likes--;
+            await axios.post(`${config.server.url}/users/${user?.id}/like_product/${prod?.id}`, {
+                withCredentials: true,
+            })
+                .then(res => {
+                    setNumberOfLikes(numberOfLikes + 1);
+                })
+                .catch(err => {
+                    console.log(err);
+                });
+            setLike(true);
+        }
 
     };
     useEffect(() => {
         loadProduct().then().catch();
     }, []);
     useEffect(() => {
-        setNumberOfLikes(prod?.numberOfLikes);
         if (prod?.dateRelease) setDateRelease(new Date(prod.dateRelease));
-        if(prod?.likedByIds) setLikedByIds(prod?.likedByIds);
+        if (prod?.likedByIds) {
+            setLikedByIds(prod?.likedByIds);
+            setLike(likedByIds.includes(user?.id as string));
+        }
+        if (prod?.numberOfLikes) setNumberOfLikes(prod?.numberOfLikes);
     }, [prod]);
 
     return (
@@ -187,6 +213,7 @@ export function ProductCard({id, className}: IProductCardProps) {
                         'bg-transparent',
                         className
                     )}
+                    id={'product-card-' + prod?.id || id}
                     shadow={false}
                     onClick={onCardClick}
                 >
@@ -213,22 +240,38 @@ export function ProductCard({id, className}: IProductCardProps) {
                         </div>
                         <ProductCardOwnerArea/>
                         <div className={'flex flex-row items-center justify-between w-full'}>
-                            <Typography
-                                className={'flex flex-row items-center gap-2 font-medium text-grvd-theme-sys-dark-on-primary-variant'}
-                                variant={'small'}
-                            >
-                                <FaHeart
-                                    size={20}
-                                    onClick={handleUserLike}
-                                    color={likedByIds.includes(user?.merchant?.id as string) ? 'red' : 'black'}
-                                    className={twJoin(
-                                        'cursor-pointer',
-                                        'hover:text-grvd-theme-sys-dark-primary',
-                                        'active:text-grvd-theme-sys-dark-primary',
-                                    )}
-                                />
-                                {numberOfLikes}
-                            </Typography>
+                            <ProtectedFeatureRequiredLogin>
+                                <Typography
+                                    className={'flex flex-row items-center gap-2 font-medium text-grvd-theme-sys-dark-on-primary-variant'}
+                                    variant={'small'}
+                                >
+                                    {
+                                        !like ?
+                                            <LuHeart
+                                                size={20}
+                                                onClick={handleUserLike}
+                                                className={twJoin(
+                                                    'cursor-pointer',
+                                                    'hover:text-grvd-theme-sys-dark-primary hover:scale-110',
+                                                    'active:text-grvd-theme-sys-dark-primary',
+                                                    'transition-all duration-300 ease-in-out',
+                                                )}/>
+                                            :
+                                            <FaHeart
+                                                size={20}
+                                                onClick={handleUserLike}
+                                                color={'red'}
+                                                className={twJoin(
+                                                    'cursor-pointer',
+                                                    'hover:text-grvd-theme-sys-dark-primary hover:scale-110',
+                                                    'active:text-grvd-theme-sys-dark-primary',
+                                                    'transition-all duration-300 ease-in-out',
+                                                )}
+                                            />
+                                    }
+                                    {numberOfLikes}
+                                </Typography>
+                            </ProtectedFeatureRequiredLogin>
                             <Typography
                                 variant={'paragraph'}
                                 className={'text-grvd-theme-sys-dark-on-primary-variant font-medium text-sm'}>
@@ -250,6 +293,8 @@ export function ProductCardsContainer() {
     const [products, setProducts] = useState<TProduct []>([]);
     const [productSkeletons, setProductSkeletons] = useState<number []>([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
     const [isLoading, setIsLoading] = useState<boolean>(true);
+    const {handleFilter} = useFilterInput();
+    const {open} = useDialog();
     const loadProducts = async () => {
         setIsLoading(true);
         await axios.get(`${config.server.url}/products`, {
@@ -263,13 +308,13 @@ export function ProductCardsContainer() {
                 setIsLoading(false);
             })
             .catch(err => {
+                open('Something went wrong. Please try again!', 'error');
                 console.log(err);
             });
     };
     useEffect(() => {
         loadProducts().then().catch();
     }, []);
-
     return (
         <div className={twJoin(
             'grid',
@@ -280,10 +325,13 @@ export function ProductCardsContainer() {
             {isLoading && productSkeletons.map((_, index) => (
                 <ProductCardSkeleton key={index}/>
             ))}
-            {!isLoading && products.map((product) => (
-                <LazyLoad once offset={1000} classNamePrefix={'blur-[1000px]'} key={product.id}>
+            {!isLoading && products.filter((product)=>{
+                return handleFilter ? handleFilter(product) : true;
+            }).map((product) => (
+                <LazyLoad offset={1000} classNamePrefix={'blur-[1000px]'} key={product.id}>
                     <ProductCard key={product.id} id={product.id}/>
                 </LazyLoad>
+
             ))}
         </div>
     );

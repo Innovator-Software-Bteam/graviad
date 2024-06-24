@@ -40,39 +40,37 @@ export interface IDatabaseCRUD<E = any, C = any, U = any> {
      * Create new entity
      * @param dto
      */
-    create?(dto?: C): Promise<E> | E;
+    create?(dto?: C): Promise<E>;
 
     /**
      * Find all entities
      * @param query
      */
-    find?(query: IQuery): Promise<E[]> | E[];
+    find?(query: IQuery): Promise<E[]>;
 
     /**
      * Find one entity
      * @param query
      */
-    findOne?(query: IQuery): Promise<E> | E;
+    findOne?(query: IQuery): Promise<E>;
 
     /**
      * Update entity by id
      * @param id
      * @param dto
      */
-    update?(id: string | number, dto?: U): Promise<E> | E;
+    update?(id: string | number, dto?: U): Promise<E>;
 
     /**
      * Replace entity by id, require all fields
      * @param id
      * @param dto
      */
-    replace?(id: string | number, dto?: C): Promise<E> | E;
+    replace?(id: string | number, dto?: C): Promise<E>;
 
     /**
      * Delete entity by id
      * @param id
      */
-    delete?(id: string | number): Promise<E> | E;
-
-
+    delete?(id: string | number): Promise<E>;
 }

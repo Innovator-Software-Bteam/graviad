@@ -16,11 +16,36 @@ const Product = React.lazy(() =>
         .then(module => ({default: module.ProductPage})
         ));
 
+const AccountPage = React.lazy(() =>
+    import('grvd/pages/Dashboard/account/AccountPage')
+        .then(module => ({default: module.AccountPage})
+        ));
+
+const AccountProduct = React.lazy(() =>
+    import('grvd/pages/Dashboard/account/AccountProductPage')
+        .then(module => ({default: module.AccountProductPage})
+        ));
+const MenuPage = React.lazy(() =>
+    import('grvd/pages/Dashboard/menu/MenuPage')
+        .then(module => ({default: module.MenuPage})
+        ));
+
+const MenuTemplatePage = React.lazy(() =>
+    import('grvd/pages/Dashboard/menu/MenuTemplatePage')
+        .then(module => ({default: module.MenuTemplatePage})
+        ));
+
 export const DashboardRouter =
     <Route path={'dashboard'} element={<Dashboard/>}>\
-        <Route path={''} element={<Navigate to={'home'}/>}/>
-        <Route path={'home'} element={<DashboardHome/>}/>
-        <Route path={'profile/:id'} element={<Profile/>}/>
-        <Route path={'products/:id'} element={<Product/>}/>
+            <Route path={''} element={<Navigate to={'home'}/>}/>
+            <Route path={'home'} element={<DashboardHome/>}/>
+            <Route path={'account'} element={<AccountPage/>}>
+                    <Route path={'products'} element={<AccountProduct/>}/>
+            </Route>
+            <Route path={'menu'} element={<MenuPage/>}>
+                    <Route path={'templates'} element={<MenuTemplatePage/>}/>
+            </Route>
+            <Route path={'profile/:id'} element={<Profile/>}/>
+            <Route path={'products/:id'} element={<Product/>}/>
     </Route>
 ;

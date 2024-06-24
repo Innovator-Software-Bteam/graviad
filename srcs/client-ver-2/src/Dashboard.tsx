@@ -25,6 +25,8 @@ import {MerchantContext, ProfileContext, UserContext} from "grvd/pages";
 import {useDispatch, useSelector} from "react-redux";
 import {setIsAuthenticated} from "grvd/storage/counters/UserCounter";
 import {RootState} from "grvd/storage";
+import {FilterInputContext, useFilterInput} from "grvd/organisms/SearchInput/FilterInputContext";
+import {filter} from "style-value-types";
 
 interface IDashboardHeaderProps extends React.ComponentProps<"header"> {
 }
@@ -40,8 +42,13 @@ function DashboardHeaderTop({className}: IDashboardHeaderProps) {
     const location = useLocation();
     const currentRoute = location.pathname.split('/');
     const dashboardTitle = currentRoute[2];
-    const state = useSelector((state: RootState) => state.state.state);
-
+    const {setFilters} = useFilterInput();
+    const handleOnChangeSearchInput = (e: any) => {
+        const value = e.target.value;
+        if (setFilters) {
+            setFilters(value.split(' '));
+        }
+    };
     const routerList = new Set<any>();
     currentRoute.map((route, index) => {
         if (index > 1) {
@@ -113,6 +120,7 @@ function DashboardHeaderTop({className}: IDashboardHeaderProps) {
                         className: 'hidden'
                     }}
                     icon={<CiSearch size={24} color={'white'}/>}
+                    onChange={handleOnChangeSearchInput}
                 />
             </div>
             <div className={'flex flex-row items-center justify-end gap-4 grow-[1] w-full'}>
@@ -132,27 +140,27 @@ function DashboardHeaderLeft({className, ...props}: IDashboardHeaderProps) {
             list: [
                 {
                     title: 'Home',
-                    path: '/dashboard/home',
+                    path: 'home',
                     icon: <HiOutlineHome size={20}/>
                 },
                 {
                     title: 'Template',
-                    path: '/template',
+                    path: 'home/template',
                     icon: <GoProjectTemplate size={20}/>
                 }
             ]
         },
         {
-            title: 'Advertisement',
+            title: 'Account ',
             list: [
                 {
                     title: 'Products',
-                    path: '/products',
+                    path: 'account/products',
                     icon: <VscPackage size={20}/>
                 },
                 {
-                    title: 'Ads',
-                    path: '/ads',
+                    title: 'Collection',
+                    path: 'account/collection',
                     icon: <RiAdvertisementLine size={20}/>
                 }
             ]
@@ -270,10 +278,16 @@ export function Dashboard() {
     const [profile, setProfile] = useState<TProfile>();
     const [email, setEmail] = useState<string>('');
     const dispatch = useDispatch();
+
+    const [filters, setFilters] = useState<string[]>([]);
+    const handleFilter = (key: any) => {
+        return filters.length === 0 || filters.some((filter) => key.name.includes(filter));
+    }
     const loadAuthenticator = async () => {
-        axios.get(`${config.server.url}/auth/login/success`, {
+        axios.get(`${config.server.url}/auth/login`, {
             withCredentials: true
         }).then(res => {
+            console.log('res', res);
             setEmail(res.data.user.email);
         }).catch(err => {
             console.error(err);
@@ -281,15 +295,18 @@ export function Dashboard() {
     }
     const loadUser = async () => {
         if (!email) return;
-        axios.get(`${config.server.url}/users/email/${email}`, {
+        axios.get(`${config.server.url}/users/search`, {
             withCredentials: true,
             params: {
-                relations: ['profile', 'merchant']
+                relations: ['profile', 'merchant'],
+                where: {
+                    email: email
+                },
             }
         }).then(res => {
-            res.data.profile = res.data.profile.data;
+            const user: TUser = res.data;
             setUser(res.data);
-            setProfile(res.data.profile);
+            setProfile(res.data.profile.data);
             dispatch(setIsAuthenticated(true));
         }).catch(err => {
             console.error(err);
@@ -317,32 +334,35 @@ export function Dashboard() {
     useEffect(() => {
         loadMerchant().then().catch();
     }, [user]);
-    useEffect(() => {
-        console.log('For Embed: ', forEmbed)
-    }, [forEmbed]);
     return (
-        <ProfileContext.Provider value={profile as any}>
-            <MerchantContext.Provider value={merchant as any}>
-                <UserContext.Provider value={user as any}>
-                    <div
-                        className={twMerge(
-                            'h-screen max-h-screen',
-                            'grid grid-rows-[min-content_auto] grid-cols-[min-content_auto]',
-                            'overflow-hidden',
-                            'transition-all duration-200 ease-in-out',
-                        )}
-                    >
-                        {forEmbed === 'false' &&
-                            <DashboardHeaderLeft className={'col-start-1 row-start-1 row-span-full col-span-1'}/>}
-                        {forEmbed === 'false' &&
-                            <DashboardHeaderTop className={'col-start-2 row-start-1 col-span-2'}/>}
-                        <DashboardMain className={'col-start-2 row-start-2 row-span-2 col-span-2'}>
-                            <Outlet/>
-                        </DashboardMain>
-                    </div>
-                </UserContext.Provider>
-            </MerchantContext.Provider>
-        </ProfileContext.Provider>
+        <FilterInputContext.Provider value={{
+            handleFilter,
+            filters,
+            setFilters
+        }}>
+            <ProfileContext.Provider value={profile as any}>
+                <MerchantContext.Provider value={merchant as any}>
+                    <UserContext.Provider value={user as any}>
+                        <div
+                            className={twMerge(
+                                'h-screen max-h-screen',
+                                'grid grid-rows-[min-content_auto] grid-cols-[min-content_auto]',
+                                'overflow-hidden',
+                                'transition-all duration-200 ease-in-out',
+                            )}
+                        >
+                            {forEmbed === 'false' &&
+                                <DashboardHeaderLeft className={'col-start-1 row-start-1 row-span-full col-span-1'}/>}
+                            {forEmbed === 'false' &&
+                                <DashboardHeaderTop className={'col-start-2 row-start-1 col-span-2'}/>}
+                            <DashboardMain className={'col-start-2 row-start-2 row-span-2 col-span-2'}>
+                                <Outlet/>
+                            </DashboardMain>
+                        </div>
+                    </UserContext.Provider>
+                </MerchantContext.Provider>
+            </ProfileContext.Provider>
+        </FilterInputContext.Provider>
     );
 }
 

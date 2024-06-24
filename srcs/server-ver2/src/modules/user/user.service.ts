@@ -1,70 +1,20 @@
 import {BadRequestException, forwardRef, Inject, Injectable} from "@nestjs/common";
-import {ICrud, IQuery} from "@app/interfaces";
-import {Avatar2D, Merchant, Profile, SocialLink, User} from "./entities";
+import {ICrud, IDatabaseCRUD, IQuery} from "@app/interfaces";
+import {Profile, User} from "./entities";
 import {InjectRepository} from "@nestjs/typeorm";
 import {Repository} from "typeorm";
 import {
     UserDto,
-    MerchantDto,
-    CreateSocialLinkDto,
-    UpdateMerchantDto,
-    UpdateSocialLinkDto, UpdateUserDto,
-    CreateAvatar2DDto, UpdateAvatar2DDto
+    UpdateUserDto,
 } from "./dto";
-import {TProfile} from "./index";
-import {IMerchantQuery, IUserQuery} from "./user.interface";
+import {IUserAction, IUserQuery, TProfile} from "./index";
+import {query} from "express";
+import {ProductService} from "@app/modules/product";
+import {MerchantService} from "@app/modules/merchant";
+import * as console from "node:console";
 
 @Injectable()
-export class SocialLinkService implements ICrud<SocialLink, CreateSocialLinkDto, UpdateSocialLinkDto> {
-    constructor(
-        @InjectRepository(SocialLink)
-        private readonly socialLinkRepository: Repository<SocialLink>
-    ) {
-    }
-
-    async create(dto: CreateSocialLinkDto): Promise<SocialLink> {
-        const socialLink: SocialLink = new SocialLink();
-        socialLink.provider = dto.provider;
-        socialLink.data = dto.data;
-        return await this.socialLinkRepository.save(socialLink);
-    }
-
-    async delete(id: any): Promise<any> {
-        return await this.socialLinkRepository.delete(id);
-    }
-
-    async findAll(): Promise<SocialLink[]> {
-        return await this.socialLinkRepository.find();
-    }
-
-    async findOne(id: any): Promise<SocialLink> {
-        return await this.socialLinkRepository.findOneBy({id});
-    }
-
-    async update(id?: any, dto?: UpdateSocialLinkDto): Promise<any> {
-        return await this.socialLinkRepository.save({
-            id,
-            ...dto,
-        });
-    }
-
-    async updatePartial(id: any, dto?: UpdateSocialLinkDto): Promise<any> {
-        if(!id) throw new BadRequestException('id is required');
-        await this.socialLinkRepository.update(id, dto);
-        return await this.findOne(id);
-    }
-
-    async findOrCreate(id?: any, dto?: CreateSocialLinkDto): Promise<SocialLink> {
-        const socialLink = this.socialLinkRepository.findOneBy({id});
-        if (socialLink) return socialLink;
-        return this.create(dto);
-    }
-
-
-}
-
-@Injectable()
-export class ProfileService implements ICrud<Profile, TProfile> {
+export class ProfileService implements IDatabaseCRUD<Profile, TProfile> {
     constructor(
         @InjectRepository(Profile)
         private readonly profileRepository: Repository<Profile>
@@ -100,11 +50,17 @@ export class ProfileService implements ICrud<Profile, TProfile> {
 }
 
 @Injectable()
-export class UserService implements ICrud<User, UserDto, UpdateUserDto> {
+export class UserService implements IDatabaseCRUD<User, UserDto, UpdateUserDto>,
+    IUserAction {
     constructor(
         @InjectRepository(User)
         private readonly userRepository: Repository<User>,
+        @Inject(forwardRef(() => ProductService))
+        private readonly productService: ProductService,
+        @Inject(forwardRef(() => MerchantService))
+        private readonly merchantService: MerchantService,
     ) {
+
 
     }
 
@@ -119,40 +75,23 @@ export class UserService implements ICrud<User, UserDto, UpdateUserDto> {
         return await this.userRepository.delete(id);
     }
 
-    async findAll(query: IUserQuery): Promise<User[]> {
-        return await this.userRepository
-            .find(query);
+    async find(query: IQuery): Promise<User[]> {
+        return await this.userRepository.find(query);
     }
 
-    async findAllByQuery({query}: any): Promise<User[]> {
-        const {limit, page, where, relations} = query as IUserQuery;
-        const take = limit && Number(limit);
-        const skip = page && Number(page) * take;
-        return this.userRepository.find({
-            where,
-            take,
-            skip,
-            relations
-        })
-    }
 
-    async findBy(query: IQuery): Promise<User> {
-        const {where} = query;
-        return await this.userRepository.findOneBy(where);
-    }
-
-    async findOneBy(query: IQuery): Promise<User> {
+    async findOne(query: IUserQuery): Promise<User> {
         return await this.userRepository.findOne(query);
     }
 
-    async update(id: any, dto?: UpdateUserDto): Promise<any> {
+    async replace(id: any, dto?: UpdateUserDto): Promise<any> {
         return await this.userRepository.save({
             id,
             email: dto.email,
         });
     }
 
-    async updatePartial(id: any, dto?: UpdateUserDto): Promise<any> {
+    async update(id: any, dto?: UpdateUserDto): Promise<any> {
         if (!id) throw new Error('id is required');
         await this.userRepository.update(id, dto);
         return await this.userRepository.findOneBy({id});
@@ -172,204 +111,90 @@ export class UserService implements ICrud<User, UserDto, UpdateUserDto> {
         return this.create(dto);
     }
 
-}
-
-@Injectable()
-export class Avatar2DService implements ICrud<Avatar2D, CreateAvatar2DDto, UpdateAvatar2DDto> {
-    constructor(
-        @InjectRepository(Avatar2D)
-        private readonly avatar2DRepository: Repository<Avatar2D>
-    ) {
-    }
-
-    async create(dto?: CreateAvatar2DDto): Promise<Avatar2D> {
-        const avatar2D: Avatar2D = new Avatar2D();
-        avatar2D.data = dto.data;
-        avatar2D.altTexts = dto.altTexts;
-        return await this.avatar2DRepository.save(avatar2D);
-    }
-
-    delete(id: any): Promise<Avatar2D>;
-    delete(id: any): Promise<any>;
-    delete(id: any): Promise<Avatar2D> | Promise<any> {
-        return Promise.resolve(undefined);
-    }
-
-    deleteAll(): Promise<any> {
-        return Promise.resolve(undefined);
-    }
-
-    async findAll(query: any): Promise<Avatar2D[]> {
-        return await this.avatar2DRepository.find(query);
-    }
-
-    async findBy(query: any): Promise<Avatar2D> {
-        return await this.avatar2DRepository.findOne(query);
-    }
-
-    async findById(id: any): Promise<Avatar2D> {
-        return await this.avatar2DRepository.findOneBy({id});
-    }
-
-    async findOrCreate(id?: any, dto?: CreateAvatar2DDto): Promise<Avatar2D> {
-        const avatar2D = this.avatar2DRepository.findOneBy({id});
-        if (avatar2D) return avatar2D;
-        return await this.create(dto);
-    }
-
-    async update(id?: any, dto?: UpdateAvatar2DDto): Promise<any> {
-        return this.avatar2DRepository.save({
-            id,
-            ...dto,
+    async likeProduct(userId: string, productId: number): Promise<any> {
+        const user = await this.findOne({
+            where: {
+                id: userId
+            },
         });
-    }
-
-    async updatePartial(id: any, dto?: UpdateAvatar2DDto): Promise<any> {
-
-        const avatar2D = await this.findById(id);
-        if (!avatar2D) throw new Error('Avatar2D not found');
-        avatar2D.data = Buffer.from(dto?.data, 'base64');
-        avatar2D.altTexts = dto?.altTexts;
-        console.log('avatar2D', avatar2D);
-        return this.avatar2DRepository.save(avatar2D);
-    }
-
-
-}
-
-@Injectable()
-export class MerchantService implements ICrud<Merchant, MerchantDto, UpdateMerchantDto> {
-    constructor(
-        @InjectRepository(Merchant)
-        private readonly merchantRepository: Repository<Merchant>,
-        @Inject(forwardRef(() => SocialLinkService))
-        private readonly socialLinkService: SocialLinkService,
-        @Inject(forwardRef(() => Avatar2DService))
-        private readonly avatar2DService: Avatar2DService,
-    ) {
-    }
-
-    async create(dto: MerchantDto): Promise<Merchant> {
-        // return await this.merchantRepository.save(dto);
-        const avatar: Avatar2D = await this.avatar2DService.findOrCreate(dto.avatar?.id, dto.avatar);
-        return await this.merchantRepository.save({
-            name: dto.name,
-            address: dto.address,
-            description: dto.description,
-            numberOfLikes: dto.numberOfLikes,
-            numberOfProducts: dto.numberOfProducts,
-            email: dto.email,
-            slogan: dto.slogan,
-            phone: dto.phone,
-            avatar: avatar,
+        const product = await this.productService.findOne({
+            where: {id: productId},
+            relations: ['likedBy']
         });
-    }
+        if (!user || !product) throw new BadRequestException('User or Product not found');
+        if(!product.likedBy) product.likedBy = [];
+        product.likedBy.push(user);
 
-    async delete(id: any): Promise<any> {
-        return await this.merchantRepository.delete(id);
-    }
-
-
-    async findAll(query: IMerchantQuery): Promise<Merchant[]> {
-        const {relations, where, limit, page} = query;
-        const take = limit && Number(limit);
-        const skip = page && Number(page) * take;
-        return this.merchantRepository
-            .find({
-                relations,
-                take,
-                skip,
-            });
-    }
-
-    async findBy(query?: any): Promise<Merchant> {
-        return await this.merchantRepository.findOne(query);
-    }
-
-    async findById(id: any, query: IQuery): Promise<Merchant> {
-        const {relations} = query;
-        return await this.merchantRepository.findOne({
-            where: {id},
-            relations,
+        const p = await this.productService.update(productId, {
+            numberOfLikes: product.numberOfLikes + 1,
+            likedBy: product.likedBy,
         });
+        return await this.userRepository.save(user);
     }
 
-    async update(id?: any, dto?: UpdateMerchantDto): Promise<any> {
-        const socialLinks: SocialLink [] = await Promise.all(dto?.socialLinks.map(async (socialLink) => {
-            return await this.socialLinkService.update(socialLink?.id, {
-                data: socialLink?.data,
-                provider: socialLink?.provider,
-                merchantId: id,
-            });
-        }));
-
-        return await this.merchantRepository.save({
-            id,
-            name: dto?.name,
-            address: dto?.address,
-            description: dto?.description,
-            numberOfLikes: dto?.numberOfLikes,
-            numberOfProducts: dto?.numberOfProducts,
-            email: dto?.email,
-            slogan: dto?.slogan,
-            phone: dto?.phone,
-            socialLinks,
+    async unlikeProduct(userId: string, productId: number): Promise<any> {
+        const user = await this.findOne({
+            where: {
+                id: userId
+            },
         });
-    }
-
-    async updatePartial(id: any, dto?: UpdateMerchantDto): Promise<any> {
-        if(!id) throw new BadRequestException('id is required');
-        if (dto.avatar && dto.avatar.data && dto.avatar.data!=='') {
-            const avatar: Avatar2D = await this.avatar2DService.findBy({
-                where: {
-                    id: dto.avatar.id,
-                }
-            });
-            if (!avatar) {
-                await this.avatar2DService.create(dto.avatar);
-            } else {
-                avatar.data = dto.avatar.data;
-                avatar.altTexts = dto.avatar.altTexts;
-                await this.avatar2DService.updatePartial(avatar.id, {
-                    data: avatar.data,
-                    altTexts: avatar.altTexts,
-                });
-            }
-        }
-        if (dto.socialLinks && dto.socialLinks.length > 0) {
-            for (const socialLink of dto?.socialLinks) {
-                await this.socialLinkService.findOrCreate(socialLink?.id, socialLink);
-                await this.socialLinkService.update(socialLink?.id, {
-                    merchantId: id,
-                    data: socialLink.data,
-                    provider: socialLink.provider,
-                });
-            }
-        }
-
-        await this.merchantRepository.update(id, {
-            id,
-            name: dto?.name,
-            address: dto?.address,
-            description: dto?.description,
-            numberOfLikes: dto?.numberOfLikes,
-            numberOfProducts: dto?.numberOfProducts,
-            email: dto?.email,
-            slogan: dto?.slogan,
-            phone: dto?.phone,
+        const product = await this.productService.findOne({
+            where: {
+                id: productId
+            },
+            relations: ['likedBy']
         });
-        return await this.findById(id, {relations: ['socialLinks', 'avatar']});
+        if (!user || !product) throw new BadRequestException('User or Product not found');
+        // user.likedProducts = user.likedProducts || [];
+
+
+        // user.likedProducts = user.likedProducts.filter(p => p.id !== productId);
+        product.likedBy = product.likedBy.filter(u => u.id !== userId) || [];
+        const p = await this.productService.update(productId, {
+            numberOfLikes: product.numberOfLikes - 1,
+            likedBy: product.likedBy,
+        });
+        console.log('p', p);
+        return await this.userRepository.save(user);
     }
 
-    async findAllByQuery({query}: any): Promise<Merchant[]> {
-        const {limit, page, where, relations} = query as IMerchantQuery;
-        const take = limit && Number(limit);
-        const skip = page && Number(page) * take;
-        return this.merchantRepository.find({
-            where,
-            take,
-            skip,
-            relations,
-        })
+    async followMerchant(userId: string, merchantId: string): Promise<any> {
+        const user = await this.findOne({
+            where: {
+                id: userId
+            },
+            relations: ['followingMerchants']
+        });
+        const merchant = await this.merchantService.findOne({
+            where: {
+                id: merchantId
+            },
+            relations: ['followers']
+        });
+        if (!user || !merchant) throw new BadRequestException('User or Merchant not found');
+        user.followingMerchants = user.followingMerchants || [];
+        user.followingMerchants.push(merchant);
+        return await this.userRepository.save(user);
+    }
+
+    async unfollowMerchant(userId: string, merchantId: string): Promise<any> {
+        const user = await this.findOne({
+            where: {
+                id: userId
+            },
+            relations: ['followingMerchants']
+        });
+        const merchant = await this.merchantService.findOne({
+            where: {
+                id: merchantId
+            },
+            relations: ['followers']
+        });
+        if (!user || !merchant) throw new BadRequestException('User or Merchant not found');
+        user.followingMerchants = user.followingMerchants || [];
+        merchant.followers = merchant.followers || [];
+        user.followingMerchants = user.followingMerchants.filter(m => m.id !== merchantId);
+        merchant.followers = merchant.followers.filter(u => u.id !== userId);
+        return await this.userRepository.save(user);
     }
 }

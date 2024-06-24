@@ -1,7 +1,6 @@
 import React from "react";
 import {Buffer} from "buffer";
 import {Avatar, AvatarProps} from "@material-tailwind/react";
-import {twJoin} from "tailwind-merge";
 
 export interface IAvatarProps extends AvatarProps {
     data: any

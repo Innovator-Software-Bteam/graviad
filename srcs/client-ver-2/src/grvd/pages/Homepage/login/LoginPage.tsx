@@ -84,7 +84,7 @@ export function LoginThirdPartyArea() {
 
 export function LoginPage() {
     return (
-        <div>
+        <div className={'min-h-[100vh] h-full'}>
             <LoginThirdPartyArea/>
             <div
                 className={twJoin(

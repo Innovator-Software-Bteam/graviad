@@ -1,5 +1,6 @@
 .App {
   text-align: center;
+  height: 100%;
 }
 
 .App-logo {
@@ -28,11 +29,14 @@
   color: #61dafb;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
+@keyframes animate-left-right-bounce {
+  0%, 100% {
+    transform: translateX(0);
   }
-  to {
-    transform: rotate(360deg);
+  50% {
+    transform: translateX(5px);
   }
+}
+.animate-left-right-bounce {
+  animation: animate-left-right-bounce 1s infinite;
 }

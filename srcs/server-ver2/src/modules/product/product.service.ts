@@ -2,30 +2,27 @@ import {BadRequestException, forwardRef, Inject, Injectable} from '@nestjs/commo
 import {Product, ProductFeature, ProductMediaFromSpline, ProductThumbnail2D} from "@app/modules/product/entities";
 import {InjectRepository} from "@nestjs/typeorm";
 import {Repository} from "typeorm";
-import {ICrud, IQuery} from "@app/interfaces";
+import {IDatabaseCRUD, IQuery} from "@app/interfaces";
 import {
-    ProductDto,
-    CreateProductFeatureDto, CreateProductMediaFromSplineDto,
-    UpdateProductDto,
-    UpdateProductFeatureDto, UpdateProductMediaFromSplineDto
+    CreateProductDTO,
+    CreateProductFeatureDTO, CreateProductMediaFromSplineDTO, CreateProductThumbnailDTO,
+    UpdateProductDTO,
+    UpdateProductFeatureDTO, UpdateProductMediaFromSplineDTO, UpdateProductThumbnailDTO
 } from "@app/modules/product/dto";
-import {IProductInteraction, IProductQuery} from "@app/modules/product/product.interface";
-import {MerchantService} from "@app/modules/user";
+import {IProductCRUD, IProductInteraction, IProductQuery} from "@app/modules/product/product.interface";
+import {MerchantService} from "@app/modules/merchant";
 
 @Injectable()
-export class ProductFeatureService implements ICrud<ProductFeature, CreateProductFeatureDto> {
+export class ProductFeatureService implements IDatabaseCRUD<ProductFeature, CreateProductFeatureDTO> {
     constructor(
         @InjectRepository(ProductFeature)
         private readonly productFeatureRepository: Repository<ProductFeature>,
         @InjectRepository(Product)
         private readonly productRepository: Repository<Product>,
-
-        @Inject(forwardRef(() => MerchantService))
-        private readonly merchantService: MerchantService,
     ) {
     }
 
-    async create(dto?: CreateProductFeatureDto): Promise<ProductFeature> {
+    async create(dto?: CreateProductFeatureDTO): Promise<ProductFeature> {
         const productFeature: ProductFeature = new ProductFeature();
         const product = await this.productRepository.findOneBy({
             id: dto.productId as any
@@ -37,32 +34,46 @@ export class ProductFeatureService implements ICrud<ProductFeature, CreateProduc
         return this.productFeatureRepository.save(productFeature);
     }
 
+    async find(query: IQuery): Promise<ProductFeature[]> {
+        return await this.productFeatureRepository.find(query);
+    }
+
+    async findOne(query: IQuery): Promise<ProductFeature> {
+        return await this.productFeatureRepository.findOne(query);
+    }
+
+
     async delete(id: any): Promise<any> {
         return this.productFeatureRepository.delete(id);
     }
 
-    async findAll(): Promise<ProductFeature[]> {
-        return this.productFeatureRepository.find();
-    }
-
-    async findBy(id: any): Promise<ProductFeature> {
-        return this.productFeatureRepository.findOne(id);
-    }
-
-    async update(id: any, dto?: UpdateProductFeatureDto): Promise<ProductFeature> {
-        const productFeature: ProductFeature = await this.productFeatureRepository.findOneBy({
-            id: dto.productId as any
+    async update(id: any, dto?: UpdateProductFeatureDTO): Promise<ProductFeature> {
+        if (!dto) throw new BadRequestException('Missing data');
+        const productFeature = await this.productFeatureRepository.findOne({
+            where: {
+                id: id
+            }
         });
-        if (!productFeature) return null;
-        productFeature.name = dto.name;
-        productFeature.description = dto.description;
-        await this.productFeatureRepository.save(productFeature);
-        return productFeature;
+        const product = await this.productRepository.findOne({
+            where: {
+                id: dto.productId
+            }
+        })
+        productFeature.name = dto.name || productFeature.name;
+        productFeature.description = dto.description || productFeature.description;
+        productFeature.product = product || productFeature.product;
+        return await this.productFeatureRepository.save(productFeature);
     }
+
+    async replace(id: string | number, dto?: CreateProductFeatureDTO): Promise<ProductFeature> {
+        return undefined;
+    }
+
+
 }
 
 @Injectable()
-export class ProductMediaFromSplineService implements ICrud<ProductMediaFromSpline, CreateProductMediaFromSplineDto> {
+export class ProductMediaFromSplineService implements IDatabaseCRUD<ProductMediaFromSpline, CreateProductMediaFromSplineDTO, UpdateProductThumbnailDTO> {
     constructor(
         @InjectRepository(ProductMediaFromSpline)
         private readonly productMediaFromSplineRepository: Repository<ProductMediaFromSpline>,
@@ -71,47 +82,97 @@ export class ProductMediaFromSplineService implements ICrud<ProductMediaFromSpli
     ) {
     }
 
-    async create(dto?: CreateProductMediaFromSplineDto): Promise<ProductMediaFromSpline> {
+    async create(dto?: CreateProductMediaFromSplineDTO): Promise<ProductMediaFromSpline> {
         const productMediaFromSpline: ProductMediaFromSpline = new ProductMediaFromSpline();
-        const product = await this.productRepository.findOneBy({
-            id: dto.productId as any
-        });
-        if (!product) return null;
-        productMediaFromSpline.product = product;
         productMediaFromSpline.data = dto.data;
-        return this.productMediaFromSplineRepository.save(productMediaFromSpline);
+        return await this.productMediaFromSplineRepository.save(productMediaFromSpline);
     }
 
     async delete(id: any): Promise<any> {
         return this.productMediaFromSplineRepository.delete(id);
     }
 
-    async findAll(): Promise<ProductMediaFromSpline[]> {
-        return this.productMediaFromSplineRepository.find();
-    }
-
-    async findBy(id: any): Promise<ProductMediaFromSpline> {
-        return this.productMediaFromSplineRepository.findOne(id);
-    }
-
-    async update(id: any, dto?: UpdateProductMediaFromSplineDto): Promise<ProductMediaFromSpline> {
-        const productMediaFromSpline: ProductMediaFromSpline = await this.productMediaFromSplineRepository.findOneBy({
-            id: dto.productId as any
-        });
-        if (!productMediaFromSpline) return null;
-        await this.productMediaFromSplineRepository.save(productMediaFromSpline);
-        return productMediaFromSpline;
+    async update(id: any, dto?: UpdateProductMediaFromSplineDTO): Promise<ProductMediaFromSpline> {
+        if (!id) throw new BadRequestException('Missing id');
+        const productMediaFromSpline = new ProductMediaFromSpline();
+        if (!productMediaFromSpline) throw new BadRequestException('Product media not found');
+        productMediaFromSpline.id = dto.id;
+        productMediaFromSpline.productId = dto.productId;
+        productMediaFromSpline.data = dto.data;
+        return await this.productMediaFromSplineRepository.save(productMediaFromSpline);
     }
 }
 
 @Injectable()
-export class ProductService implements ICrud<Product, ProductDto>,
+export class ProductThumbnailService implements IDatabaseCRUD<ProductThumbnail2D, CreateProductThumbnailDTO, UpdateProductThumbnailDTO> {
+    constructor(
+        @InjectRepository(ProductThumbnail2D)
+        private readonly productThumbnail2DRepository: Repository<ProductThumbnail2D>,
+    ) {
+    }
+
+    async create(dto?: CreateProductThumbnailDTO): Promise<ProductThumbnail2D> {
+        const productThumbnail2D: ProductThumbnail2D = new ProductThumbnail2D();
+        const dataTransfer = Buffer.from(dto.data, 'base64');
+        productThumbnail2D.data = dataTransfer;
+        productThumbnail2D.altTexts = dto.altTexts;
+        await this.productThumbnail2DRepository.save(productThumbnail2D);
+        return productThumbnail2D;
+    }
+
+    async delete(id: string | number): Promise<ProductThumbnail2D> {
+        await this.productThumbnail2DRepository.delete(id);
+        return null;
+    }
+
+    async find(query: IQuery): Promise<ProductThumbnail2D[]> {
+        return await this.productThumbnail2DRepository.find(query);
+    }
+
+    async findOne(query: IQuery): Promise<ProductThumbnail2D> {
+        return await this.productThumbnail2DRepository.findOne(query);
+    }
+
+    async replace(id: number, dto?: CreateProductThumbnailDTO): Promise<ProductThumbnail2D> {
+        if (!id) throw new BadRequestException('Missing id');
+        const productThumbnail2D = await this.productThumbnail2DRepository.findOne({
+            where: {
+                id: id
+            }
+        })
+
+        if (!productThumbnail2D) throw new BadRequestException('Product thumbnail not found');
+        productThumbnail2D.id = dto.id;
+        productThumbnail2D.data = dto.data;
+        return await this.productThumbnail2DRepository.save(productThumbnail2D);
+    }
+
+    async update(id: number, dto?: UpdateProductThumbnailDTO): Promise<ProductThumbnail2D> {
+        if (!id) throw new BadRequestException('Missing id');
+        const productThumbnail2D = await this.productThumbnail2DRepository.findOne({
+            where: {
+                id: id
+            }
+        })
+
+        if (!productThumbnail2D) throw new BadRequestException('Product thumbnail not found');
+        productThumbnail2D.id = dto.id;
+        const dataTransfer = Buffer.from(dto.data, 'base64');
+        productThumbnail2D.data = dataTransfer;
+        await this.productThumbnail2DRepository.save(productThumbnail2D);
+        return productThumbnail2D;
+    }
+
+}
+
+@Injectable()
+export class ProductService implements IProductCRUD,
     IProductInteraction {
     constructor(
         @InjectRepository(Product)
         private readonly productRepository: Repository<Product>,
-        @InjectRepository(ProductThumbnail2D)
-        private readonly productThumbnail2DRepository: Repository<ProductThumbnail2D>,
+        @Inject(forwardRef(() => ProductThumbnailService))
+        private readonly productThumbnailService: ProductThumbnailService,
         @Inject(forwardRef(() => ProductFeatureService))
         private readonly productFeatureService: ProductFeatureService,
         @Inject(forwardRef(() => ProductMediaFromSplineService))
@@ -121,59 +182,49 @@ export class ProductService implements ICrud<Product, ProductDto>,
     ) {
     }
 
-    async create(dto?: ProductDto): Promise<Product> {
+    async create(dto?: CreateProductDTO): Promise<Product> {
+        if (!dto) throw new BadRequestException('Missing data');
         const product: Product = new Product();
-        const thumbnail2D = new ProductThumbnail2D();
-        for (const key in dto) {
-            product[key] = dto[key];
-        }
-        await this.productRepository.save(product);
-        const savedProduct = await this.productRepository.find({
-            where: {
-                name: product.name,
-                merchantId: product.merchantId
-            }
-        });
-        thumbnail2D.product = savedProduct[0];
-        thumbnail2D.altTexts = product.thumbnail2D.altTexts;
-        thumbnail2D.data = Buffer.from(product.thumbnail2D.data, 'base64');
-        await this.productThumbnail2DRepository.save(thumbnail2D);
+        product.name = dto.name;
+        product.price = dto.price;
+        product.description = dto.description;
+        product.version = dto.version;
+        product.link = dto.link;
+        product.brief = dto.brief;
+        product.dateRelease = dto.dateRelease;
+        product.highlightLabel = dto.highlightLabel;
+        product.numberOfLikes = dto.numberOfLikes;
+        product.merchantId = dto.merchantId;
 
-        if (dto.mediaFromSpline) {
-            await this.productMediaFromSplineService.create({
-                productId: savedProduct[0].id,
-                data: dto.mediaFromSpline.data,
-            });
+        if (dto.thumbnail2D) {
+            product.thumbnail2D = await this.productThumbnailService.create(dto.thumbnail2D);
         }
+        if (dto.features) {
+            for (const feature of dto.features) {
+                product.features.push(await this.productFeatureService.create(feature));
+            }
+        }
+        // if (dto.mediaFromSpline) {
+        //     product.mediaFromSpline = await this.productMediaFromSplineService.create(dto.mediaFromSpline);
+        // }
+        await this.productRepository.save(product);
         return product;
     }
 
+    async findOne(query: IQuery): Promise<Product> {
+        return await this.productRepository.findOne(query);
+    }
+
+    async find(query: IQuery): Promise<Product[]> {
+        return await this.productRepository.find(query);
+    }
+
     async delete(id: any): Promise<any> {
-        return this.productRepository.delete(id);
+        await this.productRepository.delete(id);
+        return null;
     }
 
-    async findAll(query: IProductQuery): Promise<Product[]> {
-        return this.productRepository.find(query);
-    }
-
-    async findAllByQuery(query: IProductQuery): Promise<Product[]> {
-        const {limit, page, where, relations} = query;
-        const take = limit && Number(limit);
-        const skip = page && Number(page) * take;
-        return this.productRepository.find({
-            relations,
-            where,
-            take,
-            skip
-        });
-    }
-
-    // 'thumbnail2D', 'features', 'mediaFromSpline'
-    async findBy(query: IQuery): Promise<any> {
-        return this.productRepository.findOne(query)
-    }
-
-    async update(id: any, dto?: UpdateProductDto): Promise<Product> {
+    async replace(id: any, dto?: UpdateProductDTO): Promise<Product> {
         const product: Product = await this.productRepository.findOneBy({
             id: id
         });
@@ -183,24 +234,35 @@ export class ProductService implements ICrud<Product, ProductDto>,
         }
         if (dto.features) {
             for (const feature of dto.features) {
+                const featureExtension = {
+                    ...feature,
+                    productId: product.id
+                }
                 if (feature.id) {
-                    await this.productFeatureService.update(feature.id, feature);
+                    await this.productFeatureService.update(feature.id, featureExtension);
                 } else {
-                    await this.productFeatureService.create(feature as CreateProductFeatureDto);
+                    await this.productFeatureService.create(featureExtension as CreateProductFeatureDTO);
                 }
             }
         }
         return await this.productRepository.save(product);
     }
 
-    async updatePartial(id: any, dto?: UpdateProductDto): Promise<Product> {
-        const product: Product = await this.productRepository.findOne({
+    async update(id: any, dto?: UpdateProductDTO): Promise<Product> {
+        if (!dto) throw new BadRequestException('Missing data');
+        if (!id) throw new BadRequestException('Missing id');
+        const product = await this.productRepository.findOne({
             where: {
                 id: id
             },
-            relations: ['features'],
+            relations: {
+                thumbnail2D: true,
+                features: true,
+                mediaFromSpline: true,
+                likedBy: true,
+            }
         });
-        if (!product) return null;
+        if (!product) throw new BadRequestException('Product not found');
         product.name = dto.name || product.name;
         product.price = dto.price || product.price;
         product.description = dto.description || product.description;
@@ -210,63 +272,45 @@ export class ProductService implements ICrud<Product, ProductDto>,
         product.dateRelease = dto.dateRelease || product.dateRelease;
         product.highlightLabel = dto.highlightLabel || product.highlightLabel;
         product.numberOfLikes = dto.numberOfLikes || product.numberOfLikes;
-        if (dto.likedByIds) {
-            product.likedByIds = dto.likedByIds;
-            for (const id1 of product.likedByIds) {
-                await this.likesProduct(product.id, id1);
-            }
-        }
         if (dto.features) {
-
-            const currentFeatureIds = product.features.map(feature => feature.id);
-            const updateFeatures = dto.features.filter(feature => currentFeatureIds.includes(feature.id));
-            const newFeatures = dto.features.filter(feature => !feature.id);
-            const deleteFeatureIds = currentFeatureIds.filter(id => !dto.features.some(feature => feature.id === id));
-
-            // Update existing features
-            for (const feature of updateFeatures) {
-                await this.productFeatureService.update(feature.id, feature);
-            }
-            // Create new features
-            for (const feature of newFeatures) {
-                await this.productFeatureService.create(feature as CreateProductFeatureDto);
-            }
-            for (const id of deleteFeatureIds) {
-                await this.productFeatureService.delete(id);
+            for (const feature of dto.features) {
+                const featureFixed = {
+                    ...feature,
+                    productId: product.id
+                }
+                const featureEntity = await this.productFeatureService.update(feature.id, featureFixed);
+                product.features = [...product.features, featureEntity];
             }
         }
-
-        if (dto.mediaFromSpline && dto.mediaFromSpline.data) {
-            if (!product.mediaFromSpline) {
-                await this.productMediaFromSplineService.create({
-                    productId: product.id,
-                    data: dto.mediaFromSpline.data,
-                });
-            } else {
-                await this.productMediaFromSplineService.update(product.mediaFromSpline.id, dto.mediaFromSpline);
-            }
+        if (dto.thumbnail2D) {
+            product.thumbnail2D = await this.productThumbnailService.update(product.thumbnail2D.id, dto.thumbnail2D);
+            console.log('product.thumbnail2D', product.thumbnail2D)
         }
-        await this.productRepository.save(product);
-        return product;
+        if (dto.mediaFromSpline) {
+            product.mediaFromSpline = await this.productMediaFromSplineService.update(product.mediaFromSpline.id, dto.mediaFromSpline);
+        }
+        product.likedBy = dto.likedBy || product.likedBy;
+        return await this.productRepository.save(product);
     }
 
     async likesProduct(productId: number, merchantId: string): Promise<boolean> {
-        const product = await this.findBy({
-            where: {
-                id: productId
-            }
-        });
-        const merchant = await this.merchantService.findBy({
-            where: {
-                id: merchantId
-            }
-        });
-        if (!product || !merchant) throw new BadRequestException('Product or merchant not found');
-
-        if (!product.likedByIds) product.likedByIds = [];
-        if (!product.likedBy) product.likedBy = [];
-
-        product.likedBy.push(merchant);
-        return await this.productRepository.save(product);
+        // const product = await this.findBy({
+        //     where: {
+        //         id: productId
+        //     }
+        // });
+        // const merchant = await this.merchantService.findBy({
+        //     where: {
+        //         id: merchantId
+        //     }
+        // });
+        // if (!product || !merchant) throw new BadRequestException('Product or merchant not found');
+        //
+        // if (!product.likedByIds) product.likedByIds = [];
+        // if (!product.likedBy) product.likedBy = [];
+        //
+        // product.likedBy.push(merchant);
+        // return await this.productRepository.save(product);
+        return true;
     }
 }

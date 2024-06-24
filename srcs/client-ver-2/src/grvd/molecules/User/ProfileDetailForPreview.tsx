@@ -1,14 +1,32 @@
 import {Typography} from "@material-tailwind/react";
-import {useMerchant} from "grvd/pages";
+import {useMerchant, useUser} from "grvd/pages";
 import {twJoin} from "tailwind-merge";
 import {FaFacebookF, FaInstagram, FaTwitter} from "react-icons/fa";
 import {ProfileCard} from "grvd/molecules";
-import React from "react";
+import React, {useEffect, useState} from "react";
 import {AvatarBase64} from "grvd/components";
+import axios from "axios";
+import config from "../../../config";
+import {TTemplate} from "grvd/molecules/Template/types";
+import {TemplateContext} from "grvd/molecules/Template/TemplateContext";
 
 
 export function ProfileDetailForPreview() {
     const merchant = useMerchant();
+    const [templateProfileCard, setTemplateProfileCard] = useState<TTemplate>();
+    const loadTemplateProfileCard = () => {
+        if (!merchant?.usingTemplateProfileCardId) return;
+        axios.get(`${config.server.url}/templates/${merchant?.usingTemplateProfileCardId}`, {
+            withCredentials: true,
+        })
+            .then((res) => {
+                setTemplateProfileCard(res.data);
+            })
+            .catch();
+    }
+    useEffect(() => {
+        loadTemplateProfileCard();
+    }, [merchant]);
     return (
         <div
             className={'w-full h-full relative'}
@@ -82,7 +100,7 @@ export function ProfileDetailForPreview() {
                         <FaInstagram size={20}/>
                         {merchant?.socialLinks?.find(link => link.provider === 'instagram')?.data || 'No Instagram'}
                     </Typography>
-                    <ProfileCard typeCustom={'glass'}/>
+                    <ProfileCard typeCustom={templateProfileCard?.templateType}/>
                 </div>
             </div>
         </div>

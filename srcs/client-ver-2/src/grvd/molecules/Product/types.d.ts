@@ -1,5 +1,5 @@
 import {TMediaFromSpline, TMerchant, TProduct, TProductFeature} from "grvd";
-import {IProductProps} from "./ProductDetailForPreview";
+import {IProductProps} from "grvd/molecules";
 import React from "react";
 import {UseFormRegisterReturn} from "react-hook-form";
 import {ProductDetailFileUploadArea, ProductDetailPreviewArea, ProductFeatureEditArea} from "./ProductDetailForEdit";

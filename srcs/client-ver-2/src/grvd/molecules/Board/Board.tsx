@@ -6,7 +6,8 @@ import {twJoin} from "tailwind-merge";
 import axios from "axios";
 import config from "../../../config";
 import {ProfileOwnerBar} from "grvd/molecules/User/ProfileOwnerBar";
-import {TUser} from "grvd";
+import {TMerchant} from "grvd";
+import {useDialog} from "grvd/organisms";
 
 export function Board({children}: IBoardProps) {
     return (
@@ -20,29 +21,28 @@ export function Board({children}: IBoardProps) {
         </Card>
     );
 }
+
 export function BoardAdvertisement({}: IBoardProps) {
     return (
         <ProductCardsContainer/>
     );
 }
+
 export function BoardTopMerchant({}: IBoardProps) {
-    const [topMerchants, setTopMerchants] = React.useState([]);
+    const [topMerchants, setTopMerchants] = React.useState<TMerchant []>([]);
+    const {open} = useDialog();
     const loadTopMerchants = () => {
-        axios.get(`${config.server.url}/users`, {
+        axios.get(`${config.server.url}/merchants`, {
             withCredentials: true,
             params: {
-                relations:['profile', 'merchant'],
+                relations: ['avatar'],
             }
         })
             .then((res) => {
-                setTopMerchants(res.data.map((user: any) => {
-                    return {
-                        ...user,
-                        profile: user.profile.data,
-                    };
-                }));
+                setTopMerchants(res.data);
             })
             .catch((err) => {
+                open(null, 'error');
                 console.error(err);
             });
     };
@@ -51,9 +51,9 @@ export function BoardTopMerchant({}: IBoardProps) {
     }, []);
     return (
         <div className={'flex flex-col gap-8'}>
-            {topMerchants.map((owner: TUser, index) => {
-                return(
-                    <ProfileOwnerBar user={owner as any} key={index}/>
+            {topMerchants.map((owner: TMerchant, index) => {
+                return (
+                    <ProfileOwnerBar owner={owner as any} key={index}/>
                 )
             })}
         </div>

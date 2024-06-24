@@ -5,7 +5,7 @@ import {FaAngleDown, FaUser} from "react-icons/fa";
 import {useEffect, useState} from "react";
 import {IoLogOut} from "react-icons/io5";
 import config from "../../../config";
-import {useMerchant, useProfile} from "grvd/pages";
+import {useMerchant, useProfile, useUser} from "grvd/pages";
 import {useSelector} from "react-redux";
 import {RootState} from "grvd/storage";
 
@@ -21,11 +21,16 @@ export interface IProfileShortcutProps extends React.ComponentProps<'div'> {
 export function ProfileShortcut(props: IProfileShortcutProps) {
     const [, setLoginWindow] = useState<Window | null>(null);
     const merchant = useMerchant();
+    const user = useUser();
     const state=useSelector((state: RootState) => state.state.state);
     const handleLogin = () => {
-        const win = window.open(config.server.url + '/auth/google','_self', 'width=500,height=600,toolbar=0,menubar=0,location=0,status=1,scrollbars=1,resizable=1,left=50%,top=50%');
+        const win = window.open(config.server.url + '/auth/google', '_self', 'width=500,height=600,toolbar=0,menubar=0,location=0,status=1,scrollbars=1,resizable=1,left=50%,top=50%');
         setLoginWindow(win);
-    }
+    };
+    const handleLogout = () => {
+
+    };
+
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const profileItems: TProfileItem[] = [
         {
@@ -62,8 +67,9 @@ export function ProfileShortcut(props: IProfileShortcutProps) {
         )
     };
     useEffect(() => {
-    }, [state]);
-    if(!state.isAuthenticated) return (
+        console.log('user', user)
+    }, [user]);
+    if(!user) return (
         <Button colorcustom={'primary'} sizecustom={'lg'} onClick={handleLogin}>
             Login
         </Button>

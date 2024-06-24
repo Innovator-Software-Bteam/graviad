@@ -23,7 +23,7 @@ export class FacebookStrategy extends PassportStrategy(Strategy, 'facebook') {
 
     async validate(accessToken: string, refreshToken: string, profile: any, done: (err: any, user: any, info?: any) => void): Promise<any> {
         const { name, emails } = profile;
-        const user = await this.userService.findBy({
+        const user = await this.userService.findOne({
             where: {
                 email: emails[0].value,
             },

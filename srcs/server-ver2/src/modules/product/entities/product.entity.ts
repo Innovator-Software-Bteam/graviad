@@ -7,17 +7,18 @@ import {
     ManyToOne,
     OneToMany,
     OneToOne,
-    PrimaryColumn, RelationId
+    PrimaryColumn, PrimaryGeneratedColumn, RelationId
 } from "typeorm";
-import {Merchant} from "@app/modules/user/entities";
+import {User} from "@app/modules/user";
 import {ProductMediaFromSpline, ProductThumbnail2D} from "@app/modules/product/entities/productMedia.entity";
+import {Merchant} from "@app/modules/merchant";
 
 @Entity('products')
 export class Product {
-    @PrimaryColumn({type: 'int', nullable: false, name: 'id'})
+    @PrimaryGeneratedColumn({type: 'int', name: 'id'})
     id: number;
 
-    @Column({type: 'varchar', nullable: false, name: 'price'})
+    @Column({type: 'varchar', nullable: true, name: 'price'})
     price: string;
 
     @Column({type: 'varchar', nullable: false, name: 'name'})
@@ -44,40 +45,42 @@ export class Product {
     @Column({type: 'int', nullable: true, name: 'number_of_likes'})
     numberOfLikes: number;
 
-    @OneToOne(() => ProductThumbnail2D, thumbnail2D => thumbnail2D.product)
+    @OneToOne(() => ProductThumbnail2D, {cascade: true})
+    @JoinColumn({name: 'thumbnail_id'})
     thumbnail2D: ProductThumbnail2D;
 
-    @Column({type: 'int', nullable: false, name: 'merchant_id'})
-    merchantId: number;
+    @RelationId((product: Product) => product.thumbnail2D)
+    thumbnail2DId: number;
 
-    // Product belongs to a merchant
+    @Column({type: 'uuid', nullable: false, name: 'merchant_id'})
+    merchantId: string;
+
     @ManyToOne(() => Merchant, merchant => merchant.products)
     @JoinColumn({name: 'merchant_id'})
     merchant: Merchant;
 
-    // ProductPage has many product_features
-    @OneToMany(() => ProductFeature, ProductFeature => ProductFeature.product)
+    @OneToMany(() => ProductFeature, ProductFeature => ProductFeature.product, {cascade: true})
     features: ProductFeature[];
 
-    @OneToOne(() => ProductMediaFromSpline, ProductMediaFromSpline => ProductMediaFromSpline.product)
+    @OneToOne(() => ProductMediaFromSpline, ProductMediaFromSpline => ProductMediaFromSpline.product, {cascade: true})
     mediaFromSpline: ProductMediaFromSpline;
 
-    @ManyToMany(() => Merchant, merchant => merchant.likedProducts, {cascade: true})
+    @ManyToMany(() => User, user => user.likedProducts, {cascade: true})
     @JoinTable({
-        name: 'merchant_likes_products',
+        name: 'users_like_products',
         joinColumn: {
             name: 'product_id',
             referencedColumnName: 'id'
         },
         inverseJoinColumn: {
-            name: 'merchant_id',
+            name: 'user_id',
             referencedColumnName: 'id'
         }
     })
-    likedBy: Merchant[];
+    likedBy: User[];
 
     @RelationId((product: Product) => product.likedBy)
-    likedByIds: string [];
+    likedByIds: string[];
 }
 
 @Entity('product_features')

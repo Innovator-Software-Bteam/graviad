@@ -12,8 +12,8 @@ import {
     UserContext,
     useUser
 } from "grvd/contexts";
-import {MdModeEditOutline} from "react-icons/md";
-import React, {useEffect} from "react";
+import {MdModeEditOutline, MdOutlineAddCard} from "react-icons/md";
+import React, {MouseEvent, useEffect} from "react";
 import {Route, useLocation, useParams} from "react-router-dom";
 import {TMerchant, TProfile, TUser} from "grvd";
 import axios from "axios";
@@ -22,6 +22,8 @@ import {PiExportBold} from "react-icons/pi";
 import * as htmlToImage from 'html-to-image';
 import fileDownload from 'js-file-download';
 import {ProfileExportDialog} from "grvd/molecules/User/ProfileExportDialog";
+import {CiCreditCard1} from "react-icons/ci";
+import {IoCard} from "react-icons/io5";
 
 export function ProfilePageToolbar() {
     const {isEditable, setEditable} = useEditable();
@@ -64,6 +66,26 @@ export function ProfilePageToolbar() {
                 'bg-transparent backdrop-blur-[5px]',
             )}/>
             <ProfileExportDialog/>
+            <Button
+                colorcustom={'primary'}
+                sizecustom={'lg'}
+                className={twJoin(
+                    'z-50',
+                    'flex flex-row gap-2 items-center',
+                    'group',
+                )}
+            >
+                Use Template Card
+                <div className={'relative'}>
+                    <div className={twJoin(
+                        'absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2',
+                        'bg-gradient-to-b from-[#DD0FFF] to-[#12B7FE] blur-[4px]',
+                        'w-8 h-8 rounded-full -z-20',
+                        'group-hover:animate-pulse',
+                    )}/>
+                    <MdOutlineAddCard size={24} className={'z-50'}/>
+                </div>
+            </Button>
             {(!isEditable && id === user?.merchant?.id) &&
                 <Button
                     colorcustom={'tertiary'}
@@ -147,20 +169,19 @@ export function ProfilePage({className, ...props}: IPageProps) {
     const loadUser = () => {
         if (!merchant?.email) return;
         axios
-            .get(`${config.server.url}/users/email/${merchant?.email}`, {
+            .get(`${config.server.url}/users/search`, {
                 withCredentials: true,
                 params: {
                     relations: ['profile'],
                     where: {
-                        email: merchant?.email
+                        merchantId: merchant.id
                     }
                 }
             })
             .then((res) => {
-                setUser({
-                    ...res.data,
-                    profile: res.data.profile.data,
-                });
+                const user: TUser = res.data;
+                user.profile = res.data.profile.data;
+                setUser(user);
             });
     }
     React.useEffect(() => {

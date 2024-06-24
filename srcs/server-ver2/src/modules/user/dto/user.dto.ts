@@ -1,5 +1,5 @@
 import {PartialType} from "@nestjs/mapped-types";
-import {IsEmail, IsUUID} from "class-validator";
+import {IsEmail, IsString, IsUUID} from "class-validator";
 
 /**
  * @version 2.0
@@ -7,8 +7,11 @@ import {IsEmail, IsUUID} from "class-validator";
 export class UserDto {
     @IsUUID()
     readonly id?: string;
+
     @IsEmail({}, {message: 'Invalid email'})
     readonly email: string;
+
+    @IsString({message: 'Profile id must be a string'})
     readonly profileId: string;
 }
 

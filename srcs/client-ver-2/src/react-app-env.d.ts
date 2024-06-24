@@ -40,7 +40,8 @@ declare module 'grvd' {
         role: Role;
         profile: TProfile;
         merchant?: TMerchant;
-
+        followingMerchants?: TMerchant [];
+        followingMerchantIds?: string [];
     }
     type TAvatar2D = {
         id?: string;
@@ -67,6 +68,9 @@ declare module 'grvd' {
         numberOfProducts?: number;
         avatar?: TAvatar2D;
         avatarId?: string;
+        followers?: TUser[];
+        templateIds?: number [];
+        usingTemplateProfileCardId?: number;
     }
     type TProfileGoogle = {
         id: string;
@@ -107,8 +111,9 @@ declare module 'grvd' {
     type TThumbnail2D = {
         id?: string;
         data: any;
+        productId?: string;
     };
-    type TMediaFromSpline={
+    type TMediaFromSpline = {
         id?: string;
         data: any;
     }
@@ -137,6 +142,9 @@ declare module 'grvd' {
         name: string;
         description: string;
     }
+    type TRedirectURL = 'redirect_url' | 'redirect_url_after_login' | 'redirect_url_after_logout' | 'redirect_url_after_register' | 'redirect_url_before_login' | 'redirect_url_before_logout' | 'redirect_url_before_register';
 }
+
+
 declare module "*.tsx";
 declare module "*.ts";

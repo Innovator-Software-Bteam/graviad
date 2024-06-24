@@ -4,7 +4,6 @@ import {tv, TVReturnType} from "tailwind-variants";
 import {twJoin, twMerge} from "tailwind-merge";
 import * as MT from "@material-tailwind/react";
 import {IButtonProps, IButtonWithLoadingProps} from "grvd/components";
-import {Spinner} from "grvd/components/Spinner";
 import {useSpring, animated} from "react-spring";
 import {FaCircleCheck} from "react-icons/fa6";
 import {SyncLoader} from "react-spinners";
@@ -28,7 +27,10 @@ const baseButtonClass: TVReturnType<any, any, any, any, any, any> = tv({
             'sm': "px-2 py-1 text-xs rounded-sm",
             'md': "px-3 py-1.5 text-sm rounded-md",
             'lg': "px-4 py-2.5 text-base rounded-lg",
-        }
+        },
+        variant: {
+            'text': "!bg-transparent !shadow",
+        },
 
     },
     defaultVariants: {
@@ -44,6 +46,7 @@ export const Button = React.forwardRef((props: IButtonProps, ref) => {
                 baseButtonClass({
                     color: props.colorcustom,
                     size: props.sizecustom,
+                    variant: props.variant,
                 }),
                 className,
             )}

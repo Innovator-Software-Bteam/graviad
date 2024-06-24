@@ -3,6 +3,9 @@ import React from "react";
 import {ProductCardsContainer} from "grvd/molecules/Product";
 import {Board, BoardAdvertisement, BoardTopMerchant} from "grvd/molecules/Board";
 import {twJoin} from "tailwind-merge";
+import {useNavigate} from "react-router-dom";
+import {TRedirectURL} from "grvd";
+
 
 export type TDashboardBoard = {
     title?: string;
@@ -16,6 +19,7 @@ export type TDashboardBoard = {
 };
 
 export function DashboardHomePage() {
+    const navigate = useNavigate();
     const boards: TDashboardBoard[] = [
         {
             board: <Board/>,
@@ -43,19 +47,24 @@ export function DashboardHomePage() {
             <div
                 key={key}
                 className={twJoin(
-                'flex flex-col gap-4',
-                `col-start-${board.col}`,
-                `row-start-${board.row}`,
-                board.colSpan && `col-span-${board.colSpan}`,
-                board.rowSpan && `row-span-${board.rowSpan}`,
-                board.className,
-            )}>
+                    'flex flex-col gap-4',
+                    `col-start-${board.col}`,
+                    `row-start-${board.row}`,
+                    board.colSpan && `col-span-${board.colSpan}`,
+                    board.rowSpan && `row-span-${board.rowSpan}`,
+                    board.className,
+                )}>
                 <Typography variant={'h4'} className={'text-grvd-theme-sys-dark-primary'}>
                     {board.title}
                 </Typography>
                 {board.board}
             </div>
         );
+    };
+    if (localStorage.getItem('redirect_url_after_login' as TRedirectURL)) {
+        const redirectUrl = localStorage.getItem('redirect_url_after_login' as TRedirectURL);
+        localStorage.removeItem('redirect_url_after_login' as TRedirectURL);
+        window.location.href = redirectUrl as string;
     }
     return (
         <div className={twJoin(
@@ -65,8 +74,8 @@ export function DashboardHomePage() {
             'gap-16'
         )}>
             {
-                boards.map((board, index) => renderBoard(board,index)
+                boards.map((board, index) => renderBoard(board, index)
                 )}
         </div>
-    )
+    );
 }

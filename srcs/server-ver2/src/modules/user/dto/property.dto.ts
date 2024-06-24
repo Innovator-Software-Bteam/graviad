@@ -1,7 +1,7 @@
 import {IsArray, IsEmpty, IsNumber} from "class-validator";
 import {PartialType} from "@nestjs/mapped-types";
 
-export class CreateAvatar2DDto {
+export class CreateAvatarDTO {
     @IsNumber()
     readonly id?: number;
 
@@ -14,5 +14,5 @@ export class CreateAvatar2DDto {
     readonly merchantId: string;
 }
 
-export class UpdateAvatar2DDto extends PartialType(CreateAvatar2DDto) {
+export class UpdateAvatarDTO extends PartialType(CreateAvatarDTO) {
 }

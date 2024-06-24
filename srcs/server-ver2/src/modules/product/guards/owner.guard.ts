@@ -1,8 +1,8 @@
 import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
-import { Observable } from 'rxjs';
 import { Reflector } from '@nestjs/core';
 import { ProductService } from '@app/modules/product';
-import { MerchantService, UserService } from "@app/modules/user";
+import {UserService} from "@app/modules/user";
+import {MerchantService} from "@app/modules/merchant";
 
 @Injectable()
 export class OwnerGuard implements CanActivate {
@@ -20,14 +20,22 @@ export class OwnerGuard implements CanActivate {
         if(!request.user) {
             return false;
         }
-        const user = await this.userService.findBy(request.user.email);
+        const user = await this.userService.findOne({
+            where:{
+                email: request.user.email
+            }
+        });
         const productId = request.params.id;
-        const merchant = await this.merchantService.findBy(user.email);
+        const merchant = await this.merchantService.findOne({
+            where: {
+                userId: user.id
+            }
+        });
         if (!user || !merchant) {
             return false;
         }
 
-        return this.productService.findBy(productId).then((product) => {
+        return this.productService.findOne(productId).then((product) => {
             return product && product.merchantId === merchant.id;
         });
     }

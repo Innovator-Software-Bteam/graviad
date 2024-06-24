@@ -7,8 +7,10 @@ import {TypeOrmModule} from "@nestjs/typeorm";
 import {UserModule} from "@app/modules/user";
 import {AuthModule} from "@app/modules/auth/auth.module";
 import graviadConfig from "./config/graviad.config";
-import {PassportModule} from "@nestjs/passport";
 import {ProductModule} from "@app/modules/product/product.module";
+import {MerchantModule} from "@app/modules/merchant";
+import { TemplateModule } from '@app/modules/template/template.module';
+import {TemplateController} from "@app/modules/template/template.controller";
 
 @Module({
     imports: [
@@ -20,9 +22,11 @@ import {ProductModule} from "@app/modules/product/product.module";
         TypeOrmModule.forRoot(databaseConfig()),
         UserModule,
         AuthModule,
-        ProductModule
+        ProductModule,
+        MerchantModule,
+        TemplateModule
     ],
-    controllers: [AppController],
+    controllers: [AppController, TemplateController],
     providers: [AppService],
 })
 export class AppModule {
