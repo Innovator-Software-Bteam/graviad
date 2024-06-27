@@ -20,7 +20,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
         super({
             clientID: process.env.GRAVIAD_GOOGLE_CLIENT_ID,
             clientSecret: process.env.GRAVIAD_GOOGLE_CLIENT_SECRET,
-            callbackURL: configService.get<URL>('graviad.google.callbackUrl').toString(),
+            callbackURL: process.env.GRAVIAD_SERVER_URL + '/auth/google/callback',
             scope: ['email', 'profile'],
         });
 

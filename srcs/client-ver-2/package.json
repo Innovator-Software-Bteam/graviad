@@ -16,6 +16,7 @@
     "axios": "^1.6.8",
     "base64-arraybuffer": "^1.0.2",
     "buffer": "^6.0.3",
+    "cross-env": "^7.0.3",
     "download": "^4.4.3",
     "html-to-image": "^1.11.11",
     "js-file-download": "^0.4.12",
@@ -45,7 +46,8 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "start:production": "cross-env NODE_ENV=production react-scripts start"
   },
   "eslintConfig": {
     "extends": [

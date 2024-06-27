@@ -26,6 +26,7 @@ import {setIsAuthenticated} from "grvd/storage/counters/UserCounter";
 import {FilterInputContext, useFilterInput} from "grvd/organisms/SearchInput/FilterInputContext";
 import {useMedia} from "grvd/reponsive";
 import {IoSearch} from "react-icons/io5";
+import * as process from "node:process";
 
 interface IDashboardHeaderProps extends React.ComponentProps<"header"> {
 }
@@ -367,7 +368,7 @@ export function Dashboard() {
     }
     const loadAuthenticator = async () => {
         axios.get(`${config.server.url}/auth/login`, {
-            withCredentials: true
+            withCredentials: true,
         }).then(res => {
             setId(res.data.user.id);
         }).catch(err => {
@@ -418,6 +419,7 @@ export function Dashboard() {
         currentPath = currentPath.charAt(0).toUpperCase() + currentPath.slice(1);
         document.title = `Dashboard ${currentPath} | Graviad`;
     }, [location]);
+    // console.log('server', process.env.NODE_ENV);
     return (
         <FilterInputContext.Provider value={{
             handleFilter,
