@@ -1,0 +1,2 @@
+"use strict";(self.webpackChunkclient_ver_2=self.webpackChunkclient_ver_2||[]).push([[0],{6e3:(e,c,l)=>{l.r(c),l.d(c,{AccountPage:()=>u});var s=l(3216),n=l(579);function u(e){return(0,n.jsx)("div",{className:"h-full w-full",children:(0,n.jsx)(s.sv,{})})}}}]);
+//# sourceMappingURL=0.00ceb5a9.chunk.js.map
