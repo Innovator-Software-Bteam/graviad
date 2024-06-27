@@ -14,6 +14,7 @@ import {NextFunction, Request, Response} from "express";
 import {ConfigService} from "@nestjs/config";
 import {TClientConfig, TGraviadConfig, TServerConfig} from "@app/config";
 import {AuthService} from "./auth.service";
+import * as process from "node:process";
 
 
 @Controller('auth')
@@ -42,11 +43,11 @@ export class AuthController {
 
 
     @Get('logout')
-    @Redirect('http://localhost:3000/homepage/login', HttpStatus.FOUND)
+    @Redirect(`${process.env.GRAVIAD_CLIENT_URL}/homepage/login`, HttpStatus.FOUND)
     async logout(@Req() req: Request, @Res() res: Response, @Next() next: any) {
         this.authService.logout(req, res);
         return {
-            url: `http://localhost:3000/homepage/login`
+            url: `${process.env.GRAVIAD_CLIENT_URL}/homepage/login`
         };
     }
 
@@ -59,10 +60,10 @@ export class AuthController {
 
     @Get('google/callback')
     @UseGuards(GoogleOAuthGuard)
-    @Redirect(`http://localhost:8000/auth/login/success`, HttpStatus.FOUND)
+    @Redirect(`http://localhost:8000/auth/login`, HttpStatus.FOUND)
     googleAuthRedirect(@Req() req: Request) {
         return {
-            url: `http://localhost:3000/dashboard`
+            url: `${process.env.GRAVIAD_SERVER_URL}/auth/login`
         }
     }
 
