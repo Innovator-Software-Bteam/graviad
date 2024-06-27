@@ -8,6 +8,8 @@ import {IoAdd, IoRemoveOutline} from "react-icons/io5";
 import axios from "axios";
 import config from "../../../config";
 import {IoIosRemove} from "react-icons/io";
+import {Button} from "grvd/components/Button";
+import {useDialog} from "grvd/organisms";
 
 export interface ITemplateCardProps extends React.ComponentProps<'div'> {
 
@@ -26,7 +28,7 @@ export function TemplateCard(props: ITemplateCardProps) {
             className={twJoin(
                 "template-card",
                 'flex flex-col gap-8 justify-center items-center',
-                'p-4 w-fit aspect-[1/1]'
+                'p-4 w-full min-w-[300px] aspect-[1/1]'
             )}
         >
             <TemplateSample>
@@ -44,7 +46,7 @@ export interface ITemplateSampleProps extends React.ComponentProps<'div'> {
 
 export function TemplateSample(props: ITemplateSampleProps) {
     return (
-        <div>
+        <div className={'w-full'}>
             {props.children}
         </div>
     );
@@ -63,14 +65,16 @@ export function TemplateCardTool(props: ITemplateCardToolProps) {
     const template = useTemplate();
     const user = useUser();
     const merchant = user?.merchant;
+    const {open} = useDialog();
     const [templateIds, setTemplateIds] = useState<number []>([]);
-
+    const [usingTemplateProfileCardId, setUsingTemplateProfileCardId] = useState<number | undefined>(undefined);
     const items: TInfoItem[] = [
         {
             icon: <FaRegHeart size={20}/>,
             label: template?.numberOfLikes?.toString() || '0'
         }
     ];
+
     const renderInfoItem = (item: TInfoItem, index: any) => {
         return (
             <Typography
@@ -92,7 +96,7 @@ export function TemplateCardTool(props: ITemplateCardToolProps) {
             .post(`${config.server.url}/merchants/${merchant?.id}/add-template/${template?.id}`, {}, {
                 withCredentials: true
             })
-            .then(res=>{
+            .then(res => {
                 setTemplateIds([...templateIds, template?.id as any]);
             })
             .catch();
@@ -102,14 +106,35 @@ export function TemplateCardTool(props: ITemplateCardToolProps) {
             .post(`${config.server.url}/merchants/${merchant?.id}/remove-template/${template?.id}`, {}, {
                 withCredentials: true
             })
-            .then(res=>{
-                setTemplateIds(templateIds.filter(id=>id!==template?.id));
+            .then(res => {
+                setTemplateIds(templateIds.filter(id => id !== template?.id));
             })
             .catch();
     };
+    const handleUseTemplate = async () => {
+        if(!merchant?.id) return;
+        axios
+            .patch(`${config.server.url}/merchants/${merchant?.id}`, {
+                usingTemplateProfileCardId: template?.id
+            }, {
+                withCredentials: true
+            })
+            .then(res => {
+                const merchant = res.data;
+                setUsingTemplateProfileCardId(merchant.usingTemplateProfileCardId);
+            })
+            .catch(e=>{
+                open(null, 'error');
+                console.error(e);
+            });
+    };
     useEffect(() => {
         if (merchant?.templateIds) setTemplateIds(merchant.templateIds);
+        if(merchant?.usingTemplateProfileCardId) setUsingTemplateProfileCardId(merchant.usingTemplateProfileCardId);
     }, [user]);
+    useEffect(() => {
+
+    }, [usingTemplateProfileCardId]);
     return (
         <div className={twJoin(
             'w-full',
@@ -123,6 +148,24 @@ export function TemplateCardTool(props: ITemplateCardToolProps) {
             >
                 {items.map(renderInfoItem)}
             </div>
+            {
+                usingTemplateProfileCardId === template?.id ?
+
+                    <Button
+                        colorcustom={'secondary'}
+                        sizecustom={'lg'}
+                    >
+                        Using
+                    </Button>
+                    :
+                    <Button
+                        colorcustom={'primary'}
+                        sizecustom={'lg'}
+                        onClick={handleUseTemplate}
+                    >
+                        Use
+                    </Button>
+            }
             {
                 !templateIds.includes(template?.id as any) ?
                     <button className={twJoin(
@@ -154,7 +197,6 @@ export function TemplateCardTool(props: ITemplateCardToolProps) {
                         <IoIosRemove size={48}/>
                     </button>
             }
-
         </div>
     );
 }

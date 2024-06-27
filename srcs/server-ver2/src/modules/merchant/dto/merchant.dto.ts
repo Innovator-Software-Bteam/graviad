@@ -14,6 +14,7 @@ import {
 } from "class-validator";
 import {CreateAvatarDTO} from "@app/modules/user/dto/property.dto";
 import {CreateTemplateDTO} from "@app/modules/template/dto/template.dto";
+import {CreateUserDto} from "@app/modules/user";
 
 /**
  * @version 2.0
@@ -62,7 +63,10 @@ export class CreateMerchantDto {
 
 
     @IsOptional()
-    readonly usingTemplateProfileCard: CreateTemplateDTO;
+    readonly usingTemplateProfileCardId: number;
+
+    @IsOptional()
+    readonly userId: string;
 }
 
 export class UpdateMerchantDto extends PartialType(CreateMerchantDto) {

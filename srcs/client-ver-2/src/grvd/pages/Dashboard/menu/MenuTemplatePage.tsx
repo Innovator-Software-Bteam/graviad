@@ -13,6 +13,7 @@ import {TTemplate} from "grvd/molecules/Template/types";
 import {ProfileCard} from "grvd/molecules";
 import {TemplateContext} from "grvd/molecules/Template/TemplateContext";
 import {useFilterInput} from "grvd/organisms/SearchInput/FilterInputContext";
+import {twJoin} from "tailwind-merge";
 
 export interface IMenuTemplatePageProps extends IPageProps {
 }
@@ -39,7 +40,11 @@ export function MenuTemplatePage(props: IMenuTemplatePageProps) {
     }, []);
     return (
         <MerchantContext.Provider value={user?.merchant}>
-            <div className={'w-full flex flex-row gap-4 flex-wrap'}>
+            <div className={twJoin(
+                'grid grid-cols-[repeat(auto-fit,minmax(300px,1fr))] auto-rows-auto',
+                'gap-16',
+                'w-full',
+            )}>
                 {templates.filter(template=>{
                     return handleFilter ? handleFilter(template) : true;
                 }).map((template, index) => {

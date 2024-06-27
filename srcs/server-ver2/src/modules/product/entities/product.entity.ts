@@ -62,6 +62,9 @@ export class Product {
     @OneToMany(() => ProductFeature, ProductFeature => ProductFeature.product, {cascade: true})
     features: ProductFeature[];
 
+    @RelationId((product: Product) => product.features)
+    featureIds: number[];
+
     @OneToOne(() => ProductMediaFromSpline, ProductMediaFromSpline => ProductMediaFromSpline.product, {cascade: true})
     mediaFromSpline: ProductMediaFromSpline;
 
@@ -85,7 +88,7 @@ export class Product {
 
 @Entity('product_features')
 export class ProductFeature {
-    @PrimaryColumn({type: 'int', nullable: false, name: 'id'})
+    @PrimaryGeneratedColumn({type: 'int', name: 'id'})
     id: number;
 
     //Column name string
@@ -95,8 +98,10 @@ export class ProductFeature {
     @Column({type: 'varchar', nullable: false, name: 'description'})
     description: string;
 
-
     @ManyToOne(() => Product, product => product.features)
     @JoinColumn({name: 'product_id'})
     product: Product;
+
+    @RelationId((feature: ProductFeature) => feature.product)
+    productId: number;
 }

@@ -4,7 +4,7 @@ import {
     ManyToOne,
     OneToMany,
     OneToOne,
-    PrimaryColumn, RelationId, Unique
+    PrimaryColumn, PrimaryGeneratedColumn, RelationId, Unique
 } from "typeorm";
 import {TSocialLinkProvider} from "../merchant.interface";
 
@@ -15,7 +15,7 @@ import {User} from "@app/modules/user";
 
 @Entity('merchants')
 export class Merchant {
-    @PrimaryColumn({type: 'uuid', nullable: false, name: 'id'})
+    @PrimaryGeneratedColumn('uuid')
     id: string;
 
     @Column({type: 'varchar', nullable: true, name: 'phone'})
@@ -44,6 +44,13 @@ export class Merchant {
 
     @OneToMany(() => SocialLink, socialLink => socialLink.merchant, {cascade: true})
     socialLinks: SocialLink[];
+
+    // user own merchant
+    @OneToOne(() => User, user => user.merchant)
+    user: User;
+
+    @RelationId((merchant: Merchant) => merchant.user)
+    userId: string;
 
     @OneToOne(() => Avatar, {cascade: true})
     @JoinColumn({name: 'avatar_id', referencedColumnName: 'id', foreignKeyConstraintName: 'fk_merchants_avatar_id'})
@@ -120,7 +127,7 @@ export class SocialLink {
     @Column({type: 'varchar', nullable: false, name: 'provider'})
     provider: TSocialLinkProvider;
 
-    @Column({type: 'varchar', nullable: false, name: 'data'})
+    @Column({type: 'varchar', nullable: false, name: 'data', default: ''})
     data: string;
 
     @ManyToOne(() => Merchant, merchant => merchant.socialLinks)

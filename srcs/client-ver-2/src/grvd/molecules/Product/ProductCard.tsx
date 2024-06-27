@@ -16,6 +16,7 @@ import {ProductContext, OwnerContext, useOwner} from "grvd/contexts";
 import {ProtectedFeatureRequiredLogin} from "grvd/protected";
 import {useDialog} from "grvd/organisms";
 import {useFilterInput} from "grvd/organisms/SearchInput/FilterInputContext";
+import {ProfileOwnerBar} from "grvd/molecules/User/ProfileOwnerBar";
 
 export function ImagePlaceholderSkeleton() {
     return (
@@ -47,26 +48,6 @@ export function ProductCardOwnerAreaSkeleton() {
     );
 }
 
-export function ProductCardOwnerArea() {
-    const owner = useOwner();
-    return (
-        <div className={'flex flex-row gap-4 items-center'}>
-            {owner?.avatar &&
-                <AvatarBase64
-                    data={owner?.avatar?.data}
-                    size={'md'}
-                    variant={'rounded'}
-                />
-            }
-            <div className={'border-l-2 rounded-full border-grvd-theme-sys-dark-outline h-[80%] solid mx-0 my-[10px]'}/>
-            <div>
-                <Typography variant={'h6'} className={'text-grvd-theme-sys-dark-primary'}>{owner?.name}</Typography>
-                <Typography variant={'small'} className={'font-medium'}>{owner?.numberOfProducts}</Typography>
-            </div>
-        </div>
-    );
-}
-
 function ProductThumbnail2D({data, children, className}: any) {
     const bufferData = Buffer.from(data);
     const base64String = Buffer.from(bufferData).toString('base64');
@@ -78,7 +59,12 @@ function ProductThumbnail2D({data, children, className}: any) {
         )}
     >
         <img
-            src={`data:image/*;base64,${base64String}`}
+            src={
+                (data && base64String) ?
+                    `data:image/*;base64,${base64String}`
+                    :
+                    `/assets/placeholder_thumbnail_product.png`
+            }
             alt="From byte array"
             className={twJoin(
                 '!aspect-[3/2]',
@@ -154,7 +140,11 @@ export function ProductCard({id, className}: IProductCardProps) {
     };
 
     const onCardClick = () => {
-        navigate(`/dashboard/products/${prod?.id}`);
+        navigate(`/dashboard/products/${prod?.id}`,{
+            state: {
+                viewMode: 'preview',
+            }
+        });
     }
     const handleUserLike = async (e: any) => {
         if (!user) {
@@ -208,7 +198,7 @@ export function ProductCard({id, className}: IProductCardProps) {
                 <Card
                     key={prod?.id || id}
                     className={twJoin(
-                        'p-6 w-full min-w-fit relative max-w-[350px]',
+                        'p-6 w-full min-w-[300px] relative max-w-[800px]',
                         'justify-between gap-8',
                         'bg-transparent',
                         className
@@ -238,7 +228,7 @@ export function ProductCard({id, className}: IProductCardProps) {
                                 {prod?.brief}
                             </Typography>
                         </div>
-                        <ProductCardOwnerArea/>
+                        <ProfileOwnerBar owner={owner as any} hideFollowButton={true}/>
                         <div className={'flex flex-row items-center justify-between w-full'}>
                             <ProtectedFeatureRequiredLogin>
                                 <Typography
@@ -317,10 +307,9 @@ export function ProductCardsContainer() {
     }, []);
     return (
         <div className={twJoin(
-            'grid',
+            'grid grid-cols-[repeat(auto-fit,minmax(300px,1fr))] auto-rows-auto',
             'gap-16',
-            'grid-cols-[repeat(auto-fit,minmax(300px,1fr))]',
-            'auto-rows-auto',
+            'w-full',
         )}>
             {isLoading && productSkeletons.map((_, index) => (
                 <ProductCardSkeleton key={index}/>

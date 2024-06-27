@@ -82,7 +82,7 @@ export class CreateProductDTO {
     readonly thumbnail2D?: CreateProductThumbnailDTO;
 
     @IsOptional()
-    @IsObject({message: 'Media from spline must be an object'})
+    @IsObject({message: 'MediaContext from spline must be an object'})
     readonly mediaFromSpline?: CreateProductMediaFromSplineDTO;
 
 

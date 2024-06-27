@@ -68,7 +68,7 @@
 //         merchantId: string;
 //         description?: string;
 //         brief?: string;
-//         price?: number | string;
+//         pricing?: number | string;
 //         link?: string;
 //         version?: string;
 //         dateRelease?: Date;

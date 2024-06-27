@@ -1,10 +1,10 @@
 import {PartialType} from "@nestjs/mapped-types";
-import {IsEmail, IsString, IsUUID} from "class-validator";
+import {IsEmail, IsOptional, IsString, IsUUID} from "class-validator";
 
 /**
  * @version 2.0
  */
-export class UserDto {
+export class CreateUserDto {
     @IsUUID()
     readonly id?: string;
 
@@ -13,7 +13,11 @@ export class UserDto {
 
     @IsString({message: 'Profile id must be a string'})
     readonly profileId: string;
+
+    @IsOptional()
+    @IsString({message: 'Merchant id must be a string'})
+    readonly merchantId?: string;
 }
 
-export class UpdateUserDto extends PartialType(UserDto) {
+export class UpdateUserDto extends PartialType(CreateUserDto) {
 }

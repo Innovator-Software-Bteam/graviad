@@ -1,8 +1,8 @@
 import {IPageProps} from "grvd/pages/types";
 import {twJoin} from "tailwind-merge";
 import {ProfileDetailForEdit, ProfileDetailForPreview} from "grvd/molecules";
-import {Button} from "grvd/components";
-import {TiEye} from "react-icons/ti";
+import {Button, ButtonWithLoading, IButtonWithLoadingProps} from "grvd/components";
+import {TiCreditCard, TiEye} from "react-icons/ti";
 import {
     EditableContext,
     MerchantContext,
@@ -13,42 +13,95 @@ import {
     useUser
 } from "grvd/contexts";
 import {MdModeEditOutline, MdOutlineAddCard} from "react-icons/md";
-import React, {MouseEvent, useEffect} from "react";
-import {Route, useLocation, useParams} from "react-router-dom";
-import {TMerchant, TProfile, TUser} from "grvd";
+import React, {MouseEvent, useEffect, useRef} from "react";
+import {Navigate, Route, useLocation, useNavigate, useParams} from "react-router-dom";
+import {TMerchant, TProduct, TProfile, TUser} from "grvd";
 import axios from "axios";
 import config from "../../../../config";
-import {PiExportBold} from "react-icons/pi";
 import * as htmlToImage from 'html-to-image';
 import fileDownload from 'js-file-download';
 import {ProfileExportDialog} from "grvd/molecules/User/ProfileExportDialog";
-import {CiCreditCard1} from "react-icons/ci";
-import {IoCard} from "react-icons/io5";
+import {ProductExportDialog} from "grvd/molecules/Product/ProductExportDialog";
+import {useMedia} from "grvd/reponsive";
+import {SwapViewMode, TViewMode, useViewMode, ViewModeContext} from "grvd/organisms";
+
+
+export type TToolbarContext = {
+    buttonSave: IButtonWithLoadingProps;
+    setButtonSave?: (props: IButtonWithLoadingProps) => void;
+}
+export const ToolbarContext = React.createContext<TToolbarContext>({
+    buttonSave: {
+        colorcustom: 'primary',
+        sizecustom: 'lg',
+        children: 'Save',
+        className: '',
+        isloading: false,
+        isdone: false,
+        iserror: false,
+        label: {
+            labelError: 'Error',
+            labelDone: 'Done',
+            labelLoading: 'Loading',
+            labelDefault: 'Save',
+        },
+    }
+
+});
+
+export function useToolbar() {
+    return React.useContext(ToolbarContext);
+}
 
 export function ProfilePageToolbar() {
-    const {isEditable, setEditable} = useEditable();
-    const {id} = useParams();
-    const merchant = useMerchant();
-    const user = useUser();
-    const handleSwapState = () => {
-        setEditable(!isEditable);
-    };
-    const handleExportProfile = () => {
-        const node = document.getElementById('profile-card-' + merchant?.id);
-        if (!node) return;
-        htmlToImage.toBlob(node, {
-            quality: 1,
-            height: node.scrollHeight,
-            width: node.scrollWidth,
-        })
-            .then(function (blob) {
-                if (!blob) return;
-                fileDownload(blob, 'Profile Card.png')
-            })
-            .catch(function (error) {
-                console.error('oops, something went wrong!', error);
-            });
-    }
+    const {condition} = useViewMode();
+    const {isMobile} = useMedia();
+    const {buttonSave} = useToolbar();
+
+    if (isMobile) return (
+        <div
+            className={twJoin(
+                'fixed bottom-0 left-1/2 transform -translate-x-1/2 z-50',
+                'max-w-[95%] w-fit p-4 mb-4 rounded-full',
+                'bg-grvd-theme-sys-dark-surface-container',
+                'flex flex-row justify-between gap-4 items-center',
+            )}
+        >
+            {
+                condition?.edit
+                &&
+                <>
+                    <ProfileExportDialog className={'rounded-full'}/>
+                    <ButtonWithLoading
+                        label={buttonSave.label}
+                        isloading={buttonSave.isloading}
+                        isdone={buttonSave.isdone}
+                        iserror={buttonSave.iserror}
+                        onClick={buttonSave.onClick}
+                        colorcustom={'primary'}
+                        sizecustom={'lg'}
+                        className={'z-50 rounded-full'}
+                        form={'profile-form'}
+                        type={'submit'}
+                    >
+                        Save
+                    </ButtonWithLoading>
+                </>
+            }
+            <Button
+                colorcustom={'secondary'}
+                sizecustom={'lg'}
+                className={'rounded-full'}
+                onClick={() => {
+                    window.location.href = '/dashboard/templates';
+                }}
+            >
+                <TiCreditCard size={24}/>
+            </Button>
+            {condition?.edit && <SwapViewMode/>}
+        </div>
+    );
+
     return (
         <header
             className={twJoin(
@@ -60,61 +113,32 @@ export function ProfilePageToolbar() {
                 'relative'
             )}
         >
-            <div className={twJoin(
-                'absolute top-0 left-1/2 -translate-x-1/2',
-                'w-full h-full',
-                'bg-transparent backdrop-blur-[5px]',
-            )}/>
-            <ProfileExportDialog/>
-            <Button
-                colorcustom={'primary'}
-                sizecustom={'lg'}
-                className={twJoin(
-                    'z-50',
-                    'flex flex-row gap-2 items-center',
-                    'group',
-                )}
-            >
-                Use Template Card
-                <div className={'relative'}>
+            {
+                condition?.edit
+                &&
+                <>
                     <div className={twJoin(
-                        'absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2',
-                        'bg-gradient-to-b from-[#DD0FFF] to-[#12B7FE] blur-[4px]',
-                        'w-8 h-8 rounded-full -z-20',
-                        'group-hover:animate-pulse',
+                        'absolute top-0 left-1/2 -translate-x-1/2',
+                        'w-full h-full',
+                        'bg-transparent backdrop-blur-[5px]',
                     )}/>
-                    <MdOutlineAddCard size={24} className={'z-50'}/>
-                </div>
-            </Button>
-            {(!isEditable && id === user?.merchant?.id) &&
-                <Button
-                    colorcustom={'tertiary'}
-                    className={twJoin(
-                        'shadow-none border-none',
-                        'bg-grvd-theme-sys-dark-quaternary',
-                        'rounded-full p-1 w-fit h-fit',
-                        '[box-shadow:0px_0px_0px_5px_rgba(246,_110,_249,_0.25)]',
-                        'z-50'
-                    )}
-                    onClick={handleSwapState}
-                >
-                    <MdModeEditOutline size={32} color={'#DF9BFF'}/>
-                </Button>
-            }
-            {(isEditable && id === user?.merchant?.id) &&
-                <Button
-                    colorcustom={'tertiary'}
-                    className={twJoin(
-                        'shadow-none border-none',
-                        'bg-grvd-theme-sys-dark-tertiary',
-                        'rounded-full p-1 w-fit h-fit',
-                        '[box-shadow:0px_0px_0px_5px_rgba(13,_80,_253,_0.25)]',
-                        'z-50'
-                    )}
-                    onClick={handleSwapState}
-                >
-                    <TiEye size={32} color={'#9BDBFF'}/>
-                </Button>
+                    <ProfileExportDialog/>
+                    <ButtonWithLoading
+                        label={buttonSave.label}
+                        isloading={buttonSave.isloading}
+                        isdone={buttonSave.isdone}
+                        iserror={buttonSave.iserror}
+                        onClick={buttonSave.onClick}
+                        colorcustom={'primary'}
+                        sizecustom={'lg'}
+                        className={'z-50'}
+                        form={'profile-form'}
+                        type={'submit'}
+                    >
+                        Save
+                    </ButtonWithLoading>
+                    <SwapViewMode/>
+                </>
             }
         </header>
     );
@@ -125,34 +149,52 @@ export interface IProfilePageMainProps extends React.ComponentProps<'div'> {
 }
 
 export function ProfilePageMain({className}: IProfilePageMainProps) {
-    const {isEditable} = useEditable();
-    const {id} = useParams();
-    const user = useUser();
+    const location = useLocation();
+    const viewMode = location.state?.viewMode;
     return (
         <div className={twJoin(
             'relative w-full h-full',
             className
         )}>
-            {(isEditable && user?.merchant?.id === id) && <ProfileDetailForEdit/>}
-            {(!isEditable && user?.merchant?.id === id) && <ProfileDetailForPreview/>}
-            {user?.merchant?.id !== id && <ProfileDetailForPreview/>}
+            {(viewMode === 'edit') && <ProfileDetailForEdit/>}
+            {(viewMode === 'preview') && <ProfileDetailForPreview/>}
+            {(!viewMode) && <ProfileDetailForPreview/>}
         </div>
-    )
+    );
 
 }
 
 export function ProfilePage({className, ...props}: IPageProps) {
     const {id} = useParams();
+    const user = useUser();
     const location = useLocation();
+    const navigate = useNavigate();
     const forEmbed = new URLSearchParams(location.search).get('forEmbed') || 'false';
-
-    const [user, setUser] = React.useState<TUser | undefined>(undefined);
     const [merchant, setMerchant] = React.useState<TMerchant | undefined>(undefined);
+    const [viewMode, setViewMode] = React.useState<TViewMode>('preview');
     const [editable, setEditable] = React.useState(() => {
         const storedEditable = localStorage.getItem("editable_profile");
         return storedEditable ? JSON.parse(storedEditable) : false;
     });
-
+    const condition = {
+        preview: true,
+        edit: user?.merchant?.id === merchant?.id,
+    };
+    const [buttonSave, setButtonSave] = React.useState<TToolbarContext['buttonSave']>({
+        colorcustom: 'primary',
+        sizecustom: 'lg',
+        children: 'Save',
+        className: '',
+        isloading: false,
+        isdone: false,
+        iserror: false,
+        label: {
+            labelError: 'Error',
+            labelDone: 'Done',
+            labelLoading: 'Loading',
+            labelDefault: 'Save',
+        },
+    });
     const loadMerchant = () => {
         if (!id) return;
         axios
@@ -164,47 +206,34 @@ export function ProfilePage({className, ...props}: IPageProps) {
             })
             .then((res) => {
                 setMerchant(res.data);
+            })
+            .catch((err) => {
+                navigate('404', {replace: true})
             });
     };
-    const loadUser = () => {
-        if (!merchant?.email) return;
-        axios
-            .get(`${config.server.url}/users/search`, {
-                withCredentials: true,
-                params: {
-                    relations: ['profile'],
-                    where: {
-                        merchantId: merchant.id
-                    }
-                }
-            })
-            .then((res) => {
-                const user: TUser = res.data;
-                user.profile = res.data.profile.data;
-                setUser(user);
-            });
-    }
     React.useEffect(() => {
         localStorage.setItem("editable_profile", JSON.stringify(editable));
     }, [editable]);
     React.useEffect(() => {
         loadMerchant();
     }, []);
-    React.useEffect(() => {
-        loadUser();
-    }, [merchant]);
+    if (!id || id === 'undefined') return (
+        <Navigate to={'/homepage/pricing'}/>
+    );
 
     return (
-        <EditableContext.Provider value={{isEditable: editable, setEditable}}>
-            <MerchantContext.Provider value={merchant}>
-                <ProfileContext.Provider value={user?.profile}>
-                    <div className={'w-full h-full flex flex-col items-center relative'}>
-                        {forEmbed === 'false' && <ProfilePageToolbar/>}
-                        <ProfilePageMain className={'w-full'}/>
-                    </div>
-                </ProfileContext.Provider>
-            </MerchantContext.Provider>
-        </EditableContext.Provider>
+        <MerchantContext.Provider value={merchant}>
+            <ProfileContext.Provider value={user?.profile}>
+                <ViewModeContext.Provider value={{viewMode, setViewMode, condition}}>
+                    <ToolbarContext.Provider value={{buttonSave, setButtonSave}}>
+                        <div className={'w-full h-full flex flex-col items-center relative'}>
+                            {forEmbed === 'false' && <ProfilePageToolbar/>}
+                            <ProfilePageMain className={'w-full'}/>
+                        </div>
+                    </ToolbarContext.Provider>
+                </ViewModeContext.Provider>
+            </ProfileContext.Provider>
+        </MerchantContext.Provider>
     );
 
 }

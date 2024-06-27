@@ -3,7 +3,7 @@ import {
     Column,
     PrimaryColumn,
     OneToOne,
-    JoinColumn, ManyToMany, RelationId, JoinTable,
+    JoinColumn, ManyToMany, RelationId, JoinTable, PrimaryGeneratedColumn,
 } from 'typeorm';
 import {Merchant} from "@app/modules/merchant";
 import {TProfile} from "../index"
@@ -27,7 +27,7 @@ export class Profile {
 
 @Entity('users')
 export class User {
-    @PrimaryColumn({type: 'uuid', nullable: false, name: 'id'})
+    @PrimaryGeneratedColumn('uuid')
     id: string;
 
     @Column({type: 'varchar', nullable: false, name: 'email'})
@@ -46,7 +46,7 @@ export class User {
     @Column({type: 'varchar', nullable: false, name: 'profile_id'})
     profileId: string;
 
-    @OneToOne(() => Merchant)
+    @OneToOne(() => Merchant, {cascade: true})
     @JoinColumn({name: 'merchant_id', referencedColumnName: 'id', foreignKeyConstraintName: 'fk_users_merchant_id'})
     merchant: Merchant;
 

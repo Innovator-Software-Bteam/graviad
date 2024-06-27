@@ -9,14 +9,21 @@ import {AiOutlineLike} from "react-icons/ai";
 import {BiPackage} from "react-icons/bi";
 import axios from "axios";
 import config from "../../../config";
-import {AvatarBase64, ButtonWithLoading, InputWithTitle, TextareaWithTitle} from "grvd/components";
-import {MerchantContext, useMerchant, useUser} from "grvd/pages";
+import {
+    AvatarBase64,
+    ButtonWithLoading,
+    IButtonWithLoadingProps,
+    InputWithTitle,
+    TextareaWithTitle
+} from "grvd/components";
+import {MerchantContext, useMerchant, useToolbar, useUser} from "grvd/pages";
 import {TInput} from "grvd/molecules"
 import {IPageProps} from "grvd/pages/types";
 import {ProfileCard} from "grvd/molecules/User";
 import {TAvatar2D, TMerchant, TSocialLink} from "grvd";
 import {IoIosAdd} from "react-icons/io";
 import {encode} from "base64-arraybuffer";
+import {Navigate} from "react-router-dom";
 
 type TProfileFormContext = {
     profileForm: TMerchant | null;
@@ -180,6 +187,7 @@ export function ProfileAvatarArea({onAvatarChange}: IProfileAvatarAreaProps) {
 
 export function ProfileFormArea() {
     const {setProfileForm} = React.useContext(ProfileFormContext);
+    const {buttonSave} = useToolbar();
     const merchant = useMerchant();
     const user = useUser();
 
@@ -194,20 +202,26 @@ export function ProfileFormArea() {
     const [instagramLink, setInstagramLink] = useState(merchant?.socialLinks?.find((socialLink: any) => socialLink.provider === 'instagram')?.link);
     const [avatar, setAvatar] = useState<TAvatar2D>(merchant?.avatar?.data);
     const [fileAvatar, setFileAvatar] = useState<File | null>(null);
-
+    const {setButtonSave} = useToolbar();
     const {
         register,
         handleSubmit,
         formState: {
             isLoading,
             isSubmitting,
-            isSubmitSuccessful
+            isSubmitSuccessful,
+            errors,
         },
         reset,
         setValue,
     } = useForm<TFormInput>({
         mode: 'onChange',
         reValidateMode: 'onChange',
+        resetOptions: {
+            keepIsSubmitSuccessful: false,
+            keepIsSubmitted: false,
+            keepErrors: false,
+        },
         defaultValues: {
             email,
             phone,
@@ -270,7 +284,7 @@ export function ProfileFormArea() {
         slogan: {
             title: 'Slogan',
             register: register('slogan', {
-                maxLength: {value: 100, message: 'Slogan should have a maximum of 100 characters'},
+                maxLength: {value: 30, message: 'Slogan should have a maximum of 30 characters'},
                 onChange: (e) => setSlogan(e.target.value),
             }),
         },
@@ -281,7 +295,7 @@ export function ProfileFormArea() {
                 onChange: (e) => setEmail(e.target.value),
                 pattern: {
                     value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/,
-                    message: 'Invalid email address'
+                    message: 'Invalid email address. Please enter a valid email address.'
                 }
 
             })
@@ -334,7 +348,40 @@ export function ProfileFormArea() {
             }
             reader.readAsArrayBuffer(file);
         }
+    };
+    const onChange=()=>{
+        if (!isSubmitSuccessful) return;
+        reset({
+            email,
+            phone,
+            address,
+            description,
+            slogan,
+            facebookLink,
+            twitterLink,
+            instagramLink,
+            avatar
+        }, {
+            keepIsSubmitted: false,
+            keepIsSubmitSuccessful: false,
+        })
     }
+    useEffect(() => {
+        if (setButtonSave) {
+            setButtonSave({
+                isloading: isSubmitting && isLoading,
+                isdone: isSubmitSuccessful,
+                label: {
+                    labelDefault: 'Save',
+                    labelLoading: 'Saving...',
+                    labelDone: 'Saved',
+                    labelError: 'Error',
+                },
+                children: 'Save',
+            });
+        }
+    }, [isSubmitting, isLoading, isSubmitSuccessful]);
+
     useEffect(() => {
         setEmail(merchant?.email);
         setPhone(merchant?.phone);
@@ -381,7 +428,9 @@ export function ProfileFormArea() {
                 className={classNames(
                     'flex flex-col flex-wrap gap-4',
                 )}
+                id={'profile-form'}
                 onSubmit={handleSubmit(onSubmit)}
+                onChange={onChange}
             >
                 <TextareaWithTitle
                     variant={'static'}
@@ -404,9 +453,15 @@ export function ProfileFormArea() {
                         className="mt-2 flex items-center gap-2 font-normal"
                     >
                         <FaCircleExclamation size={16}/>
-                        Slogan should have a maximum of 100 characters
+                        Slogan should have a maximum of 50 characters
                     </Typography>
                 </div>
+                <Typography
+                    variant={'paragraph'}
+                    className={'text-grvd-theme-sys-dark-error font-medium'}
+                >
+                    {errors.slogan?.message}
+                </Typography>
                 <div className={'flex flex-row gap-4 justify-between w-full'}>
                     <InputWithTitle
                         title={inputItems.email.title}
@@ -417,6 +472,12 @@ export function ProfileFormArea() {
                         {...inputItems.phone.register}
                     />
                 </div>
+                <Typography
+                    variant={'paragraph'}
+                    className={'text-grvd-theme-sys-dark-error font-medium'}
+                    >
+                    {errors.email?.message}
+                </Typography>
                 <InputWithTitle
                     title={inputItems.address.title}
                     {...inputItems.address.register}
@@ -435,21 +496,6 @@ export function ProfileFormArea() {
                         {...inputItems.instagramLink.register}
                     />
                 </div>
-                <ButtonWithLoading
-                    type={'submit'}
-                    sizecustom={'lg'}
-                    colorcustom={'primary'}
-                    className={'w-fit'}
-
-                    isloading={isSubmitting && isLoading}
-                    isdone={isSubmitSuccessful}
-                    label={{
-                        labelDefault: 'Save',
-                        labelLoading: 'Saving...',
-                        labelDone: 'Saved',
-                    }}
-                >Save
-                </ButtonWithLoading>
             </form>
         </div>
     );
@@ -458,7 +504,6 @@ export function ProfileFormArea() {
 export function ProfileDetailForEdit({className, ...props}: IPageProps) {
     const merchant = useMerchant();
     const [profileForm, setProfileForm] = useState<TMerchant | null>(merchant as TMerchant);
-
     return (
         <ProfileFormContext.Provider value={{profileForm, setProfileForm}}>
             <div>

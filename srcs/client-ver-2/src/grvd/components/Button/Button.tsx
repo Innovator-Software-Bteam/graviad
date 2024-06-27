@@ -3,7 +3,7 @@ import React from "react";
 import {tv, TVReturnType} from "tailwind-variants";
 import {twJoin, twMerge} from "tailwind-merge";
 import * as MT from "@material-tailwind/react";
-import {IButtonProps, IButtonWithLoadingProps} from "grvd/components";
+import {IButtonProps, IButtonWithLoadingProps, Spinner} from "grvd/components";
 import {useSpring, animated} from "react-spring";
 import {FaCircleCheck} from "react-icons/fa6";
 import {SyncLoader} from "react-spinners";
@@ -82,7 +82,6 @@ export const ButtonWithLoading = React.forwardRef((props: IButtonWithLoadingProp
                 props.className
             )}
         >
-            {isloading && labelLoading}
             {isdone && (
                 <animated.div
                     ref={doneRef as any}
@@ -92,13 +91,14 @@ export const ButtonWithLoading = React.forwardRef((props: IButtonWithLoadingProp
                     }}
                     className={'flex flex-row gap-2 items-center w-fit'}
                 >
-                    {isdone && labelDone}
-                    {isdone && <FaCircleCheck size={20}/>}
+                    {labelDone}
+                    <FaCircleCheck size={20}/>
                 </animated.div>
             )}
-            {!isloading && !isdone && children}
-            {iserror && labelError}
-            {isloading && <SyncLoader size={5}/>}
+            {(!isloading && !isdone) && children}
+            {/*{!isdone && labelError}*/}
+            {isloading && labelLoading}
+            {isloading && <Spinner size={16}/>}
         </Button>
     );
 });

@@ -4,8 +4,8 @@ import {Profile, User} from "./entities";
 import {InjectRepository} from "@nestjs/typeorm";
 import {Repository} from "typeorm";
 import {
-    UserDto,
-    UpdateUserDto,
+    CreateUserDto,
+    UpdateUserDto, CreateProfileDTO, UpdateProfileDTO,
 } from "./dto";
 import {IUserAction, IUserQuery, TProfile} from "./index";
 import {query} from "express";
@@ -14,18 +14,18 @@ import {MerchantService} from "@app/modules/merchant";
 import * as console from "node:console";
 
 @Injectable()
-export class ProfileService implements IDatabaseCRUD<Profile, TProfile> {
+export class ProfileService implements IDatabaseCRUD<Profile, CreateProfileDTO, UpdateProfileDTO> {
     constructor(
         @InjectRepository(Profile)
         private readonly profileRepository: Repository<Profile>
     ) {
     }
 
-    async create(dto?: TProfile): Promise<Profile> {
-        if (dto?.id) throw new Error('Id is exist, please use update method');
+    async create(dto?: CreateProfileDTO): Promise<Profile> {
         const profile: Profile = new Profile();
+        if(dto.id) profile.id = dto.id;
         profile.provider = dto.provider;
-        profile.data = dto;
+        profile.data = dto.data;
         return this.profileRepository.save(profile);
     }
 
@@ -33,24 +33,15 @@ export class ProfileService implements IDatabaseCRUD<Profile, TProfile> {
         return this.profileRepository.delete(id);
     }
 
-    async findAll(): Promise<Profile[]> {
-        return this.profileRepository.find();
-    }
-
-    async findBy(query: IQuery): Promise<Profile> {
-        const {where} = query;
-        return await this.profileRepository.findOneBy(where);
-    }
-
-    async findOrCreate(id?: any, dto?: TProfile): Promise<Profile> {
+    async findOrCreate(id?: any, dto?: CreateProfileDTO): Promise<Profile> {
         const profile = await this.profileRepository.findOneBy({id});
         if (profile) return profile;
-        return await this.profileRepository.save(dto);
+        return this.create(dto);
     }
 }
 
 @Injectable()
-export class UserService implements IDatabaseCRUD<User, UserDto, UpdateUserDto>,
+export class UserService implements IDatabaseCRUD<User, CreateUserDto, UpdateUserDto>,
     IUserAction {
     constructor(
         @InjectRepository(User)
@@ -64,7 +55,7 @@ export class UserService implements IDatabaseCRUD<User, UserDto, UpdateUserDto>,
 
     }
 
-    async create(dto?: UserDto): Promise<User> {
+    async create(dto?: CreateUserDto): Promise<User> {
         if (dto?.id) throw new Error('Id is exist, please use update method');
         const user: User = new User();
         user.email = dto.email;
@@ -93,17 +84,23 @@ export class UserService implements IDatabaseCRUD<User, UserDto, UpdateUserDto>,
 
     async update(id: any, dto?: UpdateUserDto): Promise<any> {
         if (!id) throw new Error('id is required');
-        await this.userRepository.update(id, dto);
-        return await this.userRepository.findOneBy({id});
+        const user = await this.userRepository.findOne({
+            where: {
+                id
+            }
+        });
+        if (!user) throw new BadRequestException('User not found');
+        if(dto.merchantId) user.merchantId = dto.merchantId;
+        return await this.userRepository.save(user);
     }
 
-    async findOrCreate(id?: any, dto?: UserDto): Promise<User> {
+    async findOrCreate(id?: any, dto?: CreateUserDto): Promise<User> {
         const user = await this.userRepository.findOneBy({id});
         if (user) return user;
         return this.create(dto);
     }
 
-    async findOrCreateByEmail(email: string, dto?: UserDto): Promise<User> {
+    async findOrCreateByEmail(email: string, dto?: CreateUserDto): Promise<User> {
         const user = await this.userRepository.findOneBy({
             email
         });

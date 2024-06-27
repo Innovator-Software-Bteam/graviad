@@ -27,7 +27,7 @@ export class ProductFeatureService implements IDatabaseCRUD<ProductFeature, Crea
         const product = await this.productRepository.findOneBy({
             id: dto.productId as any
         });
-        if (!product) return null;
+        if (!product) throw new BadRequestException('Product not found');
         productFeature.product = product;
         productFeature.name = dto.name;
         productFeature.description = dto.description;
@@ -59,10 +59,13 @@ export class ProductFeatureService implements IDatabaseCRUD<ProductFeature, Crea
                 id: dto.productId
             }
         })
+        if(!productFeature || !product) throw new BadRequestException('Product feature or product not found');
         productFeature.name = dto.name || productFeature.name;
         productFeature.description = dto.description || productFeature.description;
         productFeature.product = product || productFeature.product;
-        return await this.productFeatureRepository.save(productFeature);
+        const p = await this.productFeatureRepository.save(productFeature);
+        console.log(p);
+        return p;
     }
 
     async replace(id: string | number, dto?: CreateProductFeatureDTO): Promise<ProductFeature> {
@@ -273,18 +276,23 @@ export class ProductService implements IProductCRUD,
         product.highlightLabel = dto.highlightLabel || product.highlightLabel;
         product.numberOfLikes = dto.numberOfLikes || product.numberOfLikes;
         if (dto.features) {
+            console.log(dto.features);
             for (const feature of dto.features) {
                 const featureFixed = {
                     ...feature,
                     productId: product.id
                 }
-                const featureEntity = await this.productFeatureService.update(feature.id, featureFixed);
+                let featureEntity: ProductFeature;
+                if (feature.id) {
+                    featureEntity = await this.productFeatureService.update(feature.id, featureFixed);
+                } else {
+                    featureEntity = await this.productFeatureService.create(featureFixed as CreateProductFeatureDTO);
+                }
                 product.features = [...product.features, featureEntity];
             }
         }
         if (dto.thumbnail2D) {
             product.thumbnail2D = await this.productThumbnailService.update(product.thumbnail2D.id, dto.thumbnail2D);
-            console.log('product.thumbnail2D', product.thumbnail2D)
         }
         if (dto.mediaFromSpline) {
             product.mediaFromSpline = await this.productMediaFromSplineService.update(product.mediaFromSpline.id, dto.mediaFromSpline);

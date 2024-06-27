@@ -50,11 +50,11 @@ export function ProfileShortcut(props: IProfileShortcutProps) {
             <MenuItem
                 key={index + title}
                 className={twMerge(
-                    'hover:bg-grvd-theme-sys-dark-surface-container-high',
+                    'hover:bg-grvd-theme-sys-dark-surface-container',
                     'hover:text-grvd-theme-sys-dark-primary',
-                    'focus:bg-grvd-theme-sys-dark-surface-container-high',
+                    'focus:bg-grvd-theme-sys-dark-surface-container',
                     'focus:text-grvd-theme-sys-dark-primary',
-                    'active:bg-grvd-theme-sys-dark-surface-container-high',
+                    'active:bg-grvd-theme-sys-dark-surface-container',
                     'active:text-grvd-theme-sys-dark-primary',
 
                     'flex flex-row items-center justify-start gap-2',
@@ -67,7 +67,6 @@ export function ProfileShortcut(props: IProfileShortcutProps) {
         )
     };
     useEffect(() => {
-        console.log('user', user)
     }, [user]);
     if(!user) return (
         <Button colorcustom={'primary'} sizecustom={'lg'} onClick={handleLogin}>
@@ -96,19 +95,20 @@ export function ProfileShortcut(props: IProfileShortcutProps) {
                     merchant?.avatar &&
                     <AvatarBase64
                         data={merchant?.avatar?.data}
+                        src={'https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png'}
                         withBorder={true}
                         alt={merchant?.name}
                         variant={'circular'}
                         size={'sm'}
                         className={twJoin(
-                            'outline-grvd-theme-sys-dark-tertiary outline outline-offset-[1px]',
+                            'h-fit outline-grvd-theme-sys-dark-tertiary outline outline-offset-[1px] aspect-[1/1]',
                         )}
                     />
                 }
                 <MenuHandler>
-                    <Button colorcustom={'secondary'} sizecustom={'sm'} className={'!bg-transparent outline-none border-none'}>
+                    <button>
                         <FaAngleDown
-                            size={20}
+                            size={24}
                             className={twJoin(
                                 'text-grvd-theme-sys-dark-on-primary-variant',
                                 'hover:text-grvd-theme-sys-dark-primary',
@@ -118,18 +118,19 @@ export function ProfileShortcut(props: IProfileShortcutProps) {
                                 }`
                             )}
                         />
-                    </Button>
+                    </button>
                 </MenuHandler>
-                <MenuList className={twJoin(
-                    'bg-grvd-theme-sys-dark-surface-container/50',
-                    'backdrop-blur-lg',
+                <MenuList
+                    className={twJoin(
+                    'bg-grvd-theme-sys-dark-surface-container backdrop-blur-lg',
                     'rounded-lg',
                     'border-none',
-                    'shadow-none',
+                    '!shadow-lg',
 
                     'text-grvd-theme-sys-dark-on-primary-variant',
                     'text-md',
-                )}>
+                )}
+                >
                     {profileItems.map((item, index) => renderProfileItems(item, index))}
                 </MenuList>
             </Menu>

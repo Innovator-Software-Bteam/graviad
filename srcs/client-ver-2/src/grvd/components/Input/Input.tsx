@@ -11,7 +11,7 @@ export const Input = React.forwardRef<HTMLInputElement, IInputProps>((props, ref
             ref={ref as any}
             crossOrigin={undefined}
             className={twMerge([
-                'rounded-lg',
+                'rounded-full',
                 '!px-4 !py-3 w-full',
                 'text-grvd-theme-sys-dark-on-surface',
                 '!bg-grvd-theme-sys-dark-surface-container !border-transparent !border',

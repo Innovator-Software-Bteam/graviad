@@ -7,7 +7,7 @@ import {RiAdvertisementFill} from "react-icons/ri";
 import axios from "axios";
 import config from "../../../config";
 import {encode} from "base64-arraybuffer";
-import {useMerchant} from "grvd/pages";
+import {useMerchant, useUser} from "grvd/pages";
 import {TMediaFromSpline, TProduct} from "grvd";
 import {IProductCreateFormProps, TInput, TProductCreateForm} from "grvd/molecules";
 import {CgDanger} from "react-icons/cg";
@@ -15,6 +15,8 @@ import {useSelector} from "react-redux";
 import {RootState} from "grvd/storage";
 import {useDialog} from "grvd/organisms";
 import {Buffer} from "buffer";
+import {useMedia} from "grvd/reponsive";
+import {ProtectedFeatureRequiredLogin} from "grvd/protected";
 
 
 export function ProductCreateTipsArea({className}: IProductCreateFormProps) {
@@ -82,8 +84,10 @@ export function ProductCreateTipsArea({className}: IProductCreateFormProps) {
 
 
 export function ProductCreateForm() {
-    const merchant = useMerchant();
+    const user=useUser();
+    const merchant = user?.merchant;
     const state = useSelector((state: RootState) => state.state.state);
+    const {isMobile} = useMedia();
 
     const [open, setOpen] = React.useState(false);
     const [fileThumbnail, setFileThumbnail] = React.useState<File | null>(null);
@@ -117,6 +121,7 @@ export function ProductCreateForm() {
         criteriaMode: 'firstError',
     });
     const onSubmit: SubmitHandler<TProductCreateForm> = async (data) => {
+        if(!merchant) return;
         const reader = new FileReader();
         if (merchant && fileThumbnail) {
             reader.readAsArrayBuffer(fileThumbnail);
@@ -144,7 +149,7 @@ export function ProductCreateForm() {
                         .then(async (response) => {
                             // await new Promise((resolve) => setTimeout(resolve, 2000));
                             console.log(response);
-                            // window.location.reload();
+                            window.location.reload();
                         })
                         .catch((err) => {
                             openDialogError('Failed to create product', 'error');
@@ -231,10 +236,20 @@ export function ProductCreateForm() {
     }
 
     const handleOpen = () => setOpen(!open);
-    if (!state.isAuthenticated) return null;
+    if (!user) return null;
     return (
-        <>
-            <Button colorcustom={'primary'} sizecustom={'lg'} onClick={handleOpen}>+ Create Ad</Button>
+        <ProtectedFeatureRequiredLogin>
+            <Button
+                colorcustom={'primary'}
+                sizecustom={'lg'}
+                onClick={handleOpen}
+                className={twJoin(
+                    'w-fit',
+                    isMobile? 'rounded-full': ''
+                )}
+            >
+                {isMobile ? '+' : 'Create'}
+            </Button>
             <Dialog
                 size="md"
                 open={open}
@@ -345,7 +360,7 @@ export function ProductCreateForm() {
                                 <Input
                                     type={'url'}
                                     title={inputItems.mediaFromSpline.title}
-                                    placeholder={'Media from spline'}
+                                    placeholder={'MediaContext from spline'}
                                     icon={
                                         <svg width="100%" height="100%" viewBox="0 0 32 32" fill="none"
                                              xmlns="http://www.w3.org/2000/svg"
@@ -422,6 +437,6 @@ export function ProductCreateForm() {
                     </div>
                 </DialogBody>
             </Dialog>
-        </>
+        </ProtectedFeatureRequiredLogin>
     );
 }

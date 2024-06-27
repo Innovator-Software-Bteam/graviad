@@ -9,12 +9,14 @@ import axios from "axios";
 import config from "../../../config";
 import {TTemplate} from "grvd/molecules/Template/types";
 import {TemplateContext} from "grvd/molecules/Template/TemplateContext";
+import {Navigate} from "react-router-dom";
 
 
 export function ProfileDetailForPreview() {
     const merchant = useMerchant();
     const [templateProfileCard, setTemplateProfileCard] = useState<TTemplate>();
     const loadTemplateProfileCard = () => {
+        if(!merchant) return;
         if (!merchant?.usingTemplateProfileCardId) return;
         axios.get(`${config.server.url}/templates/${merchant?.usingTemplateProfileCardId}`, {
             withCredentials: true,
@@ -27,6 +29,7 @@ export function ProfileDetailForPreview() {
     useEffect(() => {
         loadTemplateProfileCard();
     }, [merchant]);
+
     return (
         <div
             className={'w-full h-full relative'}
@@ -54,6 +57,7 @@ export function ProfileDetailForPreview() {
                     merchant?.avatar?.data &&
                     <AvatarBase64
                         data={merchant.avatar.data}
+                        src={merchant.avatar.data}
                         alt={merchant.avatar.alt_texts?.join(' ')}
                         variant={'rounded'}
                         size={'xxl'}

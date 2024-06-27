@@ -6,15 +6,14 @@ import {
 import {ComponentProps, useEffect, useState, useContext} from "react";
 import axios from "axios";
 import config from "../../../config";
-import {Avatar, Card, Spinner, Typography} from "@material-tailwind/react";
+import {Avatar, Card, Typography} from "@material-tailwind/react";
 import {twJoin} from "tailwind-merge";
-import {Label, Button, AvatarBase64} from "grvd/components";
+import {Label, Button,Spinner} from "grvd/components";
 import {GiTwoCoins} from "react-icons/gi";
 import {LuHeart} from "react-icons/lu";
 import {OwnerContext, ProductContext, useOwner, useProduct, useUser} from "grvd/contexts";
 import {FaHeart} from "react-icons/fa6";
 import {useDialog} from "grvd/organisms";
-import {ProtectedFeatureRequiredLogin} from "grvd/protected";
 import {ProfileOwnerBar} from "grvd/molecules/User/ProfileOwnerBar";
 
 
@@ -48,8 +47,10 @@ export function ProductDetailForPreview({}: any) {
     return (
         <OwnerContext.Provider value={owner}>
             <div className={twJoin(
-                'flex flex-row justify-between items-center gap-32 w-full h-full',
-                'p-16'
+                'flex flex-col-reverse justify-between items-center gap-16 w-full h-full',
+
+                'sm:flex-col md:flex-col lg:flex-row xl:flex-row',
+                'sm:flex-col-reverse md:flex-col-reverse lg:flex-row xl:flex-row',
             )}>
                 <ProductContentArea/>
                 <ProductPreview3DArea/>
@@ -71,6 +72,7 @@ export interface IProductContentAreaProps extends IProductProps {
 export function ProductContentArea({className}: IProductContentAreaProps) {
     return (
         <div className={twJoin(
+            'w-full min-w-[300px] h-full',
             className
         )}>
             <ProductSpecificationsArea/>
@@ -84,7 +86,7 @@ export function ProductPreview3DArea({id, className, ...props}: IProductPreview3
         <Card
             className={twJoin(
                 'relative',
-                'w-2/3 aspect-video rounded-3xl',
+                'w-full min-w-[300px] aspect-video rounded-3xl',
                 'bg-grvd-theme-sys-dark-surface-container-lowest',
                 'overflow-clip',
                 className
@@ -95,7 +97,7 @@ export function ProductPreview3DArea({id, className, ...props}: IProductPreview3
                         width='100%' height='100%'></iframe>
                 :
                 <div className={'absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2'}>
-                    <Spinner className="h-12 w-12"/>
+                    <Spinner size={48}/>
                 </div>
             }
             <Card
@@ -178,7 +180,7 @@ export function ProductSpecificationsArea({
                 className={twJoin(
                     'flex flex-col items-center justify-center gap-4',
                     'bg-grvd-theme-sys-dark-surface-container-high rounded-2xl',
-                    'p-4 w-fit h-fit',
+                    'py-4 w-full h-fit',
                 )}
             >
                 <Typography
@@ -213,7 +215,7 @@ export function ProductSpecificationsArea({
     }, [product]);
     return (
         <div className={twJoin(
-            'flex flex-col gap-8 w-[30em] max-w-[50em]',
+            'flex flex-col gap-8 w-full',
             className
         )}>
             <Label border={true} className={'top-8 left-8'}>{product?.highlightLabel}</Label>

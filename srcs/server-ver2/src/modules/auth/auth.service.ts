@@ -27,21 +27,26 @@ export class AuthService implements IAuthAction {
     }
 
     logout(req: Request, res: Response): void {
-        req.logout(done => {
-        });
-        req.session.destroy((err) => {
-            if (err) {
-                throw new ForbiddenException(AuthMessage.LOGOUT_FAILED);
-            }
-            res.redirect('/');
-        });
+        try {
+
+            req.logout(done => {
+            });
+            req.session.destroy((err) => {
+                if (err) {
+                }
+                res.redirect('/');
+            });
+        } catch (e) {
+        }
 
     }
-
 }
-
-@Injectable()
-export class SessionSerializer extends PassportSerializer {
+    @Injectable()
+    export
+    class
+    SessionSerializer
+    extends
+    PassportSerializer {
     constructor(
         @Inject(forwardRef(() => UserService)) private readonly userService: UserService
     ) {

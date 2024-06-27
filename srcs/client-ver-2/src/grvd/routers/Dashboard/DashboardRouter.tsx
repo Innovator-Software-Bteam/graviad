@@ -34,18 +34,22 @@ const MenuTemplatePage = React.lazy(() =>
     import('grvd/pages/Dashboard/menu/MenuTemplatePage')
         .then(module => ({default: module.MenuTemplatePage})
         ));
-
+const NotFoundPage = React.lazy(() =>
+    import('grvd/pages/404/NotFoundPage')
+        .then(module => ({default: module.NotFoundPage}))
+);
 export const DashboardRouter =
     <Route path={'dashboard'} element={<Dashboard/>}>\
-            <Route path={''} element={<Navigate to={'home'}/>}/>
-            <Route path={'home'} element={<DashboardHome/>}/>
-            <Route path={'account'} element={<AccountPage/>}>
-                    <Route path={'products'} element={<AccountProduct/>}/>
-            </Route>
-            <Route path={'menu'} element={<MenuPage/>}>
-                    <Route path={'templates'} element={<MenuTemplatePage/>}/>
-            </Route>
-            <Route path={'profile/:id'} element={<Profile/>}/>
-            <Route path={'products/:id'} element={<Product/>}/>
+        <Route path={''} element={<Navigate to={'home'}/>}/>
+        <Route path={'home'} element={<DashboardHome/>}/>
+        <Route path={'account'} element={<AccountPage/>}>
+            <Route path={'products'} element={<AccountProduct/>}/>
+        </Route>
+        <Route path={'products'} element={<Navigate to={'/dashboard/home'}/>}/>
+        <Route path={'profile'} element={<Navigate to={'/dashboard/home'}/>}/>
+        <Route path={'templates'} element={<MenuTemplatePage/>}/>
+        <Route path={'profile/:id'} element={<Profile/>}/>
+        <Route path={'products/:id'} element={<Product/>}/>
+        <Route path={'*'} element={<NotFoundPage/>}/>
     </Route>
 ;

@@ -8,14 +8,14 @@ import {
     Param, Patch,
     Post,
     Put,
-    Query,
+    Query, Res,
     UseGuards
 } from "@nestjs/common";
 import {AuthGuard} from "@app/modules/auth";
 import {MerchantService, SocialLinkService} from "./merchant.service";
 import {IMerchantQuery} from "./merchant.interface";
 import {UpdateMerchantDto} from "./dto";
-
+import {Response} from "express";
 
 @Controller('merchants')
 export class MerchantController {
@@ -44,6 +44,22 @@ export class MerchantController {
             });
     }
 
+    @Get(':id/avatar.png')
+    async getAvatar(@Param('id') id: string, @Res() res: Response) {
+        const merchant = await this.merchantService.findOne({
+            where: {
+                id,
+            },
+            relations: ['avatar'],
+        });
+        res.writeHead(200, {
+            'Content-Type': 'image/png',
+            'Content-Length': merchant.avatar.data.length,
+        });
+        res.end(merchant.avatar.data);
+    }
+
+
     @Get(':id/:relation')
     async getRelation(@Param('id') id: string, @Param('relation') relation: string) {
         try {
@@ -59,12 +75,17 @@ export class MerchantController {
         }
     }
 
+
+
+
     @Post()
     @UseGuards(AuthGuard)
     async create(@Body() body: any) {
+
         return this.merchantService
             .create(body)
     }
+
     @Post(':id/add-template/:templateId')
     @UseGuards(AuthGuard)
     async addTemplate(@Param('id') id: string, @Param('templateId') templateId: number) {

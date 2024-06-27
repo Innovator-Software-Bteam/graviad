@@ -1,13 +1,13 @@
 import React, {useEffect, useState} from "react";
-import {Outlet, useLocation, useNavigate, useParams} from 'react-router-dom';
+import {NavLink, Outlet, useLocation, useNavigate, useParams} from 'react-router-dom';
 import {CiSearch} from "react-icons/ci";
-import {HiChevronRight} from "react-icons/hi";
+import {HiChevronRight, HiMenuAlt4} from "react-icons/hi";
 import {twJoin, twMerge} from "tailwind-merge";
 import {Input} from "grvd/components";
 import {ProfileShortcut} from "grvd/molecules";
 import {
     List,
-    ListItem,
+    ListItem, Menu, MenuHandler, MenuItem, MenuList,
     Navbar,
     Typography
 } from "@material-tailwind/react";
@@ -15,8 +15,7 @@ import {HiOutlineHome} from "react-icons/hi2";
 import {GoProjectTemplate} from "react-icons/go";
 import {VscPackage} from "react-icons/vsc";
 import {RiAdvertisementLine} from "react-icons/ri";
-import {IoSettingsOutline} from "react-icons/io5";
-import {TbHelp} from "react-icons/tb";
+import {TbHelp, TbLayoutDashboardFilled} from "react-icons/tb";
 import {ProductCreateForm} from "grvd/molecules/Product";
 import {TMerchant, TProfile, TUser} from "grvd";
 import axios from "axios";
@@ -24,9 +23,9 @@ import config from "./config";
 import {MerchantContext, ProfileContext, UserContext} from "grvd/pages";
 import {useDispatch, useSelector} from "react-redux";
 import {setIsAuthenticated} from "grvd/storage/counters/UserCounter";
-import {RootState} from "grvd/storage";
 import {FilterInputContext, useFilterInput} from "grvd/organisms/SearchInput/FilterInputContext";
-import {filter} from "style-value-types";
+import {useMedia} from "grvd/reponsive";
+import {IoSearch} from "react-icons/io5";
 
 interface IDashboardHeaderProps extends React.ComponentProps<"header"> {
 }
@@ -39,10 +38,12 @@ interface IDashboardMainProps extends React.ComponentProps<"main"> {
 }
 
 function DashboardHeaderTop({className}: IDashboardHeaderProps) {
+    const {isTabletOrMobile, isMobile} = useMedia();
     const location = useLocation();
     const currentRoute = location.pathname.split('/');
     const dashboardTitle = currentRoute[2];
     const {setFilters} = useFilterInput();
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
     const handleOnChangeSearchInput = (e: any) => {
         const value = e.target.value;
         if (setFilters) {
@@ -54,7 +55,7 @@ function DashboardHeaderTop({className}: IDashboardHeaderProps) {
         if (index > 1) {
             routerList.add({
                 title: route,
-                path: `/dashboard/${route}`
+                path: location.pathname.split(route)[0] + route
             });
         }
     });
@@ -87,56 +88,106 @@ function DashboardHeaderTop({className}: IDashboardHeaderProps) {
             fullWidth={true}
             className={twJoin(
                 'h-fit',
-                'flex',
-                'flex-row',
-                'items-center',
-                'justify-between',
-                'gap-16',
+                'flex flex-row items-center justify-between',
+                'gap-4',
+                'md:gap-8 lg:gap-16',
                 'sticky top-0 z-50',
                 className
             )}
         >
             <div className={twMerge(
-                'flex flex-col w-full grow-[1]',
+                'flex flex-col w-fit',
+                'md:w-fit lg:w-fit'
             )}>
                 <h6
                     className={twMerge(
+                        'w-full',
                         'text-grvd-theme-sys-dark-primary',
                         'font-medium text-left capitalize',
                     )}
                 >
                     {dashboardTitle}
                 </h6>
-                <div className={twMerge(
-                    'flex flex-row items-center justify-start gap-2',
-                )}>
-                    {Array.from(routerList).map((item, index) => renderRouterListItem(item.title, item.path, index))}
-                </div>
+                {
+                    !isMobile
+                    &&
+                    <div className={twMerge(
+                        'flex flex-row items-center justify-start gap-2',
+                    )}>
+                        <NavLink
+                            to={'/dashboard/home'}
+                            className={({isActive}) =>
+                                isActive ?
+                                    twJoin(
+                                        'text-grvd-theme-sys-dark-primary'
+                                    )
+                                    :
+                                    twJoin(
+                                        'text-grvd-theme-sys-dark-on-primary-variant',
+                                    )
+
+                            }
+                        >
+                            <TbLayoutDashboardFilled/>
+                        </NavLink>
+                        {Array.from(routerList).map((item, index) => renderRouterListItem(item.title, item.path, index))}
+                    </div>
+                }
             </div>
-            <div className={'grow-[2] w-full'}>
+
+            <div className={twJoin(
+                'w-full flex items-center justify-center',
+            )}>
                 <Input
                     placeholder={'Search anything ...'}
                     labelProps={{
                         className: 'hidden'
                     }}
-                    icon={<CiSearch size={24} color={'white'}/>}
+                    containerProps={{
+                        className: 'lg:!w-[50%] md:!w-[50%] w-full'
+                    }}
+                    icon={<IoSearch size={20} color={'white'}/>}
                     onChange={handleOnChangeSearchInput}
                 />
             </div>
-            <div className={'flex flex-row items-center justify-end gap-4 grow-[1] w-full'}>
-                <ProductCreateForm/>
+            {
+                !isMobile &&
+                <div className={'flex flex-row items-center justify-end gap-4 w-fit'}>
+                    <ProductCreateForm/>
+                    <ProfileShortcut/>
+                </div>
+            }
+            {
+                isMobile &&
                 <ProfileShortcut/>
-            </div>
+            }
         </Navbar>
     );
 }
 
+export interface IDashboardToolbarProps extends React.ComponentProps<'div'> {
+
+}
+
+export function DashboardToolbar(props: IDashboardToolbarProps) {
+    return (
+        <div
+            className={twJoin(
+                props.className
+            )}
+            id={'dashboard-toolbar'}
+        >
+            <ProductCreateForm/>
+        </div>
+    )
+}
+
 function DashboardHeaderLeft({className, ...props}: IDashboardHeaderProps) {
     const navigate = useNavigate();
-
+    const {isTabletOrMobile} = useMedia();
     const listItems = [
         {
-            title: 'Menu',
+            title: 'Board',
             list: [
                 {
                     title: 'Home',
@@ -145,7 +196,7 @@ function DashboardHeaderLeft({className, ...props}: IDashboardHeaderProps) {
                 },
                 {
                     title: 'Template',
-                    path: 'home/template',
+                    path: 'templates',
                     icon: <GoProjectTemplate size={20}/>
                 }
             ]
@@ -165,55 +216,85 @@ function DashboardHeaderLeft({className, ...props}: IDashboardHeaderProps) {
                 }
             ]
         },
-        {
-            title: 'System',
-            list: [
-                {
-                    title: 'Settings',
-                    path: '/settings',
-                    icon: <IoSettingsOutline size={20}/>
-                },
-                {
-                    title: 'Help & Feedback',
-                    path: '/help-feedback',
-                    icon: <TbHelp size={20}/>,
-                }
-            ]
-        }
+        // {
+        //     title: 'System',
+        //     list: [
+        //         {
+        //             title: 'Settings',
+        //             path: '/settings',
+        //             icon: <IoSettingsOutline size={20}/>
+        //         },
+        //         {
+        //             title: 'Help & Feedback',
+        //             path: '/help-feedback',
+        //             icon: <TbHelp size={20}/>,
+        //         }
+        //     ]
+        // }
     ];
     const renderListItems = ({title, path, icon, key}: any) => {
         return (
-            <ListItem
+            <div
                 key={key}
                 className={twJoin(
-                    'hover:bg-grvd-theme-sys-dark-surface-container-high hover:text-grvd-theme-sys-dark-on-secondary hover:font-medium',
-                    'focus:bg-grvd-theme-sys-dark-surface-container-high focus:text-grvd-theme-sys-dark-on-secondary focus:font-medium',
-                    'transition-all duration-200 ease-in-out',
-
-                    'text-grvd-theme-sys-dark-on-secondary-variant',
-                    'text-md',
-                    'font-normal',
-                    'rounded-lg border border-transparent',
-                    'p-2',
+                    // 'hover:bg-grvd-theme-sys-dark-surface-container-high hover:text-grvd-theme-sys-dark-on-secondary hover:font-medium',
+                    // 'focus:bg-grvd-theme-sys-dark-surface-container-high focus:text-grvd-theme-sys-dark-on-secondary focus:font-medium',
+                    // 'transition-all duration-200 ease-in-out',
+                    //
+                    // 'text-grvd-theme-sys-dark-on-secondary-variant',
+                    // 'text-md',
+                    // 'font-normal',
+                    // 'rounded-lg border border-transparent',
+                    // 'p-2',
                 )}
                 onClick={() => {
                     navigate(path);
                 }}
             >
-                <Typography
-                    as={'a'}
-                    className={twJoin(
-                        'flex flex-row items-center justify-start gap-2 w-full h-full',
-                    )}
+                <NavLink
+                    to={path}
+                    className={({isActive}) =>
+                        isActive ?
+                            twJoin(
+                                'flex flex-row items-center justify-start gap-2 w-full h-full',
+                                'bg-grvd-theme-sys-dark-surface-container-high text-grvd-theme-sys-dark-primary font-medium',
+                                'transition-all duration-200 ease-in-out',
+
+                                'text-grvd-theme-sys-dark-on-secondary-variant',
+                                'text-md',
+                                'font-normal',
+                                'rounded-lg border border-transparent',
+                                'px-2 py-3',
+                            )
+                            :
+                            twJoin(
+                                'flex flex-row items-center justify-start gap-2 w-full h-full',
+
+                                'hover:bg-grvd-theme-sys-dark-surface-container-high hover:text-grvd-theme-sys-dark-on-secondary hover:font-medium',
+                                'transition-all duration-200 ease-in-out',
+
+                                'text-grvd-theme-sys-dark-on-secondary-variant',
+                                'text-md',
+                                'font-normal',
+                                'rounded-lg border border-transparent',
+                                'px-2 py-3',
+                            )
+
+                    }
                 >
                     {icon}
                     {title}
-                </Typography>
-            </ListItem>
+                </NavLink>
+            </div>
         );
+    };
+    if (isTabletOrMobile) {
+        return null;
     }
     return (
-        <Navbar className={twJoin(
+        <Navbar
+            shadow={false}
+            className={twJoin(
             'min-h-screen w-auto',
             'px-6 py-4',
             'bg-transparent border-none',
@@ -262,7 +343,7 @@ function DashboardFooter({...props}: IDashboardFooterProps) {
 export function DashboardMain({className, children}: IDashboardMainProps) {
     return (
         <main className={twMerge(
-            'h-full w-full overflow-auto px-4',
+            'h-full w-full overflow-auto px-4 shadow-none',
             className
         )}>
             {children}
@@ -272,11 +353,12 @@ export function DashboardMain({className, children}: IDashboardMainProps) {
 
 export function Dashboard() {
     const location = useLocation();
+    const {isMobile, isTabletOrMobile} = useMedia();
     const forEmbed = new URLSearchParams(location.search).get('forEmbed') || 'false';
     const [user, setUser] = useState<TUser>();
     const [merchant, setMerchant] = useState<TMerchant>();
     const [profile, setProfile] = useState<TProfile>();
-    const [email, setEmail] = useState<string>('');
+    const [id,setId] = useState<string>('');
     const dispatch = useDispatch();
 
     const [filters, setFilters] = useState<string[]>([]);
@@ -287,32 +369,29 @@ export function Dashboard() {
         axios.get(`${config.server.url}/auth/login`, {
             withCredentials: true
         }).then(res => {
-            console.log('res', res);
-            setEmail(res.data.user.email);
+            setId(res.data.user.id);
         }).catch(err => {
             console.error(err);
         });
     }
     const loadUser = async () => {
-        if (!email) return;
-        axios.get(`${config.server.url}/users/search`, {
+        if (!id) return;
+        axios.get(`${config.server.url}/users/${id}`, {
             withCredentials: true,
             params: {
                 relations: ['profile', 'merchant'],
-                where: {
-                    email: email
-                },
             }
         }).then(res => {
-            const user: TUser = res.data;
-            setUser(res.data);
-            setProfile(res.data.profile.data);
+            const user = res.data;
+            setUser(user);
+            setProfile(user.profile.data);
             dispatch(setIsAuthenticated(true));
         }).catch(err => {
             console.error(err);
         });
     };
     const loadMerchant = async () => {
+        if (!user?.merchant) return;
         if (!user?.merchant?.id) return;
         axios.get(`${config.server.url}/merchants/${user?.merchant?.id}`, {
             withCredentials: true,
@@ -330,10 +409,15 @@ export function Dashboard() {
     }, []);
     useEffect(() => {
         loadUser().then().catch();
-    }, [email]);
+    }, [id]);
     useEffect(() => {
         loadMerchant().then().catch();
     }, [user]);
+    useEffect(() => {
+        let currentPath = location.pathname.split('/')[2] || '';
+        currentPath = currentPath.charAt(0).toUpperCase() + currentPath.slice(1);
+        document.title = `Dashboard ${currentPath} | Graviad`;
+    }, [location]);
     return (
         <FilterInputContext.Provider value={{
             handleFilter,
@@ -358,6 +442,8 @@ export function Dashboard() {
                             <DashboardMain className={'col-start-2 row-start-2 row-span-2 col-span-2'}>
                                 <Outlet/>
                             </DashboardMain>
+                            {isMobile &&
+                                <DashboardToolbar className={'fixed bottom-0 left-1/2 -translate-x-1/2 mb-4'}/>}
                         </div>
                     </UserContext.Provider>
                 </MerchantContext.Provider>

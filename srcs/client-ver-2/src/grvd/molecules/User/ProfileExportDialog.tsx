@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useEffect} from "react";
 import {
     Dialog,
     DialogBody,
@@ -13,6 +13,7 @@ import {twJoin} from "tailwind-merge";
 import {useParams} from "react-router-dom";
 import * as htmlToImage from 'html-to-image';
 import jsFileDownload from 'js-file-download';
+import {useToolbar} from "grvd/pages";
 
 export type TObjectExportType = 'profile' | 'card';
 export type TDataExportType = 'image' | 'url' | 'embed';
@@ -207,6 +208,7 @@ export function ProfileObjectExportTypesArea(props: IProfileExportObjectTypesAre
 export function ProfileExportDialog(props: IProfileExportDialogProps) {
     const {} = props;
     const {id} = useParams();
+    const {buttonSave}=useToolbar()
     const [isOpenExportDialog, setIsOpenExportDialog] = React.useState(false);
     const [isExporting, setIsExporting] = React.useState(false);
     const [isExported, setIsExported] = React.useState(false);
@@ -361,13 +363,22 @@ export function ProfileExportDialog(props: IProfileExportDialogProps) {
         }
         console.log(error);
     }, [dataExportType]);
+    const beforeAll = () => {
+        buttonSave.onClick = handleExport;
+    };
+    useEffect(() => {
+        beforeAll();
+    }, []);
     return (
         <DataExportTypeContext.Provider value={{dataExportType, setDataExportType}}>
             <ObjectExportTypeContext.Provider value={{objectExportType, setObjectExportType}}>
                 <Button
                     colorcustom={'secondary'}
                     sizecustom={'lg'}
-                    className={'bg-[rgb(157,157,157)]/25 flex flex-row gap-2 items-center justify-center w-fit h-fit backdrop-blur-[25px] relative'}
+                    className={twJoin(
+                        'flex flex-row gap-2 items-center justify-center w-fit h-fit backdrop-blur-[25px] relative',
+                        props.className
+                    )}
                     onClick={handleOpenSelectionDialog}
                 >
                     Export

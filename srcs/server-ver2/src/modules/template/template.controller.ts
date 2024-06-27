@@ -17,8 +17,14 @@ export class TemplateController {
     }
 
     @Get(':id')
-    async get(@Query() query: IQuery) {
-        return await this.templateService.findOne(query);
+    async get(@Query() query: IQuery, @Param('id') id: number){
+        return await this.templateService.findOne({
+            ...query,
+            where: {
+                id: id,
+                ...query.where
+            }
+        });
     }
 
     @Post()

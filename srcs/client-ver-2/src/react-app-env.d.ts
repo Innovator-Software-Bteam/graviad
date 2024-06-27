@@ -66,6 +66,7 @@ declare module 'grvd' {
         socialLinks?: any [];
         numberOfLikes?: number;
         numberOfProducts?: number;
+        userId?: string;
         avatar?: TAvatar2D;
         avatarId?: string;
         followers?: TUser[];

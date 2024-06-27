@@ -1,5 +1,5 @@
 import {IBoardProps} from "./index";
-import {Card} from "@material-tailwind/react";
+import {Card, Carousel} from "@material-tailwind/react";
 import {ProductCardsContainer} from "grvd/molecules";
 import React from "react";
 import {twJoin} from "tailwind-merge";
@@ -11,14 +11,30 @@ import {useDialog} from "grvd/organisms";
 
 export function Board({children}: IBoardProps) {
     return (
-        <Card className={twJoin(
-            'bg-grvd-theme-sys-dark-surface-container-lowest',
-            'rounded-3xl w-full aspect-video'
-        )}
-              shadow={false}
+        <Carousel
+            autoplay={true}
+            autoplayDelay={5000}
+            loop={true}
+            transition={{duration: 1}}
+            className={twJoin(
+                'w-full h-full rounded-[32px]',
+            )}
         >
-            {children}
-        </Card>
+            <img
+                src={'/assets/board_poster_1.png'}
+                alt={'dashboard_demo'}
+                className={twJoin(
+                    'bottom-0 object-cover w-full'
+                )}
+            />
+            <img
+                src={'/assets/board_poster_2.png'}
+                alt={'dashboard_demo'}
+                className={twJoin(
+                    'bottom-0 object-cover w-full'
+                )}
+            />
+        </Carousel>
     );
 }
 

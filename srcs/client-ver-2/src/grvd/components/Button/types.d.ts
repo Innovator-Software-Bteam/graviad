@@ -14,7 +14,7 @@ export type TButtonWithLoadingLabel = {
 }
 
 export interface IButtonWithLoadingProps extends IButtonProps {
-    isloading: boolean;
+    isloading?: boolean;
     isdone?: boolean;
     iserror?: boolean;
     textloading?: string;

@@ -5,6 +5,7 @@ import {Board, BoardAdvertisement, BoardTopMerchant} from "grvd/molecules/Board"
 import {twJoin} from "tailwind-merge";
 import {useNavigate} from "react-router-dom";
 import {TRedirectURL} from "grvd";
+import {useMedia} from "grvd/reponsive";
 
 
 export type TDashboardBoard = {
@@ -20,6 +21,7 @@ export type TDashboardBoard = {
 
 export function DashboardHomePage() {
     const navigate = useNavigate();
+    const {isMobile} = useMedia();
     const boards: TDashboardBoard[] = [
         {
             board: <Board/>,
@@ -43,6 +45,7 @@ export function DashboardHomePage() {
         },
     ];
     const renderBoard = (board: TDashboardBoard, key: any) => {
+        if(isMobile && board.col === 3) return null;
         return (
             <div
                 key={key}
@@ -69,9 +72,11 @@ export function DashboardHomePage() {
     return (
         <div className={twJoin(
             'grid',
-            'grid-cols-3',
             'grid-rows-[repeat(auto-fill,auto-fill)]',
-            'gap-16'
+            'gap-16',
+
+            'grid-cols-2',
+            'md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-3',
         )}>
             {
                 boards.map((board, index) => renderBoard(board, index)

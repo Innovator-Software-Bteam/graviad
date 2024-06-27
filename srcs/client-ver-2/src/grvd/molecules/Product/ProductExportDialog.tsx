@@ -380,7 +380,10 @@ export function ProductExportDialog(props: IProfileExportDialogProps) {
                 <Button
                     colorcustom={'secondary'}
                     sizecustom={'lg'}
-                    className={'bg-[rgb(157,157,157)]/25 flex flex-row gap-2 items-center justify-center w-fit h-fit backdrop-blur-[25px] relative'}
+                    className={twJoin(
+                        'flex flex-row gap-2 items-center justify-center w-fit h-fit relative',
+                        props.className
+                    )}
                     onClick={handleOpenSelectionDialog}
                 >
                     Export

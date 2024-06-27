@@ -23,6 +23,21 @@ const ContactPage = React.lazy<FC>(() =>
         .then(module => ({default: module.ContactPage}
         ))
 );
+const PricingPage = React.lazy<FC>(() =>
+    import('grvd/pages/Homepage/pricing/PricingPage')
+        .then(module => ({default: module.PricingPage}
+        ))
+);
+const PrivacyPage = React.lazy<FC>(() =>
+    import('grvd/pages/Homepage/privacy/PrivacyPage')
+        .then(module => ({default: module.PrivacyPage}
+        ))
+);
+const NotFoundPage = React.lazy(() =>
+    import('grvd/pages/404/NotFoundPage')
+        .then(module => ({default: module.NotFoundPage}))
+);
+
 export const HomepageRouter =
     <Route path={'homepage'} element={
         <ProtectedHomepageRoute>
@@ -34,4 +49,7 @@ export const HomepageRouter =
         <Route path={'home'} element={<HomePage/>}/>
         <Route path={'about'} element={<AboutPage/>}/>
         <Route path={'contact'} element={<ContactPage/>}/>
+        <Route path={'pricing'} element={<PricingPage/>}/>
+        <Route path={'privacy'} element={<PrivacyPage/>}/>
+        <Route path="*" element={<NotFoundPage/>}/>
     </Route>;

@@ -6,6 +6,7 @@ import {useNavigate} from "react-router-dom";
 import {Typography} from "@material-tailwind/react";
 import {FaSquareFacebook} from "react-icons/fa6";
 import {FaGoogle} from "react-icons/fa";
+import {useUser} from "grvd/contexts";
 
 enum ListContentOfLoginPage {
     TITLE = 'Welcome to Graviad',
@@ -27,7 +28,7 @@ export function LoginThirdPartyArea() {
             'transition-all duration-500 ease-in-out',
             'flex flex-col items-center justify-center gap-8',
         )}>
-            <div>
+            <div className={'flex flex-col items-center justify-center gap-2 w-full'}>
                 <Typography
                     variant={'h1'}
                     className={twMerge(
@@ -38,7 +39,8 @@ export function LoginThirdPartyArea() {
                         'mt-10',
                     )}
                 >
-                    Welcome to <br/> Graviad
+                    Welcome <br/>
+                    to Graviad
                 </Typography>
                 <Typography
                     variant={'paragraph'}
@@ -51,7 +53,7 @@ export function LoginThirdPartyArea() {
                 </Typography>
             </div>
             <div className={twMerge(
-                'flex flex-row gap-8 items-center',
+                'flex flex-col gap-4 items-center',
                 'w-full'
             )}>
                 <Button
@@ -77,23 +79,39 @@ export function LoginThirdPartyArea() {
                     Facebook
                 </Button>
             </div>
+            <Typography
+                variant={'paragraph'}
+                className={twMerge(
+                    'text-center text-base break-words font-normal text-grvd-theme-sys-dark-on-secondary-variant',
+                    'max-w-[30em]'
+                )}
+            >
+                By clicking on the button above, you agree to Graviad's <u><a
+                href={'/privacy'}>Privacy Policy</a></u>.
+            </Typography>
         </div>
     );
 
 }
 
 export function LoginPage() {
+    const user=useUser();
+    const navigate = useNavigate();
+    if(user){
+        navigate('/dashboard');
+    }
     return (
-        <div className={'min-h-[100vh] h-full'}>
+        <div className={twJoin(
+            'min-h-[100vh] h-full px-16',
+            'sm:px-16 md:px-[20vw] lg:px-[30vw] xl:px-[40vw]',
+            'relative'
+        )}>
             <LoginThirdPartyArea/>
-            <div
-                className={twJoin(
-                    'w-full h-[50vh]',
-                    'bg-[linear-gradient(180deg,_rgba(2,_103,_255,_0.25)_0%,_rgba(248,_4,_253,_0.25)_100%)] blur-[300px] -z-20',
-                    'rounded-full',
-                    'absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2',
-                )}
-            />
+            <div className={twJoin(
+                'w-[50%] h-[80vh] -translate-y-1/2 rounded-full',
+                'bg-gradient-to-b from-[#0029FF] from-22.3% to-rgba(0,41,255,0.50) to-56.32% blur-[200px]',
+                'absolute -top-1/4 left-1/2 transform -translate-x-1/2 -translate-y-1/2 -z-20',
+            )}/>
         </div>
     )
 }

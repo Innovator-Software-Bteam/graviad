@@ -6,19 +6,20 @@ import {
 } from "grvd/molecules/Product";
 import {useForm} from "react-hook-form";
 import {TProduct, TProductFeature, TProductFeatureKey, TThumbnail2D} from "grvd";
-import {Card, Spinner, Typography} from "@material-tailwind/react";
+import {Card, Typography} from "@material-tailwind/react";
 import React, {useContext, useEffect, useState} from "react";
 import axios from "axios";
 import config from "../../../config";
-import {Button, ButtonWithLoading, InputTypeFile, InputWithTitle, TextareaWithTitle} from "grvd/components";
-import {CiHeart} from "react-icons/ci";
+import {Button, InputTypeFile, InputWithTitle, TextareaWithTitle, Spinner} from "grvd/components";
 import {twJoin} from "tailwind-merge";
 import {MdDeleteForever} from "react-icons/md";
 import {TInput} from "grvd/molecules";
 import {ProductContext, useProduct} from "grvd/contexts";
-import {DialogErrorContext, useDialog} from "grvd/organisms";
+import {useDialog} from "grvd/organisms";
 import {useParams} from "react-router-dom";
-import {decode, encode} from "base64-arraybuffer";
+import {encode} from "base64-arraybuffer";
+import {useToolbar} from "grvd/pages";
+import {FaHeart, FaRegHeart} from "react-icons/fa6";
 
 type TProductFormContext = {
     productForm: TProduct | null;
@@ -48,6 +49,9 @@ export function ProductFeatureEditArea({features, setFeatures}: IProductFeatureE
     const handleFeatureChange = (index: number, key: TProductFeatureKey, value: string) => {
         const newFeatures = [...features || []];
         newFeatures[index][key] = value;
+        if (product?.features[index].id) {
+            newFeatures[index].id = product?.features[index].id;
+        }
         setFeatures(newFeatures);
     };
 
@@ -138,7 +142,7 @@ export function ProductDetailFormArea({className}: IProductDetailForm) {
     const [features, setFeatures] = useState<TProductFeature[]>(product?.features || []);
     const [fileThumbnail, setFileThumbnail] = React.useState<File | null>(null);
     const [name, setName] = useState<string>('');
-    const [price, setPrice] = useState<number>(0);
+    const [price, setPrice] = useState<string>('0');
     const [highlightLabel, setHighlightLabel] = useState<string>('');
     const [version, setVersion] = useState<string>('');
     const [brief, setBrief] = useState<string>('');
@@ -164,6 +168,7 @@ export function ProductDetailFormArea({className}: IProductDetailForm) {
     const {
         open,
     } = useDialog();
+    const {setButtonSave} = useToolbar()
     const {
         register,
         handleSubmit,
@@ -172,7 +177,9 @@ export function ProductDetailFormArea({className}: IProductDetailForm) {
             isSubmitting,
             isSubmitSuccessful,
             isSubmitted,
-        }
+            isLoading,
+        },
+        reset
     } = useForm<TProductDetailForm>({
         mode: 'onBlur',
         reValidateMode: 'onChange',
@@ -200,7 +207,7 @@ export function ProductDetailFormArea({className}: IProductDetailForm) {
         price: {
             title: 'Price',
             register: register('price', {
-                onChange: (e) => setPrice(parseFloat(e.target.value)),
+                onChange: (e) => setPrice(e.target.value),
             }),
         },
         label: {
@@ -264,6 +271,7 @@ export function ProductDetailFormArea({className}: IProductDetailForm) {
         })
     }, [name, price, highlightLabel, version, brief, link, description, features, numberOfLikes, fileThumbnail, thumbnail2D]);
     const onSubmit = async (data: TProductDetailForm) => {
+        console.log(features);
         await axios.patch(`${config.server.url}/products/${product?.id}`,
             {
                 ...data,
@@ -277,22 +285,56 @@ export function ProductDetailFormArea({className}: IProductDetailForm) {
                 withCredentials: true,
             })
             .then(res => {
-
             })
             .catch(err => {
                 open('Something went wrong. Please try again!')
                 console.log(err);
             });
-    }
+    };
+    const onChange = () => {
+        if(!isSubmitSuccessful) return;
+        reset({
+            name,
+            highlightLabel,
+            version,
+            brief,
+            link,
+            description,
+            features,
+            numberOfLikes,
+            price,
+        }, {
+            keepIsSubmitSuccessful: false,
+            keepErrors: false,
+            keepIsSubmitted: false,
+        })
+    };
     useEffect(() => {
     }, [features]);
+    useEffect(() => {
+        if (setButtonSave) {
+            setButtonSave({
+                isloading: isSubmitting && isLoading,
+                isdone: isSubmitSuccessful,
+                label: {
+                    labelDefault: 'Save',
+                    labelLoading: 'Saving...',
+                    labelDone: 'Saved',
+                    labelError: 'Error',
+                },
+                children: 'Save',
+            });
+        }
+    }, [isSubmitting, isLoading, isSubmitSuccessful]);
     return (
         <form
             className={twJoin(
                 'min-w-fit flex flex-col gap-4',
                 className
             )}
+            id={'product-form'}
             onSubmit={handleSubmit(onSubmit)}
+            onChange={onChange}
         >
             <div className={'flex flex-row justify-between items-center'}>
                 <input
@@ -303,10 +345,11 @@ export function ProductDetailFormArea({className}: IProductDetailForm) {
                 <Typography
                     variant='paragraph'
                     className={twJoin(
-                        'flex flex-row items-center gap-2 text-grvd-theme-sys-dark-primary'
+                        'flex flex-row items-center gap-2 text-grvd-theme-sys-dark-primary font-semibold',
+                        'text-red-700'
                     )}
                 >
-                    <CiHeart size={20}/>
+                    <FaHeart size={20}/>
                     {product?.numberOfLikes}
                 </Typography>
             </div>
@@ -359,22 +402,6 @@ export function ProductDetailFormArea({className}: IProductDetailForm) {
                 file={fileThumbnail}
                 {...inputItems.fileThumbnail.register}
             />
-            <ButtonWithLoading
-                type={'submit'}
-                colorcustom={'primary'}
-                sizecustom={'lg'}
-                isloading={isSubmitting}
-                isdone={isSubmitSuccessful}
-                iserror={isSubmitted && !isSubmitSuccessful}
-                label={{
-                    labelDefault: 'Save',
-                    labelLoading: 'Saving...',
-                    labelDone: 'Saved',
-                    labelError: 'Error',
-                }}
-            >
-                Save
-            </ButtonWithLoading>
         </form>
     );
 
@@ -415,7 +442,7 @@ export function ProductDetailPreviewArea({className}: any) {
                     />
                     :
                     <div className={'absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2'}>
-                        <Spinner className="h-12 w-12"/>
+                        <Spinner size={32}/>
                     </div>
                 }
             </Card>
@@ -425,32 +452,11 @@ export function ProductDetailPreviewArea({className}: any) {
 
 export function ProductDetailForEdit({}: IProductDetailForEditProps) {
     const {id} = useParams();
-    const [prod, setProd] = useState<TProduct>();
     const product = useProduct();
     const [productForm, setProductForm] = useState<TProduct | null>(null);
     const {
         open,
     } = useDialog();
-    useEffect(() => {
-    }, [product]);
-    const loadProduct = async () => {
-        await axios.get(`${config.server.url}/products/${id}`,
-            {
-                withCredentials: true,
-            })
-            .then(res => {
-                res.data.dateRelease = new Date(res.data.dateRelease);
-                setProd(res.data);
-                setProductForm(res.data);
-            })
-            .catch(err => {
-                open('Something went wrong. Please try again!', 'error');
-                console.log(err);
-            });
-    };
-    useEffect(() => {
-        loadProduct();
-    }, []);
 
     return (
         <div>

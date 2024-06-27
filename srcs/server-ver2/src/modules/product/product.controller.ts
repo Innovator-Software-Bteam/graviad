@@ -13,7 +13,6 @@ import {
 } from '@nestjs/common';
 import {ProductService} from "@app/modules/product/product.service";
 import {CreateProductDTO, UpdateProductDTO} from "@app/modules/product";
-import {AuthGuard} from "@app/modules/auth";
 import {IProductQuery} from "@app/modules/product/product.interface";
 
 @Controller('products')

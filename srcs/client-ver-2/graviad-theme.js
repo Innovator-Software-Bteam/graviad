@@ -12,7 +12,7 @@ const grvdTheme = {
                     "secondary": "#1a1a1a",
                     "on-primary-variant": "#9A9A9A",
                     "on-secondary": "#ffffff",
-                    "tertiary": "#1A5DCD",
+                    "tertiary": "#1B48E8",
                     "on-tertiary": "#006382",
                     "quaternary": "#B00DFD",
                     "error": "#cc0000",
@@ -23,12 +23,12 @@ const grvdTheme = {
                     "surface": "#151515",
                     "on-surface": "#ffffff",
                     "surface-container-lowest": "#060606",
-                    "surface-container-lower": "#080808",
-                    "surface-container-low": "#0d0d0d",
-                    "surface-container": "#1f1f1f",
-                    "surface-container-high": "#252525",
-                    "surface-container-higher": "#2f2f2f",
-                    "surface-container-highest": "#444444",
+                    "surface-container-lower": "hsl(0, 0%, 3%)",
+                    "surface-container-low": "hsl(0, 0%, 5%)",
+                    "surface-container": "hsl(0, 0%, 8%)",
+                    "surface-container-high": "hsl(0, 0%, 10%)",
+                    "surface-container-higher": "hsl(0, 0%, 12%)",
+                    "surface-container-highest": "hsl(0, 0%, 15%)",
                     "on-secondary-variant": "#8F8F8F"
                 }
             },
@@ -130,9 +130,11 @@ const grvdTheme = {
     fontFamily: {inter: 'Inter', sans: 'sans-serif'},
     boxShadow:
         {
-            'grvd-theme/shadow/shadow-medium': '2px 2px 4px 0px rgba(0,0,0,0.25)',
-            'grvd-theme/shadow/shadow-large': '2px 2px 8px 0px rgba(0,0,0,0.3)',
-            'grvd-theme/shadow/shadow-small': '2px 2px 2px 0px rgba(0,0,0,0.1)'
+            'none': 'none',
+            md: '0px 0px 16px 0px rgba(0,0,0,0.25)',
+            lg: '0px 0px 24px 0px rgba(0,0,0,0.5)',
+            sm: '0px 0px 8px 0px rgba(0,0,0,0.1)',
+
         },
     borderRadius:
         {

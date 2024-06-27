@@ -11,7 +11,7 @@ import {
     Query, Search, UseGuards
 } from '@nestjs/common';
 import {UserService} from "@app/modules/user/user.service";
-import {UserDto} from "@app/modules/user/dto";
+import {CreateUserDto} from "@app/modules/user/dto";
 import {IUserQuery} from "@app/modules/user/user.interface";
 import {UserGuard} from "@app/modules/user/guards";
 import {AuthGuard} from "@app/modules/auth";
@@ -65,7 +65,7 @@ export class UserController {
 
     @Post()
     // @UseGuards(AuthGuard)
-    async create(@Body() body: UserDto) {
+    async create(@Body() body: CreateUserDto) {
         return await this.userService
             .create(body);
     }
@@ -99,7 +99,7 @@ export class UserController {
     @Put(':id')
     @UseGuards(AuthGuard)
     @UseGuards(UserGuard)
-    async update(@Param('id') id: string, @Body() body: UserDto) {
+    async update(@Param('id') id: string, @Body() body: CreateUserDto) {
         return await this.userService
             .update(id, body)
     }

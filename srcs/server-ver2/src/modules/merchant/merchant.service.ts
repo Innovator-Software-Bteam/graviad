@@ -15,6 +15,7 @@ import {Repository} from "typeorm";
 import {IMerchantAction} from "@app/modules/merchant/merchant.interface";
 import {TemplateService} from "@app/modules/template/template.service";
 import {query} from "express";
+import {UserService} from "@app/modules/user";
 
 @Injectable()
 export class SocialLinkService implements IDatabaseCRUD<SocialLink, CreateSocialLinkDto, UpdateSocialLinkDto> {
@@ -131,19 +132,32 @@ export class MerchantService implements IDatabaseCRUD<Merchant, CreateMerchantDt
         private readonly avatar2DService: AvatarService,
         @Inject(forwardRef(() => TemplateService))
         private readonly templateService: TemplateService,
+        @Inject(forwardRef(() => UserService))
+        private readonly userService: UserService,
     ) {
     }
 
     async create(dto: CreateMerchantDto): Promise<Merchant> {
-        return await this.merchantRepository.save({
-            name: dto.name,
-            address: dto.address,
-            description: dto.description,
-            numberOfLikes: dto.numberOfLikes,
-            numberOfProducts: dto.numberOfProducts,
-            slogan: dto.slogan,
-            phone: dto.phone,
+        if (!dto.userId) throw new BadRequestException('User id is required');
+        const user = await this.userService.findOne({
+            where:
+                {
+                    id: dto.userId
+                }
         });
+        if (!user) throw new BadRequestException('User not found');
+        let merchant = new Merchant();
+        if (dto.name) merchant.name = dto.name;
+        if (dto.address) merchant.address = dto.address;
+        if (dto.description) merchant.description = dto.description;
+        if (dto.slogan) merchant.slogan = dto.slogan;
+        if (dto.phone) merchant.phone = dto.phone;
+        if (dto.email) merchant.email = dto.email;
+        merchant= await this.merchantRepository.save(merchant);
+        await this.userService.update(user.id, {
+            merchantId: merchant.id
+        });
+        return merchant;
     }
 
     async delete(id: any): Promise<any> {
@@ -182,11 +196,10 @@ export class MerchantService implements IDatabaseCRUD<Merchant, CreateMerchantDt
     }
 
     async update(id: string, dto?: UpdateMerchantDto): Promise<any> {
-        if (!id) throw new BadRequestException('id is required');
+        if (!id) throw new BadRequestException('Id is required');
         const merchant: Merchant = await this.findOne({where: {id}});
         if (!merchant) throw new BadRequestException('Merchant not found');
-        if (dto.avatar) {
-            if (!dto.avatar.data) throw new BadRequestException('Avatar data is required');
+        if (dto.avatar && dto.avatar.data) {
             let avatar = await this.avatar2DService.findOne({
                 where: {
                     merchantId: id,
@@ -203,21 +216,22 @@ export class MerchantService implements IDatabaseCRUD<Merchant, CreateMerchantDt
         if (dto.socialLinks && dto.socialLinks.length > 0) {
             const socialLinks: SocialLink[] = [];
             for (const socialLink of dto.socialLinks) {
+                if(!socialLink.provider || !socialLink.data) continue;
                 const socialLinkEntity = await this.socialLinkService.findOne({
                     where: {
                         merchantId: id,
                         provider: socialLink.provider,
                     }
                 });
-                socialLinkEntity.data = socialLink.data;
-                socialLinkEntity.provider = socialLink.provider;
+                socialLinkEntity.data = socialLink?.data;
+                socialLinkEntity.provider = socialLink?.provider;
                 socialLinkEntity.merchantId = id;
                 if (socialLinkEntity) {
                     socialLinks.push(await this.socialLinkService.update(socialLinkEntity.id, socialLinkEntity));
                 } else {
                     socialLinks.push(await this.socialLinkService.create({
-                        data: socialLink.data,
-                        provider: socialLink.provider,
+                        data: socialLink?.data,
+                        provider: socialLink?.provider,
                         merchantId: id,
                     }));
                 }
@@ -233,6 +247,8 @@ export class MerchantService implements IDatabaseCRUD<Merchant, CreateMerchantDt
         if (dto.numberOfProducts) merchant.numberOfProducts = dto.numberOfProducts;
         if (dto.email) merchant.email = dto.email;
         if (dto.phone) merchant.phone = dto.phone;
+        if (dto.usingTemplateProfileCardId) merchant.usingTemplateProfileCardId = dto.usingTemplateProfileCardId;
+
         return await this.merchantRepository
             .save(merchant)
     }

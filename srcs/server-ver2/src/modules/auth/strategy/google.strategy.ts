@@ -30,7 +30,9 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
         const {emails} = profile;
         const email = emails[0].value;
         const newProfile = await this.profileService.findOrCreate(profile.id, {
-            ...profile
+            id: profile.id,
+            data: profile,
+            provider: 'google',
         })
 
         const user: User = await this.userService.findOrCreateByEmail(email, {
