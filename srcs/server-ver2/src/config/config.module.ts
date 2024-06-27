@@ -1,3 +1,0 @@
-// Implement config module
-
-export {}
