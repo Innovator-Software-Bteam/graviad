@@ -31,6 +31,7 @@ exports.default = (0, config_1.registerAs)('database', () => ({
     username: process.env.GRAVIAD_DATABASE_USERNAME,
     password: process.env.GRAVIAD_DATABASE_PASSWORD,
     database: process.env.GRAVIAD_DATABASE_NAME,
+    ssl: process.env.GRAVIAD_DATABASE_SSL === 'true',
     type: process.env.GRAVIAD_DATABASE_ORM_TYPE,
     synchronize: process.env.GRAVIAD_DATABASE_ORM_SYNCHRONIZE === 'true',
     logging: process.env.GRAVIAD_DATABASE_ORM_LOGGING === 'true',
