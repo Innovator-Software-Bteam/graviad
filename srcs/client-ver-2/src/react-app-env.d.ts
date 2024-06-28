@@ -24,10 +24,12 @@ declare namespace NodeJS {
         REACT_APP_GRAVIAD_SERVER_SCHEMA: string;
         REACT_APP_GRAVIAD_SERVER_HOST: string;
         REACT_APP_GRAVIAD_SERVER_PORT: number;
+        REACT_APP_GRAVIAD_SERVER_URL: string;
 
         REACT_APP_GRAVIAD_CLIENT_SCHEMA: string;
         REACT_APP_GRAVIAD_CLIENT_HOST: string;
         REACT_APP_GRAVIAD_CLIENT_PORT: number;
+        REACT_APP_GRAVIAD_CLIENT_URL: string;
     }
 }
 declare module 'grvd' {
