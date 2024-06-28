@@ -15,7 +15,7 @@ import {TemplateController} from "@app/modules/template/template.controller";
 @Module({
     imports: [
         ConfigModule.forRoot({
-            envFilePath: ['.env.production'],
+            envFilePath: ['.env.development', '.env', '.env.production'],
             isGlobal: true,
             load: [databaseConfig, graviadConfig],
         }),

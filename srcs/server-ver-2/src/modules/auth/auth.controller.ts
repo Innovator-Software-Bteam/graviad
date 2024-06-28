@@ -60,10 +60,10 @@ export class AuthController {
 
     @Get('google/callback')
     @UseGuards(GoogleOAuthGuard)
-    @Redirect(`${process.env.GRAVIAD_CLIENT_URL}/homepage/login\``, HttpStatus.FOUND)
+    @Redirect(`${process.env.GRAVIAD_CLIENT_URL}/dashboard`, HttpStatus.FOUND)
     googleAuthRedirect(@Req() req: Request) {
         return {
-            url: `${process.env.GRAVIAD_CLIENT_URL}/homepage/login`
+            url: `${process.env.GRAVIAD_CLIENT_URL}/dashboard`
         }
     }
 

@@ -45,6 +45,9 @@ export class Product {
     @Column({type: 'int', nullable: true, name: 'number_of_likes'})
     numberOfLikes: number;
 
+    @Column({type: 'varchar', nullable: true, name: 'media_from_spline_id'})
+    mediaFromSplineId: string;
+
     @OneToOne(() => ProductThumbnail2D, {cascade: true})
     @JoinColumn({name: 'thumbnail_id'})
     thumbnail2D: ProductThumbnail2D;

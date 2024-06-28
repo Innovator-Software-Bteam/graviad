@@ -104,6 +104,11 @@ export class ProductMediaFromSplineService implements IDatabaseCRUD<ProductMedia
         productMediaFromSpline.data = dto.data;
         return await this.productMediaFromSplineRepository.save(productMediaFromSpline);
     }
+
+    async findOne(query: IQuery): Promise<ProductMediaFromSpline> {
+        return await this.productMediaFromSplineRepository.findOne(query);
+    }
+
 }
 
 @Injectable()
@@ -198,6 +203,7 @@ export class ProductService implements IProductCRUD,
         product.highlightLabel = dto.highlightLabel;
         product.numberOfLikes = dto.numberOfLikes;
         product.merchantId = dto.merchantId;
+        product.mediaFromSplineId = dto.mediaFromSplineId;
 
         if (dto.thumbnail2D) {
             product.thumbnail2D = await this.productThumbnailService.create(dto.thumbnail2D);
@@ -275,6 +281,7 @@ export class ProductService implements IProductCRUD,
         product.dateRelease = dto.dateRelease || product.dateRelease;
         product.highlightLabel = dto.highlightLabel || product.highlightLabel;
         product.numberOfLikes = dto.numberOfLikes || product.numberOfLikes;
+        product.mediaFromSplineId = dto.mediaFromSplineId || product.mediaFromSplineId;
         if (dto.features) {
             console.log(dto.features);
             for (const feature of dto.features) {
@@ -291,11 +298,9 @@ export class ProductService implements IProductCRUD,
                 product.features = [...product.features, featureEntity];
             }
         }
+
         if (dto.thumbnail2D) {
             product.thumbnail2D = await this.productThumbnailService.update(product.thumbnail2D.id, dto.thumbnail2D);
-        }
-        if (dto.mediaFromSpline) {
-            product.mediaFromSpline = await this.productMediaFromSplineService.update(product.mediaFromSpline.id, dto.mediaFromSpline);
         }
         product.likedBy = dto.likedBy || product.likedBy;
         return await this.productRepository.save(product);
