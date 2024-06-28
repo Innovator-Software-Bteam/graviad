@@ -15,7 +15,7 @@ async function bootstrap() {
 
     app.use(cookieParser());
     app.use(cors({
-        origin: configService.get('GRAVIAD_CLIENT_URL'),
+        origin: ['https://graviad.vercel.app', 'http://localhost:3000'],
         credentials: true,
         methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
         allowedHeaders: ['Content-Type', 'Authorization'],
