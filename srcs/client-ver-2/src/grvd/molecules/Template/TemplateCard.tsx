@@ -10,6 +10,7 @@ import config from "../../../config";
 import {IoIosRemove} from "react-icons/io";
 import {Button} from "grvd/components/Button";
 import {useDialog} from "grvd/organisms";
+import {ProtectedFeatureRequiredLogin} from "grvd/protected";
 
 export interface ITemplateCardProps extends React.ComponentProps<'div'> {
 
@@ -148,6 +149,7 @@ export function TemplateCardTool(props: ITemplateCardToolProps) {
             >
                 {items.map(renderInfoItem)}
             </div>
+            <ProtectedFeatureRequiredLogin>
             {
                 usingTemplateProfileCardId === template?.id ?
 
@@ -166,6 +168,7 @@ export function TemplateCardTool(props: ITemplateCardToolProps) {
                         Use
                     </Button>
             }
+            </ProtectedFeatureRequiredLogin>
             {
                 !templateIds.includes(template?.id as any) ?
                     <button className={twJoin(

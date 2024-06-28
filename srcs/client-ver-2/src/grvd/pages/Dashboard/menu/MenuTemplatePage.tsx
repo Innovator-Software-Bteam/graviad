@@ -14,6 +14,7 @@ import {ProfileCard} from "grvd/molecules";
 import {TemplateContext} from "grvd/molecules/Template/TemplateContext";
 import {useFilterInput} from "grvd/organisms/SearchInput/FilterInputContext";
 import {twJoin} from "tailwind-merge";
+import {TSocialLink} from "grvd";
 
 export interface IMenuTemplatePageProps extends IPageProps {
 }
@@ -39,13 +40,36 @@ export function MenuTemplatePage(props: IMenuTemplatePageProps) {
         console.log(templates);
     }, []);
     return (
-        <MerchantContext.Provider value={user?.merchant}>
+        <MerchantContext.Provider value={{
+            name: 'Merchant\'s name',
+            id: 'merchant-id',
+            userId: 'user-id',
+            slogan: 'Merchant\'s slogan',
+            description: 'Merchant\'s description',
+            phone: '0123456789',
+            email: 'example@gmail.com',
+            address: 'Merchant\'s address',
+            socialLinks: [
+                {
+                    provider: 'facebook',
+                    data: 'https://facebook.com',
+                },
+                {
+                    id: 'instagram',
+                    provider: 'https://instagram.com',
+                },
+                {
+                    id: 'twitter',
+                    provider: 'https://twitter.com',
+                },
+            ] as TSocialLink [],
+        }}>
             <div className={twJoin(
                 'grid grid-cols-[repeat(auto-fit,minmax(300px,1fr))] auto-rows-auto',
                 'gap-16',
                 'w-full',
             )}>
-                {templates.filter(template=>{
+                {templates.filter(template => {
                     return handleFilter ? handleFilter(template) : true;
                 }).map((template, index) => {
                     return (
