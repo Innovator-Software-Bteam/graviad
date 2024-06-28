@@ -82,11 +82,6 @@ export class CreateProductDTO {
     readonly thumbnail2D?: CreateProductThumbnailDTO;
 
     @IsOptional()
-    @IsObject({message: 'MediaContext from spline must be an object'})
-    readonly mediaFromSpline?: CreateProductMediaFromSplineDTO;
-
-
-    @IsOptional()
     @IsArray({message: 'Features must be an array'})
     readonly features?: CreateProductFeatureDTO[];
 
@@ -97,6 +92,10 @@ export class CreateProductDTO {
 
     @IsString({message: 'Merchant id must be a string'})
     readonly merchantId: string;
+
+    @IsOptional()
+    @IsString({message: 'Media from spline id must be a string'})
+    readonly mediaFromSplineId: string;
 }
 
 export class UpdateProductDTO extends PartialType(CreateProductDTO) {

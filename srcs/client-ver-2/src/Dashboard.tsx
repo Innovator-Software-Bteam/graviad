@@ -1,9 +1,9 @@
 import React, {useEffect, useState} from "react";
-import {NavLink, Outlet, useLocation, useNavigate, useParams} from 'react-router-dom';
+import {Link, NavLink, Outlet, useLocation, useNavigate, useParams} from 'react-router-dom';
 import {CiSearch} from "react-icons/ci";
 import {HiChevronRight, HiMenuAlt4} from "react-icons/hi";
 import {twJoin, twMerge} from "tailwind-merge";
-import {Input} from "grvd/components";
+import {Button, Input} from "grvd/components";
 import {ProfileShortcut} from "grvd/molecules";
 import {
     List,
@@ -96,22 +96,27 @@ function DashboardHeaderTop({className}: IDashboardHeaderProps) {
                 className
             )}
         >
-            <div className={twMerge(
-                'flex flex-col w-fit',
-                'md:w-fit lg:w-fit'
-            )}>
-                <h6
-                    className={twMerge(
-                        'w-full',
-                        'text-grvd-theme-sys-dark-primary',
-                        'font-medium text-left capitalize',
-                    )}
-                >
-                    {dashboardTitle}
-                </h6>
-                {
-                    !isMobile
-                    &&
+            {
+                isMobile
+                &&
+                <DashboardHeaderLeft/>
+            }
+            {
+                !isMobile
+                &&
+                <div className={twMerge(
+                    'flex flex-col w-fit',
+                    'md:w-fit lg:w-fit'
+                )}>
+                    <h6
+                        className={twMerge(
+                            'w-full',
+                            'text-grvd-theme-sys-dark-primary',
+                            'font-medium text-left capitalize',
+                        )}
+                    >
+                        {dashboardTitle}
+                    </h6>
                     <div className={twMerge(
                         'flex flex-row items-center justify-start gap-2',
                     )}>
@@ -133,9 +138,8 @@ function DashboardHeaderTop({className}: IDashboardHeaderProps) {
                         </NavLink>
                         {Array.from(routerList).map((item, index) => renderRouterListItem(item.title, item.path, index))}
                     </div>
-                }
-            </div>
-
+                </div>
+            }
             <div className={twJoin(
                 'w-full flex items-center justify-center',
             )}>
@@ -185,7 +189,8 @@ export function DashboardToolbar(props: IDashboardToolbarProps) {
 
 function DashboardHeaderLeft({className, ...props}: IDashboardHeaderProps) {
     const navigate = useNavigate();
-    const {isTabletOrMobile} = useMedia();
+    const {isTabletOrMobile, isMobile} = useMedia();
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
     const listItems = [
         {
             title: 'Board',
@@ -289,20 +294,53 @@ function DashboardHeaderLeft({className, ...props}: IDashboardHeaderProps) {
             </div>
         );
     };
-    if (isTabletOrMobile) {
-        return null;
+    if (isMobile) {
+        return (
+            <Menu
+                placement={'bottom-start'}
+                allowHover
+                offset={15}
+                handler={setIsMenuOpen}
+                open={isMenuOpen}
+            >
+                <MenuHandler>
+                    <button>
+                        <HiMenuAlt4 size={24} color={'white'}/>
+                    </button>
+                </MenuHandler>
+                <MenuList
+                    className={twJoin(
+                        'flex flex-col gap-2 items-center justify-center',
+                        'bg-grvd-theme-sys-dark-surface-container rounded-lg !shadow-lg',
+                        'border-none',
+                        'w-[50%]',
+                    )}
+                >
+                    {listItems.map((listGroup) => {
+                        return (
+                            <div
+                                className={'flex flex-col gap-4 w-full'}>
+                                <Typography variant={'h6'}
+                                            className={'font-medium text-grvd-theme-sys-dark-on-primary-variant'}>{listGroup.title}</Typography>
+                                {listGroup.list.map((item, index) => renderListItems({...item, key: index}))}
+                            </div>
+                        )
+                    })}
+                </MenuList>
+            </Menu>
+        );
     }
     return (
         <Navbar
             shadow={false}
             className={twJoin(
-            'min-h-screen w-auto',
-            'px-6 py-4',
-            'bg-transparent border-none',
-            'sticky top-0 left-0',
-            'flex flex-col justify-between',
-            className,
-        )}>
+                'min-h-screen w-auto',
+                'px-6 py-4',
+                'bg-transparent border-none',
+                'sticky top-0 left-0',
+                'flex flex-col justify-between',
+                className,
+            )}>
             <List className={'flex flex-col gap-4'}>
                 {listItems.map((listGroup) => {
                     return (
@@ -359,7 +397,7 @@ export function Dashboard() {
     const [user, setUser] = useState<TUser>();
     const [merchant, setMerchant] = useState<TMerchant>();
     const [profile, setProfile] = useState<TProfile>();
-    const [id,setId] = useState<string>('');
+    const [id, setId] = useState<string>('');
     const dispatch = useDispatch();
 
     const [filters, setFilters] = useState<string[]>([]);
@@ -437,15 +475,17 @@ export function Dashboard() {
                                 'transition-all duration-200 ease-in-out',
                             )}
                         >
-                            {forEmbed === 'false' &&
-                                <DashboardHeaderLeft className={'col-start-1 row-start-1 row-span-full col-span-1'}/>}
+                            {(forEmbed === 'false' && !isMobile) &&
+                                <DashboardHeaderLeft className={'col-start-1 row-start-1 row-span-full col-span-1'}/>
+                            }
                             {forEmbed === 'false' &&
                                 <DashboardHeaderTop className={'col-start-2 row-start-1 col-span-2'}/>}
                             <DashboardMain className={'col-start-2 row-start-2 row-span-2 col-span-2'}>
                                 <Outlet/>
                             </DashboardMain>
                             {isMobile &&
-                                <DashboardToolbar className={'fixed bottom-0 left-1/2 -translate-x-1/2 mb-4'}/>}
+                                <DashboardToolbar className={'fixed bottom-0 left-1/2 -translate-x-1/2 mb-4'}/>
+                            }
                         </div>
                     </UserContext.Provider>
                 </MerchantContext.Provider>

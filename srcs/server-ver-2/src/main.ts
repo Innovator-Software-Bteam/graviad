@@ -12,10 +12,11 @@ async function bootstrap() {
     const app = await NestFactory.create(AppModule);
     const configService = app.get(ConfigService);
     const port = configService.get('GRAVIAD_SERVER_PORT');
+    const sessionCookieSecure = configService.get('GRAVIAD_SESSION_COOKIE_SECURE');
 
     app.use(cookieParser());
     app.use(cors({
-        origin: ['https://graviad.vercel.app', 'http://localhost:3000'],
+        origin: configService.get('GRAVIAD_CLIENT_URL'),
         credentials: true,
         methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
         allowedHeaders: ['Content-Type', 'Authorization'],
@@ -30,6 +31,7 @@ async function bootstrap() {
         resave: false,
         cookie: {
             maxAge: 1000 * 60 * 60, // 1 hour
+            secure: sessionCookieSecure,
         },
         saveUninitialized: false,
     }));

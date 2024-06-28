@@ -94,7 +94,6 @@ export class AvatarService implements IDatabaseCRUD<Avatar, CreateAvatarDTO, Upd
         if (!avatar) throw new BadRequestException('Avatar not found');
         const dataTransfer = Buffer.from(dto.data, 'base64');
         avatar.data = dataTransfer;
-        console.log('dataTransfer', dataTransfer)
         avatar.altTexts = dto.altTexts;
         avatar.merchantId = dto.merchantId;
         return await this.avatar2DRepository.save(avatar);
