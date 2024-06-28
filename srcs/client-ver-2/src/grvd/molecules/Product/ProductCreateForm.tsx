@@ -98,7 +98,7 @@ export function ProductCreateForm() {
     const [version, setVersion] = React.useState('');
     const [brief, setBrief] = React.useState('');
 
-    const MAX_FILE_THUMBNAIL_SIZE = 300 * 1024;
+    const MAX_FILE_THUMBNAIL_SIZE = 500 * 1024;
     const {open: openDialogError} = useDialog();
     const {
         register,
@@ -140,9 +140,7 @@ export function ProductCreateForm() {
                                 data: encode(arrayBuffer),
                             },
                             features: [],
-                            mediaFromSpline: {
-                                data: data.mediaFromSpline?.data || data.mediaFromSpline,
-                            },
+                            mediaFromSplineId: data.mediaFromSpline?.data || data.mediaFromSpline,
                         }, {
                             withCredentials: true
                         })
@@ -214,7 +212,7 @@ export function ProductCreateForm() {
                 onChange: (e) => setFileThumbnail(e.target.files[0]),
                 validate: (files: any) => {
                     if (files[0]?.size > MAX_FILE_THUMBNAIL_SIZE) {
-                        return 'File size should be less than 300KB';
+                        return 'File size should be less than 500KB';
                     }
                     return true;
                 }
@@ -263,28 +261,36 @@ export function ProductCreateForm() {
                         'relative overflow-hidden',
                     )}
                 >
-                    <div>
-                        <div className={twJoin(
-                            'bg-[#0092E4] blur-[75px] w-[180px] h-[180px] rounded-full',
-                            'absolute top-0 left-0 -z-10',
-                        )}/>
-                        <div className={twJoin(
-                            'bg-[#0E50FA] blur-[125px] w-[300px] h-[300px] rounded-full',
-                            'absolute top-0 left-0 -z-10',
-                        )}/>
-                        <div className={twJoin(
-                            'bg-[#003ACF] blur-[100px] w-[200px] h-[200px] rounded-full',
-                            'absolute bottom-0 right-0 -z-10',
-                        )}/>
-                    </div>
+                    {
+                        !isMobile
+                        &&
+                        <div>
+                            <div className={twJoin(
+                                'bg-[#0092E4] blur-[75px] w-[180px] h-[180px] rounded-full',
+                                'absolute top-0 left-0 -z-10',
+                            )}/>
+                            <div className={twJoin(
+                                'bg-[#0E50FA] blur-[125px] w-[300px] h-[300px] rounded-full',
+                                'absolute top-0 left-0 -z-10',
+                            )}/>
+                            <div className={twJoin(
+                                'bg-[#003ACF] blur-[100px] w-[200px] h-[200px] rounded-full',
+                                'absolute bottom-0 right-0 -z-10',
+                            )}/>
+                        </div>
+                    }
                     <div className={twJoin(
                         'z-20',
                         'flex flex-row justify-between gap-4 items-center',
                         'w-full h-full'
                     )}>
-                        <ProductCreateTipsArea className={twJoin(
-                            'z-20',
-                        )}/>
+                        {
+                            !isMobile
+                            &&
+                            <ProductCreateTipsArea className={twJoin(
+                                'z-20',
+                            )}/>
+                        }
                         <form
                             className={twJoin(
                                 'w-full min-w-fit h-full',
@@ -360,7 +366,7 @@ export function ProductCreateForm() {
                                 <Input
                                     type={'url'}
                                     title={inputItems.mediaFromSpline.title}
-                                    placeholder={'MediaContext from spline'}
+                                    placeholder={'Media from spline'}
                                     icon={
                                         <svg width="100%" height="100%" viewBox="0 0 32 32" fill="none"
                                              xmlns="http://www.w3.org/2000/svg"

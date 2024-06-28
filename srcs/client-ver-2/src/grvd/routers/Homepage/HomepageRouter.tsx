@@ -37,7 +37,10 @@ const NotFoundPage = React.lazy(() =>
     import('grvd/pages/404/NotFoundPage')
         .then(module => ({default: module.NotFoundPage}))
 );
-
+const DemoPage = React.lazy(() =>
+    import('grvd/pages/Homepage/demo/DemoPage')
+        .then(module => ({default: module.DemoPage}))
+);
 export const HomepageRouter =
     <Route path={'homepage'} element={
         <ProtectedHomepageRoute>
@@ -51,5 +54,6 @@ export const HomepageRouter =
         <Route path={'contact'} element={<ContactPage/>}/>
         <Route path={'pricing'} element={<PricingPage/>}/>
         <Route path={'privacy'} element={<PrivacyPage/>}/>
+        <Route path={'demo'} element={<DemoPage/>}/>
         <Route path="*" element={<NotFoundPage/>}/>
     </Route>;

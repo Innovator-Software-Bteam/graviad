@@ -9,16 +9,18 @@ import {FaCircleCheck} from "react-icons/fa6";
 import {SyncLoader} from "react-spinners";
 
 const baseButtonClass: TVReturnType<any, any, any, any, any, any> = tv({
-    base: "font-bold normal-case",
+    base: "font-bold normal-case transition-all duration-300 ease-in-out",
     variants: {
         color: {
             'primary': [
                 "!bg-grvd-theme-sys-dark-primary text-grvd-theme-sys-dark-on-primary",
-                '!shadow-[2px_2px_35px_0px_rgba(255,255,255,0.25)]'
+                '!shadow-[2px_2px_35px_0px_rgba(255,255,255,0.25)]',
+                "hover:bg-grvd-theme-ref-primary-500/80",
+                "hover:bg-grvd-theme-ref-primary-500/80",
             ],
             'secondary': [
                 "bg-grvd-theme-sys-dark-secondary text-grvd-theme-sys-dark-on-secondary",
-                "hover:bg-grvd-theme-ref-secondary-500/10 font-semibold"
+                "hover:bg-grvd-theme-ref-secondary-500/80 font-semibold"
             ],
             'tertiary_a': ["bg-grvd-theme-sys-dark-tertiary", "hover:bg-grvd-theme-ref-tertiary-500"],
             'tertiary_b': ["bg-grvd-theme-sys-dark-tertiary", "hover:bg-grvd-theme-ref-tertiary-500"],

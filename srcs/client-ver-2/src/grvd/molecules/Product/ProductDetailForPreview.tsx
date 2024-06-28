@@ -92,8 +92,8 @@ export function ProductPreview3DArea({id, className, ...props}: IProductPreview3
                 className
             )}
         >
-            {product?.mediaFromSpline ?
-                <iframe src={product?.mediaFromSpline?.data}
+            {product?.mediaFromSplineId ?
+                <iframe src={product?.mediaFromSplineId}
                         width='100%' height='100%'></iframe>
                 :
                 <div className={'absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2'}>

@@ -16,7 +16,8 @@ export const Input = React.forwardRef<HTMLInputElement, IInputProps>((props, ref
                 'text-grvd-theme-sys-dark-on-surface',
                 '!bg-grvd-theme-sys-dark-surface-container !border-transparent !border',
                 '!outline-none',
-                '!font-light !text-base',
+                '!text-sm',
+                '!font-light md:!text-base lg:!text-base',
                 'focus:!border-grvd-theme-sys-dark-primary',
                 'placeholder:text-grvd-theme-sys-dark-primary placeholder:opacity-100',
                 'transition-colors duration-200 ease-in-out',
@@ -29,7 +30,7 @@ export const Input = React.forwardRef<HTMLInputElement, IInputProps>((props, ref
                 className: 'hidden'
             }}
             containerProps={{
-                className: 'flex flex-row items-center h-fit' + (props.containerProps?.className ? ' ' + props.containerProps.className : '')
+                className: 'flex flex-row items-center h-fit' + (props.containerProps?.className ? ' ' + props.containerProps.className : '') +' w-full'
             }}
         />
     );
@@ -40,14 +41,18 @@ export const InputWithTitle = React.forwardRef<HTMLInputElement, IInputProps>((p
         props.containerProps?.className
     ])}>
         <Typography className={twJoin(
-            'text-grvd-theme-sys-dark-primary font-semibold text-base'
+            'text-grvd-theme-sys-dark-primary font-semibold text-base w-full'
         )}>
             {props.title}
         </Typography>
         <Input
             {...props}
+            className={'w-full'}
             labelProps={{
                 className: 'hidden'
+            }}
+            containerProps={{
+                className: 'w-full'
             }}
             ref={ref as any}
         />
@@ -61,7 +66,7 @@ export const Textarea = React.forwardRef<HTMLTextAreaElement, ITextAreaProps>((p
         {...props}
         className={twMerge([
             'rounded-lg',
-            '!px-4 !py-3 w-full',
+            '!px-4 !py-3 !w-full',
             'text-grvd-theme-sys-dark-on-surface',
             '!bg-grvd-theme-sys-dark-surface-container !border-transparent !border',
             '!outline-none',

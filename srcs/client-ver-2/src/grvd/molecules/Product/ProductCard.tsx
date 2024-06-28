@@ -199,6 +199,7 @@ export function ProductCard({id, className}: IProductCardProps) {
                     key={prod?.id || id}
                     className={twJoin(
                         'p-6 w-full min-w-[300px] relative max-w-[800px]',
+                        'lg:max-w-[350px]',
                         'justify-between gap-8',
                         'bg-transparent',
                         className

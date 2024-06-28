@@ -119,6 +119,7 @@ declare module 'grvd' {
         data: any;
     }
     type TProduct = {
+        mediaFromSplineId?: string;
         id?: string;
         name: string;
         merchantId: string;

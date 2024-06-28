@@ -54,6 +54,7 @@ export function ProductPageToolbar() {
             >
                 <TiCreditCard size={24}/>
             </Button>
+            {condition?.edit && <SwapViewMode/>}
         </div>
     );
     return (
@@ -103,6 +104,7 @@ export function ProductPageMain({className}: IProductPageProps) {
     return (
         <ProductContext.Provider value={product}>
             <div className={twJoin(
+                'w-full',
                 className
             )}>
                 {(viewMode === 'edit') && <ProductDetailForEdit/>}

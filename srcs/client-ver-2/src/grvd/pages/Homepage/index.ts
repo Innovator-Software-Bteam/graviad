@@ -4,3 +4,4 @@ export * from './about';
 export * from './contact';
 export * from './pricing';
 export * from './privacy';
+export * from './demo';

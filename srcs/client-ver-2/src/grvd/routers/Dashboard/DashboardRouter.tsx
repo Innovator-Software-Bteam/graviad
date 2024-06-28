@@ -39,7 +39,7 @@ const NotFoundPage = React.lazy(() =>
         .then(module => ({default: module.NotFoundPage}))
 );
 export const DashboardRouter =
-    <Route path={'dashboard'} element={<Dashboard/>}>\
+    <Route path={'dashboard'} element={<Dashboard/>}>
         <Route path={''} element={<Navigate to={'home'}/>}/>
         <Route path={'home'} element={<DashboardHome/>}/>
         <Route path={'account'} element={<AccountPage/>}>

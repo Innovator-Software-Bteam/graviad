@@ -99,4 +99,5 @@ export type TProductDetailForm = {
     numberOfLikes: number;
     features: TProductFeature[];
     fileThumbnail?: File;
+    mediaFromSplineId: string;
 }

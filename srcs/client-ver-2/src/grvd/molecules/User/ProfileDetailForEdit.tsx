@@ -128,7 +128,8 @@ export function ProfileAvatarArea({onAvatarChange}: IProfileAvatarAreaProps) {
                         className={classNames(
                             'text-grvd-theme-sys-dark-primary',
                             'font-bold',
-                            'w-fit',
+                            'w-full break-words text-lg',
+                            'md:text-xl lg:text-2xl xl:text-3xl',
                             'whitespace-nowrap'
                         )}
                     >
@@ -440,6 +441,7 @@ export function ProfileFormArea() {
                         scrollbarWidth: 'thin',
                         scrollbarColor: 'rgba(0,0,0,0.1) transparent',
                     }}
+                    className={'!text-sm md:text-base lg:text-base'}
                     {...inputItems.description.register}
                 />
                 <div>
@@ -462,7 +464,11 @@ export function ProfileFormArea() {
                 >
                     {errors.slogan?.message}
                 </Typography>
-                <div className={'flex flex-row gap-4 justify-between w-full'}>
+                <div className={twJoin(
+                    'flex flex-col gap-4 justify-between w-full',
+                    'md:flex-row lg:flex-row xl:flex-row',
+
+                )}>
                     <InputWithTitle
                         title={inputItems.email.title}
                         {...inputItems.email.register}
@@ -508,9 +514,11 @@ export function ProfileDetailForEdit({className, ...props}: IPageProps) {
         <ProfileFormContext.Provider value={{profileForm, setProfileForm}}>
             <div>
                 <div className={twJoin(
-                    'flex flex-row justify-between gap-16',
+                    'flex flex-col gap-16',
                     'w-full h-full',
                     'relative',
+                    'md:flex-row lg:flex-row xl:flex-row',
+                    'pb-32'
                 )}>
                     <ProfileFormArea/>
                     <MerchantContext.Provider value={profileForm as TMerchant}>

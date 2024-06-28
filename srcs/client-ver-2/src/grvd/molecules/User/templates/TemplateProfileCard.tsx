@@ -6,6 +6,7 @@ import {twJoin} from "tailwind-merge";
 import {Buffer} from "buffer";
 import {AvatarBase64} from "grvd/components/Avatar";
 import {TSocialLink} from "grvd";
+import {useMedia} from "grvd/reponsive";
 
 export type TStyleCard = 'simple' | 'luxury' | 'glass' | 'modern';
 
@@ -80,6 +81,7 @@ export function TemplateProfileCard(props: IProfileCardProps) {
         backgroundProps
     } = props;
     const merchant = useMerchant();
+    const {isMobile} = useMedia();
     useEffect(() => {
     }, [merchant]);
     return (
@@ -99,6 +101,8 @@ export function TemplateProfileCard(props: IProfileCardProps) {
                         variant={'h4'}
                         className={twJoin(
                             'w-full text-left text-grvd-theme-sys-dark-primary font-bold uppercase',
+                            'text-lg',
+                            'md:text-xl lg:text-2xl',
                             brandNameProps?.className,
                         )}>
                         {merchant?.name}
@@ -117,9 +121,12 @@ export function TemplateProfileCard(props: IProfileCardProps) {
                     merchant?.avatar && (
                         <AvatarBase64
                             data={merchant.avatar.data}
-                            variant={'rounded'}
+                            variant={'square'}
                             className={twJoin(
-                                'w-16 h-16',
+                                'w-12 h-12 !rounded-md',
+                                'md:w-16 md:h-16 lg:w-20 lg:h-20',
+                                'md:!rounded-xl lg:!rounded-2xl',
+
                             )}
                         />
                     )
@@ -138,11 +145,13 @@ export function TemplateProfileCard(props: IProfileCardProps) {
                     <Typography
                         className={twJoin(
                             contactProps?.className,
+                            'text-right'
                         )}
                     >
                         {merchant?.phone} | {merchant?.email}
                     </Typography>
-                    {merchant?.socialLinks && (
+                    {
+                        (!isMobile && merchant?.socialLinks) && (
                         merchant.socialLinks.map((link: TSocialLink, index) => {
                             return (
                                 <Typography key={index}
