@@ -7,9 +7,12 @@ import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import bodyParser from 'body-parser';
 import {ValidationPipe} from "@nestjs/common";
+import {NestExpressApplication} from "@nestjs/platform-express";
 
 async function bootstrap() {
-    const app = await NestFactory.create(AppModule);
+    const app = await NestFactory.create<NestExpressApplication>(AppModule,{
+        rawBody: true,
+    });
     const configService = app.get(ConfigService);
     const port = configService.get('GRAVIAD_SERVER_PORT');
     const sessionCookieSecure = configService.get('GRAVIAD_SESSION_COOKIE_SECURE');
@@ -37,7 +40,7 @@ async function bootstrap() {
         },
         saveUninitialized: false,
     }));
-
+    app.enable('trust proxy')
     app.use(passport.initialize());
     app.use(passport.session());
     app.useGlobalPipes(new ValidationPipe({stopAtFirstError: true}));
