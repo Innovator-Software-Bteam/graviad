@@ -29,9 +29,11 @@ async function bootstrap() {
         name: 'SID',
         secret: 'secret',
         resave: false,
+        proxy: true,
         cookie: {
             maxAge: 1000 * 60 * 60, // 1 hour
             secure: true,
+            sameSite: 'none',
         },
         saveUninitialized: false,
     }));
